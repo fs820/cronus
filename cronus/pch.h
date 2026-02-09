@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <strsafe.h>
+#include <comdef.h>
 
 // C++(std)
 #include <iostream>
@@ -23,21 +24,47 @@
 
 #define STR(var) #var
 
-inline std::wstring Utf8ToWide(const std::string& text) {
-    if (text.empty()) return L"";
+// string -> wstring
+inline std::wstring Utf8ToWide(std::string_view text)
+{
+    if (text.empty()) return std::wstring();
 
-    // 必要なバッファサイズを計算
+    // 必バッファサイズを計算
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, &text[0], (int)text.size(), NULL, 0);
 
+    // 変換
     std::wstring wstrTo(size_needed, 0);
-
-    // 変換実行
     MultiByteToWideChar(CP_UTF8, 0, &text[0], (int)text.size(), &wstrTo[0], size_needed);
 
     return wstrTo;
 }
 
-inline std::u8string toU8String(const std::string& s)
+// wstring -> string
+inline std::string WideToUtf8(std::wstring_view wstr)
+{
+    if (wstr.empty()) return std::string();
+
+    // バッファサイズを計算
+    int size_needed = WideCharToMultiByte(
+        CP_UTF8, // 変換先は UTF-8
+        0,
+        &wstr[0], (int)wstr.size(),
+        NULL, 0, NULL, NULL
+    );
+
+    // 変換
+    std::string strTo(size_needed, 0);
+    WideCharToMultiByte(
+        CP_UTF8,
+        0,
+        &wstr[0], (int)wstr.size(),
+        &strTo[0], size_needed,
+        NULL, NULL
+    );
+    return strTo;
+}
+
+inline std::u8string toU8String(std::string_view s)
 {
     return std::u8string(s.begin(), s.end());
 }
