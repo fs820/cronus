@@ -138,7 +138,7 @@ struct Vector3
     }
 
     // 球座標から直交座標への変換
-    static Vector3 fromSpherical(float radius, float theta, float phi)
+    static Vector3 FromSpherical(float radius, float theta, float phi)
     {
         float x = radius * sinf(phi) * cosf(theta); // 方位角theta、天頂角phi
         float z = radius * sinf(phi) * sinf(theta); // 方位角theta、天頂角phi
@@ -710,6 +710,28 @@ struct Color
 
     Color() : r(1.0f), g(1.0f), b(1.0f), a(1.0f) {}
     Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
+
+    Color operator*(float scalar) const
+    {
+        return Color(r * scalar, g * scalar, b * scalar, a * scalar);
+    }
+
+    Color operator/(float scalar) const
+    {
+        return Color(r / scalar, g / scalar, b / scalar, a / scalar);
+    }
+
+    Color& operator*=(const float& other)
+    {
+        *this = *this * other;
+        return *this;
+    }
+
+    Color& operator/=(const float& other)
+    {
+        *this = *this / other;
+        return *this;
+    }
 
     unsigned long toARGB() const
     {

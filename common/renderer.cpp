@@ -5,8 +5,16 @@
 //
 //--------------------------------------------
 
+#include <d3dcompiler.h> // シェーダーコンパイル用
+#include <DirectXMath.h> // 本来は数学用だがこのrendererではTextでの受け渡しにのみ使用
+#include <DirectXTex.h>  // テクスチャ用
+
+#include <SpriteBatch.h> // Text用
+#include <SpriteFont.h>  //
+
+#pragma comment(lib, "d3dcompiler.lib")
+
 // ComPtrを使います
-#include <wrl/client.h>
 using Microsoft::WRL::ComPtr;
 
 namespace
@@ -21,25 +29,8 @@ namespace
     }
 }
 
-// DirectX11 Import
-// ↓
-
-#include <d3d11.h>
-#include <d3dcompiler.h> // シェーダーコンパイル用
-#include <DirectXTex.h>  // テクスチャ用
-#include <SpriteBatch.h> // Text用
-#include <SpriteFont.h>  //
-#include <DirectXMath.h> // 本来は数学用だがこのrendererではTextでの受け渡しにのみ使用
-
-// ライブラリのリンク
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "d3dcompiler.lib")
-
-// ↑ DirectX11 Import
-
 #include "renderer.h"
 #include "texture.h"
-#include "player.h"
 #include "mymath.h"
 
 static constexpr wchar_t SHADER_DIRECTORY[] = L"data/SHADER/";

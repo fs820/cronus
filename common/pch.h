@@ -1,6 +1,7 @@
 #pragma once
 
 // C
+#define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
 #include <stdio.h>
@@ -21,6 +22,13 @@
 #include <thread>
 #include <future>
 #include <atomic>
+#include <array>
+#include <algorithm>
+#include <wrl/client.h> // Com
+
+// DirectX11
+#include <d3d11.h>
+#pragma comment(lib, "d3d11.lib")
 
 #define STR(var) #var
 
