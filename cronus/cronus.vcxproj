@@ -122,8 +122,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>
-      </AdditionalManifestFiles>
+      <AdditionalManifestFiles>app.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,8 +145,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>
-      </AdditionalManifestFiles>
+      <AdditionalManifestFiles>app.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -164,6 +162,9 @@
     <ProjectReference Include="..\common\common.vcxproj">
       <Project>{7642632d-65fc-4e09-9d94-18490577f10d}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="app.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
