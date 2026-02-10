@@ -160,6 +160,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="easing.h" />
     <ClInclude Include="graphics_types.h" />
+    <ClInclude Include="gui.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="math_types.h" />
     <ClInclude Include="mesh.h" />
@@ -175,6 +176,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="gui.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="model.cpp" />

@@ -287,6 +287,10 @@ public:
     void getViewportSize(Vector2& size) const { size = m_viewportSize; }
     void getScreenSizeMagnification(Vector2& magnification) const { magnification = m_screenMagnification; }
 
+    ID3D11Device* getDevice() const;
+    ID3D11DeviceContext* getContext() const;
+    HWND getRegisteredHWND() const;
+
 private:
     void setupDevice(HWND handle);
     void setupShader();
@@ -309,6 +313,8 @@ private:
     ComPtr<ID3D11Device> m_pDevice;         // デバイス
     ComPtr<ID3D11DeviceContext> m_pContext; // コンテキスト
     ComPtr<IDXGISwapChain> m_pSwapChain;    // スワップチェイン
+
+    HWND m_hWnd; // アウトプット先のWindow
 
     // 最終描画先 (バックバッファ)
     ComPtr<ID3D11RenderTargetView> m_pRenderTargetView; // レンダーターゲット (バックバッファへの書き込み)
@@ -424,7 +430,7 @@ private:
     std::unique_ptr<DirectX::SpriteFont> m_spriteFont;
 };
 
-RendererImpl::RendererImpl() : m_pDevice(nullptr), m_pContext(nullptr), m_pSwapChain(nullptr), m_pRenderTargetView(nullptr), m_pDepthStencilView(nullptr), m_pDepthStencilTexture(nullptr), m_pSceneTexture{}, m_pSceneRTV{}, m_pSceneSRV{}, m_pVertexShader2D(nullptr), m_pVertexShader3D(nullptr), m_pGeometryPS(nullptr), m_pInputLayout2D(nullptr), m_pInputLayout3D(nullptr), m_pWMatBuffer(nullptr), m_wMatData{}, m_pMtlBuffer(nullptr), m_mtlData{}, m_pVPMatBuffer(nullptr), m_vpMatData{}, m_pLightBuffer(nullptr), m_lightData{}, m_samplerStates{}, m_pDummyTextureWhite(nullptr), m_pDummyTextureBlack(nullptr), m_pInputLayoutModel(nullptr), m_pBoneBuffer(nullptr), m_boneData{}, m_pVertexShaderModel(nullptr), m_pGBufferTextures{}, m_pGBufferRTVs{}, m_pGBufferSRVs{}, m_pScreenVS{}, m_blendStates{}, m_depthStates{}, m_rasStates{}, m_textures{}, m_screenSize{}, m_screenMagnification{}, m_viewportSize{}, m_pShadowTexture{}, m_pShadowDSV{}, m_pShadowSRV{}, m_currentPass{}, m_currentForwardSubPass{}, m_pShadowConstantBuffer{}, m_lightVPMatrix{}, m_pSkyPS{}, m_pTransparentPS{}, m_pOutline3DVS{}, m_pOutlineModelVS{}, m_pOutlinePS{}, m_pOutlineBuffer{}, m_outlineData{}, m_pShadowPS{}, m_pFogBuffer{}, m_texMutex{}, m_spriteBatch{}, m_spriteFont{}, m_pDecalBuffer(nullptr), m_pDecalVS(nullptr), m_pDecalPS(nullptr), m_pPostProcessShaders{}, m_pPostProcessBuffer{}, m_pWorkTexture{}, m_pWorkRTV{}, m_pWorkSRV{}, m_pBloomRTVs{}, m_pBloomSRVs{}, m_meshs{}, m_pUnifiedLighting_DL_PS{}, m_pUIPS{} {}
+RendererImpl::RendererImpl() : m_pDevice(nullptr), m_pContext(nullptr), m_pSwapChain(nullptr), m_hWnd{}, m_pRenderTargetView(nullptr), m_pDepthStencilView(nullptr), m_pDepthStencilTexture(nullptr), m_pSceneTexture{}, m_pSceneRTV{}, m_pSceneSRV{}, m_pVertexShader2D(nullptr), m_pVertexShader3D(nullptr), m_pGeometryPS(nullptr), m_pInputLayout2D(nullptr), m_pInputLayout3D(nullptr), m_pWMatBuffer(nullptr), m_wMatData{}, m_pMtlBuffer(nullptr), m_mtlData{}, m_pVPMatBuffer(nullptr), m_vpMatData{}, m_pLightBuffer(nullptr), m_lightData{}, m_samplerStates{}, m_pDummyTextureWhite(nullptr), m_pDummyTextureBlack(nullptr), m_pInputLayoutModel(nullptr), m_pBoneBuffer(nullptr), m_boneData{}, m_pVertexShaderModel(nullptr), m_pGBufferTextures{}, m_pGBufferRTVs{}, m_pGBufferSRVs{}, m_pScreenVS{}, m_blendStates{}, m_depthStates{}, m_rasStates{}, m_textures{}, m_screenSize{}, m_screenMagnification{}, m_viewportSize{}, m_pShadowTexture{}, m_pShadowDSV{}, m_pShadowSRV{}, m_currentPass{}, m_currentForwardSubPass{}, m_pShadowConstantBuffer{}, m_lightVPMatrix{}, m_pSkyPS{}, m_pTransparentPS{}, m_pOutline3DVS{}, m_pOutlineModelVS{}, m_pOutlinePS{}, m_pOutlineBuffer{}, m_outlineData{}, m_pShadowPS{}, m_pFogBuffer{}, m_texMutex{}, m_spriteBatch{}, m_spriteFont{}, m_pDecalBuffer(nullptr), m_pDecalVS(nullptr), m_pDecalPS(nullptr), m_pPostProcessShaders{}, m_pPostProcessBuffer{}, m_pWorkTexture{}, m_pWorkRTV{}, m_pWorkSRV{}, m_pBloomRTVs{}, m_pBloomSRVs{}, m_meshs{}, m_pUnifiedLighting_DL_PS{}, m_pUIPS{} {}
 RendererImpl::~RendererImpl() { uninit(); }
 
 //-------------------------------------------
@@ -1472,6 +1478,30 @@ void RendererImpl::onResize(int width, int height)
 }
 
 //-----------------------------------
+// デバイスの取得 (限定的)
+//-----------------------------------
+ID3D11Device* RendererImpl::getDevice() const
+{
+    return m_pDevice.Get();
+}
+
+//-----------------------------------
+// コンテキストの取得 (限定的)
+//-----------------------------------
+ID3D11DeviceContext* RendererImpl::getContext() const
+{
+    return m_pContext.Get();
+}
+
+//-----------------------------------
+// 登録されているHWNDの取得 (限定的)
+//-----------------------------------
+HWND RendererImpl::getRegisteredHWND() const
+{
+    return m_hWnd;
+}
+
+//-----------------------------------
 // レンダラーの核の部分を生成する
 //-----------------------------------
 void RendererImpl::setupDevice(HWND handle)
@@ -1522,6 +1552,9 @@ void RendererImpl::setupDevice(HWND handle)
     {
         pFactory->CreateSwapChain(m_pDevice.Get(), &sd, m_pSwapChain.ReleaseAndGetAddressOf());
     }
+
+    // スワップチェーンに使用したWindowを保存
+    m_hWnd = handle;
 
     // レンダーターゲットビューの作成
     ComPtr<ID3D11Texture2D> pBackBuffer = nullptr;
@@ -3093,4 +3126,31 @@ void Renderer::getViewportSize(Vector2& size) const
     {
         m_pImpl->getViewportSize(size);
     }
+}
+
+ID3D11Device* Renderer::getDevice() const
+{
+    if (m_pImpl != nullptr)
+    {
+        return m_pImpl->getDevice();
+    }
+    return nullptr;
+}
+
+ID3D11DeviceContext* Renderer::getContext() const
+{
+    if (m_pImpl != nullptr)
+    {
+        return m_pImpl->getContext();
+    }
+    return nullptr;
+}
+
+HWND Renderer::getRegisteredHWND() const
+{
+    if (m_pImpl != nullptr)
+    {
+        return m_pImpl->getRegisteredHWND();
+    }
+    return nullptr;
 }

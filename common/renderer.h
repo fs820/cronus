@@ -5,7 +5,14 @@
 //
 //--------------------------------------------
 #pragma once
-#include "graphics_types.h"    // Vertex3D
+#include "graphics_types.h" // Vertex3D
+
+class Renderer;
+
+namespace gui
+{
+    void init(const Renderer& renderer);
+}
 
 class RendererImpl;
 class TextureManager;
@@ -74,5 +81,12 @@ public:
     void getViewportSize(Vector2& size) const;
 
 private:
+    // ↓ friend Gui
+    friend void gui::init(const Renderer& renderer);
+    ID3D11Device* getDevice() const;
+    ID3D11DeviceContext* getContext() const;
+    HWND getRegisteredHWND() const;
+    // ↑
+    
     std::unique_ptr<RendererImpl> m_pImpl;
 };
