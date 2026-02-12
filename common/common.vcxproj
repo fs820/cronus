@@ -157,8 +157,10 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="application.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="easing.h" />
+    <ClInclude Include="entry.h" />
     <ClInclude Include="graphics_types.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="log.h" />
@@ -175,6 +177,7 @@
     <ClInclude Include="window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="application.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="log.cpp" />
