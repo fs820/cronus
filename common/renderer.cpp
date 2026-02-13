@@ -9,10 +9,11 @@
 #include <DirectXMath.h> // 本来は数学用だがこのrendererではTextでの受け渡しにのみ使用
 #include <DirectXTex.h>  // テクスチャ用
 
-#include <SpriteBatch.h> // Text用
-#include <SpriteFont.h>  //
+#include <DirectXTK/SpriteBatch.h> // Text用
+#include <DirectXTK/SpriteFont.h>  //
 
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "DirectXTK.lib")
 
 // ComPtrを使います
 using Microsoft::WRL::ComPtr;
@@ -229,7 +230,7 @@ public:
     RendererImpl();
     ~RendererImpl();
 
-    void init(HINSTANCE instance, HWND handle, long width, long height);
+    void init(HWND handle, long width, long height);
     void uninit();
     void beginShadow(Matrix lightView, Matrix lightProj);
     void endShadow();
@@ -436,7 +437,7 @@ RendererImpl::~RendererImpl() { uninit(); }
 //-------------------------------------------
 // 初期化
 //-------------------------------------------
-void RendererImpl::init(HINSTANCE instance, HWND handle, long width, long height)
+void RendererImpl::init(HWND handle, long width, long height)
 {
     if (handle == nullptr || width <= 0 || height <= 0)return;
 
@@ -2742,11 +2743,11 @@ void RendererImpl::setOrthographic()
 Renderer::Renderer() : m_pImpl{ std::make_unique<RendererImpl>() } {}
 Renderer::~Renderer() = default;
 
-void Renderer::init(HINSTANCE instance, HWND handle, long width, long height)
+void Renderer::init(HWND handle, long width, long height)
 {
     if (m_pImpl != nullptr)
     {
-        m_pImpl->init(instance, handle, width, height);
+        m_pImpl->init(handle, width, height);
     }
 }
 

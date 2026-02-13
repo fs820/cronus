@@ -9,6 +9,7 @@
 union SDL_Event;
 
 class Window;
+class Renderer;
 
 constexpr const char* DEFAULT_WINDOW_TITLE = "アプリケーション";
 constexpr int DEFAULT_WINDOW_WIDTH = 1920;
@@ -31,6 +32,7 @@ public:
     bool handleEvent(SDL_Event* event);
 
     Window* getWindow();
+    Renderer* getRenderer();
 
 protected:
     virtual bool onStart() = 0;
@@ -40,8 +42,10 @@ protected:
 
 private:
     std::unique_ptr<Window> m_pWindow;
+    std::unique_ptr<Renderer> m_pRenderer;
 
     uint64_t m_frequency;
     uint64_t m_startCounter;
     uint64_t m_lastCounter;
+    bool m_isGuiSetup;
 };

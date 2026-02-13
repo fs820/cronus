@@ -28,7 +28,7 @@ public:
     Renderer();
     ~Renderer();
 
-    void init(HINSTANCE instance, HWND handle, long width, long height);
+    void init(HWND handle, long width, long height);
     void uninit();
     void beginShadow(Matrix lightView, Matrix lightProj);
     void endShadow();
