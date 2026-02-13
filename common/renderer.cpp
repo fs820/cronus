@@ -13,7 +13,6 @@
 #include <DirectXTK/SpriteFont.h>  //
 
 #pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "DirectXTK.lib")
 
 // ComPtrを使います
 using Microsoft::WRL::ComPtr;
