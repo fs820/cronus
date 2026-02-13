@@ -15,36 +15,55 @@ extern Application* CreateApplication();
 
 // SDLのエントリーポイント定義
 
+//-------------------------------------------------------------------
+// 初期化
+//-------------------------------------------------------------------
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-    // ユーザー定義の関数を呼んでアプリを生成
+    // アプリを生成
     Application* app = CreateApplication();
     *appstate = app;
 
-    if (!app || !app->init(argc, argv))
+    // 初期化
+    if (app == nullptr || !app->init(argc, argv))
     {
         return SDL_APP_FAILURE;
     }
     return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_AppIterate(void* appstate)
-{
-    Application* app = (Application*)appstate;
-    return app->update();
-}
-
-SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
-{
-    Application* app = (Application*)appstate;
-    return app->handleEvent(event);
-}
-
+//-------------------------------------------------------------------
+// 破棄
+//-------------------------------------------------------------------
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
-    if (appstate) {
-        Application* app = (Application*)appstate;
+    if (appstate != nullptr)
+    {
+        Application* app = static_cast<Application*>(appstate);
         app->uninit();
         delete app;
+        app = nullptr;
     }
+}
+
+//-------------------------------------------------------------------
+// 更新
+//-------------------------------------------------------------------
+SDL_AppResult SDL_AppIterate(void* appstate)
+{
+    Application* app = static_cast<Application*>(appstate);
+    return app->update() ? SDL_APP_CONTINUE : SDL_APP_SUCCESS;
+}
+
+//-------------------------------------------------------------------
+// イベント
+//-------------------------------------------------------------------
+SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
+{
+    Application* app = static_cast<Application*>(appstate);
+    if (!app->handleEvent(event))
+    {
+        return SDL_APP_SUCCESS;
+    }
+    return SDL_APP_CONTINUE;
 }

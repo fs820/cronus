@@ -22,9 +22,4 @@
   <ItemGroup>
     <Manifest Include="app.manifest" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="app.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-  </ItemGroup>
 </Project>

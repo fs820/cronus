@@ -8,10 +8,11 @@
 #include "graphics_types.h" // Vertex3D
 
 class Renderer;
+class Window;
 
 namespace gui
 {
-    void init(const Renderer& renderer);
+    void init(const Window& window, const Renderer& renderer);
 }
 
 class RendererImpl;
@@ -77,15 +78,15 @@ public:
 
     void onResize(int width, int height);
 
+    HWND getRegisteredHWND() const;
     void getScreenSizeMagnification(Vector2& magnification) const;
     void getViewportSize(Vector2& size) const;
 
 private:
     // ↓ friend Gui
-    friend void gui::init(const Renderer& renderer);
+    friend void gui::init(const Window& window, const Renderer& renderer);
     ID3D11Device* getDevice() const;
     ID3D11DeviceContext* getContext() const;
-    HWND getRegisteredHWND() const;
     // ↑
     
     std::unique_ptr<RendererImpl> m_pImpl;

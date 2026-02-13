@@ -161,6 +161,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="easing.h" />
     <ClInclude Include="entry.h" />
+    <ClInclude Include="event.h" />
     <ClInclude Include="graphics_types.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="log.h" />
