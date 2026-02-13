@@ -33,7 +33,7 @@ namespace
 #include "texture.h"
 #include "mymath.h"
 
-static constexpr wchar_t SHADER_DIRECTORY[] = L"data/SHADER/";
+static constexpr wchar_t SHADER_DIRECTORY[] = L"data/SHADER";
 
 //------------------------
 // レンダーパス
@@ -1770,12 +1770,12 @@ void RendererImpl::setupShader()
     obd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     m_pDevice->CreateBuffer(&obd, nullptr, m_pOutlineBuffer.ReleaseAndGetAddressOf());
 
-    // アウトライン
+    // フォグ
     D3D11_BUFFER_DESC fbd = {};
-    obd.ByteWidth = sizeof(FogBufferData);
-    obd.Usage = D3D11_USAGE_DEFAULT;
-    obd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    m_pDevice->CreateBuffer(&obd, nullptr, m_pFogBuffer.ReleaseAndGetAddressOf());
+    fbd.ByteWidth = sizeof(FogBufferData);
+    fbd.Usage = D3D11_USAGE_DEFAULT;
+    fbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    m_pDevice->CreateBuffer(&fbd, nullptr, m_pFogBuffer.ReleaseAndGetAddressOf());
 
     // デカール
     D3D11_BUFFER_DESC dcd = {};
@@ -2535,7 +2535,15 @@ void RendererImpl::drawPostProcessPass(PostProcessShaderMask mask, ToneMappingTy
 void RendererImpl::drawString(std::string_view string, Vector2 pos, Color color, float angle, Vector2 scale)
 {
     // 描画開始
-    m_spriteBatch->Begin();
+    m_spriteBatch->Begin(
+        DirectX::SpriteSortMode_Deferred,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        DirectX::XMMatrixIdentity()
+    );
 
     // テキスト描画
     m_spriteFont->DrawString(
