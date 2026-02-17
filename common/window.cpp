@@ -6,6 +6,7 @@
 //--------------------------------------------
 #include "window.h"
 #include <SDL3/SDL.h>
+#include "gui.h"
 
 // デリータでSDL_DestroyWindowを呼ぶ
 void SDLWindowDeleter::operator()(SDL_Window* window) const
@@ -158,10 +159,36 @@ bool Window::handleEvent(SDL_Event* event)
     //------------------------
     // 入力イベント関連
     //------------------------
-    const bool* keyboardState = SDL_GetKeyboardState(nullptr);
-    std::vector<SDL_Gamepad*> gamepads;
+    ImGuiIO& io = ImGui::GetIO();
+
+    // キーボード
+    if (!io.WantCaptureKeyboard)
+    {
+        // キーボードの状態を取得
+        const bool* keyboardState = SDL_GetKeyboardState(nullptr);
+        if (keyboardState[SDL_SCANCODE_W])
+        {
+            std::cout << "W is Down:" << std::endl;
+        }
+    }
+
+    // マウス
+    if (!io.WantCaptureMouse)
+    {
+        // マウスの位置と状態を取得
+        float mouseX, mouseY;
+        Uint32 mouseState = SDL_GetMouseState(&mouseX, &mouseY);
+
+        std::cout << "Mouse:" << mouseX << "," << mouseY << std::endl;
+
+        if (mouseState & SDL_BUTTON_LMASK)
+        {
+            std::cout << "Mouse Left is Down:" << std::endl;
+        }
+    }
 
     // コントローラーの接続
+    std::vector<SDL_Gamepad*> gamepads;
     if (event->type == SDL_EVENT_GAMEPAD_ADDED)
     {
         int deviceIndex = event->gdevice.which;
@@ -185,21 +212,6 @@ bool Window::handleEvent(SDL_Event* event)
         }
         SDL_CloseGamepad(gamepad); // デバイスを閉じる
         std::cout << "コントローラーが切断されました。" << std::endl;
-    }
-
-    if (keyboardState[SDL_SCANCODE_W])
-    {
-        std::cout << "W is Down:" << std::endl;
-    }
-
-    float mouseX, mouseY;
-    Uint32 mouseState = SDL_GetMouseState(&mouseX, &mouseY);
-
-    std::cout << "Mouse:" << mouseX << "," << mouseY << std::endl;
-
-    if (mouseState & SDL_BUTTON_LMASK)
-    {
-        std::cout << "Mouse Left is Down:" << std::endl;
     }
 
     for (SDL_Gamepad* gamepad : gamepads)

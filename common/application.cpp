@@ -10,13 +10,20 @@
 #include "window.h"
 #include "renderer.h"
 #include "gui.h"
+#include "texture.h"
+#include "mesh.h"
+#include "model.h"
+#include "physics.h"
+#include "sound.h"
+#include "event.h"
+#include "camera.h"
 
 //------------------------------------------
 // 
 // アプリケーションクラス
 // 
 //------------------------------------------
-Application::Application() : m_pWindow{}, m_pRenderer{}, m_frequency{}, m_startCounter{}, m_lastCounter{}, m_isGuiSetup{} {}
+Application::Application() : m_pWindow{}, m_pRenderer{}, m_pTextureManager{}, m_pMeshManager{}, m_pModelManager{}, m_pPhysicsManager{}, m_pSoundManager{}, m_pEventDispatcher{}, m_pCamera{}, m_frequency{}, m_startCounter{}, m_lastCounter{}, m_isGuiSetup{} {}
 Application::~Application() = default;
 
 //------------------------------------------
@@ -33,6 +40,17 @@ bool Application::init(int argc, char* argv[])
     // レンダラー
     m_pRenderer = std::make_unique<Renderer>();
     m_pRenderer->init(static_cast<HWND>(m_pWindow->getNativeWindow()), DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+
+    // 物理
+    m_pPhysicsManager = std::make_unique<PhysicsManager>();
+    m_pPhysicsManager->init();
+
+    m_pTextureManager = std::make_unique<TextureManager>();             // テクスチャ
+    m_pMeshManager = std::make_unique<MeshManager>(*m_pRenderer.get()); // メッシュ
+    m_pModelManager = std::make_unique<ModelManager>();                 // モデル
+    m_pSoundManager = std::make_unique<SoundManager>();                 // サウンド
+    m_pEventDispatcher = std::make_unique<EventDispatcher>();           // イベント
+    m_pCamera = std::make_unique<Camera>();                             // カメラ
 
     // Gui
     gui::init(*m_pWindow.get(), *m_pRenderer.get());
@@ -56,6 +74,7 @@ void Application::uninit()
 
     // 固定の破棄
     gui::uninit();
+    m_pPhysicsManager->uninit();
     m_pRenderer->uninit();
     m_pWindow->uninit();
 }
@@ -65,8 +84,9 @@ void Application::uninit()
 //------------------------------------------
 bool Application::update()
 {
-    // 固定の更新
     gui::beginFrame(); // Gui開始
+
+    // 固定の更新
 
     // 現在のカウント
     Uint64 currentCounter = SDL_GetPerformanceCounter();
@@ -83,8 +103,25 @@ bool Application::update()
     // ゲームの更新
     if (!onUpdate(elapsedTime, deltaTime)) return false;
 
+    // 物理シミュレーション
+    m_pPhysicsManager->simulate(deltaTime);
+
     gui::endFrame(); // Gui終了
+    return true;
+}
+
+//------------------------------------------
+// 描画
+//------------------------------------------
+bool Application::render()
+{
+    m_pRenderer->beginUI(true); // 描画開始
+
     gui::draw();     // Gui描画
+
+    m_pRenderer->endUI(); // 描画終了
+
+    m_pRenderer->present(); // 表示
     return true;
 }
 
@@ -106,3 +143,10 @@ bool Application::handleEvent(SDL_Event* event)
 //------------------------------------------
 Window* Application::getWindow() { return m_pWindow.get(); }
 Renderer* Application::getRenderer() { return m_pRenderer.get(); }
+TextureManager* Application::getTextureManager() { return m_pTextureManager.get(); }
+MeshManager* Application::getMeshManager() { return m_pMeshManager.get(); }
+ModelManager* Application::getModelManager() { return m_pModelManager.get(); }
+PhysicsManager* Application::getPhysicsManager() { return m_pPhysicsManager.get(); }
+SoundManager* Application::getSoundManager() { return m_pSoundManager.get(); }
+EventDispatcher* Application::getEventDispatcher() { return m_pEventDispatcher.get(); }
+Camera* Application::getCamera() { return m_pCamera.get(); }

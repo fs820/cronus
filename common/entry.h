@@ -39,6 +39,7 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
     if (appstate != nullptr)
     {
+        // アプリを破棄
         Application* app = static_cast<Application*>(appstate);
         app->uninit();
         delete app;
@@ -52,7 +53,15 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
     Application* app = static_cast<Application*>(appstate);
-    return app->update() ? SDL_APP_CONTINUE : SDL_APP_SUCCESS;
+
+    // 更新
+    if (!app->update())
+    {
+        return SDL_APP_SUCCESS;
+    }
+
+    // 描画
+    return app->render() ? SDL_APP_CONTINUE : SDL_APP_SUCCESS;
 }
 
 //-------------------------------------------------------------------
@@ -60,10 +69,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 //-------------------------------------------------------------------
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
+    // イベント処理
     Application* app = static_cast<Application*>(appstate);
-    if (!app->handleEvent(event))
-    {
-        return SDL_APP_SUCCESS;
-    }
-    return SDL_APP_CONTINUE;
+    return app->handleEvent(event) ? SDL_APP_CONTINUE : SDL_APP_SUCCESS;
 }

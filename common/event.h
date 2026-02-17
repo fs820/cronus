@@ -22,8 +22,26 @@ public:
 
     EventDispatcher(const EventDispatcher&) = delete;
     EventDispatcher& operator=(const EventDispatcher&) = delete;
-    EventDispatcher(const EventDispatcher&&) = default;
-    EventDispatcher& operator=(const EventDispatcher&&) = default;
+    EventDispatcher(EventDispatcher&& other) noexcept
+        : m_subscribers(std::move(other.m_subscribers))
+    {
+        // ポインタ無効化
+        other.m_subscribers.clear();
+    }
+    EventDispatcher& operator=(EventDispatcher&& other) noexcept
+    {
+        // 自分自身への代入でない
+        if (this != &other)
+        {
+            // 既存の購読者をクリア
+            m_subscribers.clear();
+
+            // 相手からデータをコピー
+            m_subscribers = std::move(other.m_subscribers);
+            other.m_subscribers.clear();
+        }
+        return *this;
+    }
 
     // イベントTに対するコールバックを登録する
     // コールバックの型は void(const T&)
