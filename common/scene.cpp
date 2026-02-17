@@ -17,7 +17,7 @@
 //------------------
 void SceneManager::addScene(std::string_view sceneName, Scene* scene)
 {
-    m_scenes[std::string(sceneName)] = std::unique_ptr<Scene>(scene);
+    m_scenes.try_emplace(std::string(sceneName), std::unique_ptr<Scene>(scene)); // シーンを追加
 }
 
 //------------------

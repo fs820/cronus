@@ -191,8 +191,7 @@ bool Window::handleEvent(SDL_Event* event)
     std::vector<SDL_Gamepad*> gamepads;
     if (event->type == SDL_EVENT_GAMEPAD_ADDED)
     {
-        int deviceIndex = event->gdevice.which;
-        SDL_Gamepad* gamepad = SDL_OpenGamepad(deviceIndex);
+        SDL_Gamepad* gamepad = SDL_OpenGamepad(event->gdevice.which);
         if (gamepad)
         {
             std::cout << SDL_GetGamepadName(gamepad) << "が接続されました。" << std::endl;
@@ -263,6 +262,14 @@ bool Window::handleEvent(SDL_Event* event)
 void Window::setTitle(const char* title)
 {
     SDL_SetWindowTitle(m_pWindow.get(), title);
+}
+
+//------------------------------------------
+// ウィンドウのサイズ設定
+//------------------------------------------
+void Window::setSize(int width, int height)
+{
+    SDL_SetWindowSize(m_pWindow.get(), width, height);
 }
 
 //------------------------------------------

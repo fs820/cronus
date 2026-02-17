@@ -37,6 +37,7 @@ public:
     bool handleEvent(SDL_Event* event);
 
     void setTitle(const char* title);
+    void setSize(int width, int height);
 
     void* getNativeWindow() const { return m_pNativeWindow; }
 
