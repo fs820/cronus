@@ -173,6 +173,7 @@
     <ClInclude Include="physics.h" />
     <ClInclude Include="physics_types.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="scene.h" />
     <ClInclude Include="sound.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="window.h" />
@@ -192,6 +193,7 @@
     </ClCompile>
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="scene.cpp" />
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="window.cpp" />

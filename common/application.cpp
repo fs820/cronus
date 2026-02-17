@@ -16,14 +16,15 @@
 #include "physics.h"
 #include "sound.h"
 #include "event.h"
-#include "camera.h"
+#include "log.h"
+#include "scene.h"
 
 //------------------------------------------
 // 
 // アプリケーションクラス
 // 
 //------------------------------------------
-Application::Application() : m_pWindow{}, m_pRenderer{}, m_pTextureManager{}, m_pMeshManager{}, m_pModelManager{}, m_pPhysicsManager{}, m_pSoundManager{}, m_pEventDispatcher{}, m_pCamera{}, m_frequency{}, m_startCounter{}, m_lastCounter{}, m_isGuiSetup{} {}
+Application::Application() : m_pWindow{}, m_pRenderer{}, m_pTextureManager{}, m_pMeshManager{}, m_pModelManager{}, m_pPhysicsManager{}, m_pSoundManager{}, m_pEventDispatcher{}, m_pSceneManager{}, m_frequency{}, m_startCounter{}, m_lastCounter{}, m_isGuiSetup{} {}
 Application::~Application() = default;
 
 //------------------------------------------
@@ -32,6 +33,9 @@ Application::~Application() = default;
 bool Application::init(int argc, char* argv[])
 {
     // 固定の初期化
+
+    // ロガー
+    InitLogger();
 
     // ウインドウ
     m_pWindow = std::make_unique<Window>();
@@ -50,7 +54,7 @@ bool Application::init(int argc, char* argv[])
     m_pModelManager = std::make_unique<ModelManager>();                 // モデル
     m_pSoundManager = std::make_unique<SoundManager>();                 // サウンド
     m_pEventDispatcher = std::make_unique<EventDispatcher>();           // イベント
-    m_pCamera = std::make_unique<Camera>();                             // カメラ
+    m_pSceneManager = std::make_unique<SceneManager>();                 // シーン
 
     // Gui
     gui::init(*m_pWindow.get(), *m_pRenderer.get());
@@ -103,6 +107,9 @@ bool Application::update()
     // ゲームの更新
     if (!onUpdate(elapsedTime, deltaTime)) return false;
 
+    // シーンの更新
+    m_pSceneManager->update(elapsedTime, deltaTime);
+
     // 物理シミュレーション
     m_pPhysicsManager->simulate(deltaTime);
 
@@ -149,4 +156,4 @@ ModelManager* Application::getModelManager() { return m_pModelManager.get(); }
 PhysicsManager* Application::getPhysicsManager() { return m_pPhysicsManager.get(); }
 SoundManager* Application::getSoundManager() { return m_pSoundManager.get(); }
 EventDispatcher* Application::getEventDispatcher() { return m_pEventDispatcher.get(); }
-Camera* Application::getCamera() { return m_pCamera.get(); }
+SceneManager* Application::getSceneManager() { return m_pSceneManager.get(); }

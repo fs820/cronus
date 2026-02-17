@@ -257,6 +257,14 @@ bool Window::handleEvent(SDL_Event* event)
     return true;
 }
 
+//------------------------
+// タイトルの設定
+//------------------------
+void Window::setTitle(const char* title)
+{
+    SDL_SetWindowTitle(m_pWindow.get(), title);
+}
+
 //------------------------------------------
 // ウィンドウの取得 (限定的)
 //------------------------------------------

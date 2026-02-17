@@ -36,6 +36,8 @@ public:
     void uninit();
     bool handleEvent(SDL_Event* event);
 
+    void setTitle(const char* title);
+
     void* getNativeWindow() const { return m_pNativeWindow; }
 
 private:

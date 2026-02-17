@@ -6,6 +6,9 @@
 //--------------------------------------------
 #include "entry.h"
 #include "gui.h"
+#include "log.h"
+#include "window.h"
+#include "title.h"
 
 //---------------------------------
 // Cronus (ゲーム本体)
@@ -30,6 +33,12 @@ private:
 //------------------------
 bool Cronus::onStart()
 {
+    spdlog::info("Cronusを開始します。"); // ログ出力
+
+    getWindow()->setTitle("Cronus");                      // ウィンドウタイトルを設定
+
+    getSceneManager()->addScene("Title", new TitleScene); // タイトルシーンを追加
+    getSceneManager()->changeScene("Title");              // タイトルシーンに切り替え
     return true;
 }
 
@@ -38,7 +47,7 @@ bool Cronus::onStart()
 //------------------------
 void Cronus::onEnd()
 {
-
+    spdlog::info("Cronusを終了します。"); // ログ出力
 }
 
 //------------------------

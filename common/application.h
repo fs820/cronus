@@ -16,7 +16,7 @@ class ModelManager;
 class PhysicsManager;
 class SoundManager;
 class EventDispatcher;
-class Camera;
+class SceneManager;
 
 constexpr const char* DEFAULT_WINDOW_TITLE = "アプリケーション";
 constexpr int DEFAULT_WINDOW_WIDTH = 1920;
@@ -31,7 +31,7 @@ class Application
 {
 public:
     Application();
-    ~Application();
+    virtual ~Application();
 
     bool init(int argc, char* argv[]);
     void uninit();
@@ -47,7 +47,7 @@ public:
     PhysicsManager* getPhysicsManager();
     SoundManager* getSoundManager();
     EventDispatcher* getEventDispatcher();
-    Camera* getCamera();
+    SceneManager* getSceneManager();
 
 protected:
     virtual bool onStart() = 0;
@@ -65,7 +65,7 @@ private:
     std::unique_ptr<PhysicsManager> m_pPhysicsManager;
     std::unique_ptr<SoundManager> m_pSoundManager;
     std::unique_ptr<EventDispatcher> m_pEventDispatcher;
-    std::unique_ptr<Camera> m_pCamera;
+    std::unique_ptr<SceneManager> m_pSceneManager;
 
     uint64_t m_frequency;
     uint64_t m_startCounter;
