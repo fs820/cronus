@@ -15,12 +15,19 @@ namespace gui
 }
 
 struct SDL_Window;
+struct SDL_Cursor;
 union SDL_Event;
 
 // SDLのウィンドウのデリータ
 struct SDLWindowDeleter
 {
     void operator()(SDL_Window* window) const;
+};
+
+// SDLのカーソルのデリータ
+struct SDLCursorDeleter
+{
+    void operator()(SDL_Cursor* cursor) const;
 };
 
 //-------------------------
@@ -36,8 +43,13 @@ public:
     void uninit();
     bool handleEvent(SDL_Event* event);
 
+    void setIcon(const std::filesystem::path& iconPath);
+    void setCursor(const std::filesystem::path& cursorPath, int hotspotX = 0, int hotspotY = 0);
+
     void setTitle(const char* title);
     void setSize(int width, int height);
+    void setFullscreen(bool fullscreen);
+    void setCursorVisible(bool visible);
 
     void* getNativeWindow() const { return m_pNativeWindow; }
 
@@ -49,4 +61,6 @@ private:
 
     std::unique_ptr<SDL_Window, SDLWindowDeleter> m_pWindow; // SDLウインドウ
     void* m_pNativeWindow;                                   // 生のウィンドウ
+
+    std::unique_ptr<SDL_Cursor, SDLCursorDeleter> m_pCursor; // カーソル
 };

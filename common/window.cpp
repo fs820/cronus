@@ -14,12 +14,18 @@ void SDLWindowDeleter::operator()(SDL_Window* window) const
     SDL_DestroyWindow(window);
 }
 
+// デリータでSDL_DestroyWindowを呼ぶ
+void SDLCursorDeleter::operator()(SDL_Cursor* cursor) const
+{
+    SDL_DestroyCursor(cursor);
+}
+
 //------------------------------------------
 // 
 // ウィンドウクラス
 // 
 //------------------------------------------
-Window::Window() : m_pWindow{}, m_pNativeWindow{} {}
+Window::Window() : m_pWindow{}, m_pNativeWindow{}, m_pCursor{} {}
 Window::~Window() { uninit(); }   // SDL_Quit漏れを防ぐ
 
 //------------------------------------------
@@ -67,6 +73,7 @@ bool Window::init(const char* title, int width, int height)
 //------------------------------------------
 void Window::uninit()
 {
+    m_pCursor.reset(); // カーソルをリセット
     m_pWindow.reset(); // ウィンドウをリセット
     SDL_Quit();        // SDLの終了
 }
@@ -117,12 +124,12 @@ bool Window::handleEvent(SDL_Event* event)
             if (flags & SDL_WINDOW_FULLSCREEN)
             {
                 // ウィンドウモードに戻す
-                SDL_SetWindowFullscreen(m_pWindow.get(), false);
+                setFullscreen(false);
             }
             else
             {
                 // フルスクリーンにする
-                SDL_SetWindowFullscreen(m_pWindow.get(), true);
+                setFullscreen(true);
             }
             break;
         }
@@ -257,6 +264,52 @@ bool Window::handleEvent(SDL_Event* event)
 }
 
 //------------------------
+// アイコンの設定
+//------------------------
+void Window::setIcon(const std::filesystem::path& iconPath)
+{
+    // 画像を読み込む
+    SDL_Surface* iconSurface = SDL_LoadBMP(iconPath.string().c_str());
+    if (iconSurface != nullptr)
+    {
+        // ウィンドウに設定
+        SDL_SetWindowIcon(m_pWindow.get(), iconSurface);
+
+        // データ解放
+        SDL_DestroySurface(iconSurface);
+    }
+    else
+    {
+        SDL_Log("アイコンの読み込みに失敗: %s", SDL_GetError());
+    }
+}
+
+//------------------------
+// カーソルの設定
+//------------------------
+void Window::setCursor(const std::filesystem::path& cursorPath, int hotspotX, int hotspotY)
+{
+    // 画像読み込み
+    SDL_Surface* cursorSurface = SDL_LoadBMP(cursorPath.string().c_str());
+    if (cursorSurface != nullptr)
+    {
+        // カーソルを作成
+        SDL_Cursor* cursor = SDL_CreateColorCursor(cursorSurface, hotspotX, hotspotY);
+        if (cursor != nullptr)
+        {
+            // アクティブなカーソルとして設定
+            SDL_SetCursor(cursor);
+
+            // 保持
+            m_pCursor.reset(cursor);
+        }
+
+        // データ解放
+        SDL_DestroySurface(cursorSurface);
+    }
+}
+
+//------------------------
 // タイトルの設定
 //------------------------
 void Window::setTitle(const char* title)
@@ -270,6 +323,29 @@ void Window::setTitle(const char* title)
 void Window::setSize(int width, int height)
 {
     SDL_SetWindowSize(m_pWindow.get(), width, height);
+}
+
+//------------------------------------------
+// フルスクリーンの切り替え
+//------------------------------------------
+void Window::setFullscreen(bool fullscreen)
+{
+    SDL_SetWindowFullscreen(m_pWindow.get(), fullscreen);
+}
+
+//------------------------------------------
+// カーソルの表示切り替え
+//------------------------------------------
+void Window::setCursorVisible(bool visible)
+{
+    if (visible)
+    {
+        SDL_ShowCursor();
+    }
+    else
+    {
+        SDL_HideCursor();
+    }
 }
 
 //------------------------------------------

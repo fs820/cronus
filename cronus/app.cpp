@@ -6,6 +6,7 @@
 //--------------------------------------------
 #include "entry.h"
 #include "game_loader.h"
+#include "binary_stream.h"
 #include "gui.h"
 #include "log.h"
 #include "window.h"
@@ -36,6 +37,13 @@ bool Cronus::onStart()
 {
     spdlog::info("Cronusを開始します。"); // ログ出力
 
+    // Cursorの変更をImGuiにさせないようにする
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+
+    getWindow()->setIcon("bmp/ICON/icon.bmp");       // アイコンの設定
+    getWindow()->setCursor("bmp/CURSOR/cursor.bmp"); // カーソルの設定
+
     Config config = file::loadConfig("data/custom.yaml");          // 設定ファイルの読み込み
     getWindow()->setTitle(config.title.c_str());                   // ウィンドウタイトルを設定
     getWindow()->setSize(config.windowWidth, config.windowHeight); // ウィンドウタイトルを設定
@@ -65,6 +73,19 @@ bool Cronus::onUpdate(float elapsedTime, float deltaTime)
         ImGui::Text("Delta Time: %.3f sec", deltaTime);
     }
     ImGui::End(); // ウィンドウ終了
+
+    static float testValue = 0.0f;
+    BinaryReader reader("data/test.bin");
+    if(reader.isValid()) testValue = reader.read<float>();
+
+    if (ImGui::Begin("File")) // ウィンドウ開始
+    {
+        ImGui::SliderFloat("test", &testValue, 0.0f, 1.0f);
+    }
+    ImGui::End(); // ウィンドウ終了
+
+    BinaryWriter writer("data/test.bin");
+    writer.write(testValue);
 #endif // _DEBUG
     return true;
 }

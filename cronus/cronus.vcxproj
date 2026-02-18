@@ -172,7 +172,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game_loader.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="title.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="main.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
