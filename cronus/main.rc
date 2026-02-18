@@ -7,4 +7,4 @@
 #include "resource.h" // 対応するリソースヘッダ
 
 // アイコン
-IDI_EXE ICON "exe.ico" // exe
+IDI_EXE ICON "app.ico" // exe
