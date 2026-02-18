@@ -135,7 +135,7 @@ void NativeFile::seek(std::streamoff offset, std::ios_base::seekdir origin)
 //--------------------------
 bool NativeFile::Exists(const std::filesystem::path& path)
 {
-    return exists(path);
+    return std::filesystem::exists(path);
 }
 
 //--------------------------
@@ -143,7 +143,7 @@ bool NativeFile::Exists(const std::filesystem::path& path)
 //--------------------------
 bool NativeFile::CreateDir(const std::filesystem::path& path)
 {
-    return create_directories(path);
+    return std::filesystem::create_directories(path);
 }
 
 //--------------------------
@@ -154,9 +154,9 @@ size_t NativeFile::GetSize(const std::filesystem::path& path)
     try
     {
         // ファイルが存在し、通常のファイルであればサイズを返す
-        if (exists(path) && is_regular_file(path))
+        if (std::filesystem::exists(path) && std::filesystem::is_regular_file(path))
         {
-            return static_cast<size_t>(file_size(path));
+            return static_cast<size_t>(std::filesystem::file_size(path));
         }
     }
     catch (...) {}

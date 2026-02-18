@@ -5,12 +5,14 @@
 //
 //--------------------------------------------
 #pragma once
+#include <string>
 #include <filesystem>
 
 struct Config
 {
-    int windowWidth;  // ウィンドウ幅
-    int windowHeight; // ウィンドウ高さ
+    std::string title; // タイトル
+    int windowWidth;   // ウィンドウ幅
+    int windowHeight;  // ウィンドウ高さ
 };
 
 namespace file

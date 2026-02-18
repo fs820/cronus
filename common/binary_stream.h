@@ -24,8 +24,11 @@ public:
     T read()
     {
         T data{};
-        m_file.read(&data, sizeof(T));
-        return data;
+        if (m_file.read(&data, sizeof(T)) == sizeof(T))
+        {
+            return data;
+        }
+        throw std::runtime_error("Failed to read data");
     }
 
     // 配列などをまとめて読み込む
@@ -34,14 +37,21 @@ public:
     void readArray(std::vector<T>& outVector, size_t count)
     {
         outVector.resize(count);
-        m_file.read(outVector.data(), sizeof(T) * count);
+        if (m_file.read(outVector.data(), sizeof(T) * count) != sizeof(T) * count)
+        {
+            throw std::runtime_error("Failed to read array data");
+        }
     }
 
     // 生データ読み込み
     void readBytes(void* dest, size_t size)
     {
-        m_file.read(dest, size);
+        if (m_file.read(dest, size) != size)
+        {
+            throw std::runtime_error("Failed to read bytes");
+        }
     }
+
 
     bool isValid() const { return m_file.isOpen(); }
 

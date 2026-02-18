@@ -14,8 +14,24 @@ namespace file
     //---------------
     std::string loadText(const std::filesystem::path& path)
     {
+        // サイズを取得
+        size_t fileSize = NativeFile::GetSize(path);
+        if (fileSize == 0) return "";
+
         NativeFile file(path, FileMode::ReadText);
-        return file.read();
+        if (!file.isOpen()) return "";
+
+        // 領域を確保
+        std::string content;
+        content.resize(fileSize);
+
+        // 書き込む
+        if (file.read(content.data(), fileSize) == fileSize)
+        {
+            return content;
+        }
+
+        return "";
     }
 
     //----------------
@@ -24,7 +40,6 @@ namespace file
     bool saveText(const std::filesystem::path& path, std::string_view content)
     {
         NativeFile file(path, FileMode::WriteText);
-        file.write(content);
-        return true;
+        return file.write(content.data(), content.size());
     }
 }

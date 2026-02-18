@@ -42,6 +42,10 @@ public:
 
     void seek(std::streamoff offset, std::ios_base::seekdir origin = std::ios_base::beg);
 
+    bool exists() { return Exists(m_filePath); }
+
+    std::filesystem::path getFilePath() const { return m_filePath; }
+
     static bool Exists(const std::filesystem::path& path);
     static bool CreateDir(const std::filesystem::path& path);
     static size_t GetSize(const std::filesystem::path& path);

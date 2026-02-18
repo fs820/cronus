@@ -14,6 +14,7 @@ namespace file
     //----------------
     YAML::Node loadYaml(const std::filesystem::path& path)
     {
-
+        // YAMLファイルの読み込み
+        return YAML::LoadFile(path.string()); // ノードを返す
     }
 }

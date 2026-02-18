@@ -5,6 +5,7 @@
 //
 //--------------------------------------------
 #include "entry.h"
+#include "game_loader.h"
 #include "gui.h"
 #include "log.h"
 #include "window.h"
@@ -35,7 +36,9 @@ bool Cronus::onStart()
 {
     spdlog::info("Cronusを開始します。"); // ログ出力
 
-    getWindow()->setTitle("Cronus");                      // ウィンドウタイトルを設定
+    Config config = file::loadConfig("data/custom.yaml");          // 設定ファイルの読み込み
+    getWindow()->setTitle(config.title.c_str());                   // ウィンドウタイトルを設定
+    getWindow()->setSize(config.windowWidth, config.windowHeight); // ウィンドウタイトルを設定
 
     getSceneManager()->addScene("Title", new TitleScene); // タイトルシーンを追加
     getSceneManager()->changeScene("Title");              // タイトルシーンに切り替え
