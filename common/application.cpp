@@ -18,13 +18,14 @@
 #include "event.h"
 #include "log.h"
 #include "scene.h"
+#include "input.h"
 
 //------------------------------------------
 // 
 // アプリケーションクラス
 // 
 //------------------------------------------
-Application::Application() : m_pWindow{}, m_pRenderer{}, m_pTextureManager{}, m_pMeshManager{}, m_pModelManager{}, m_pPhysicsManager{}, m_pSoundManager{}, m_pEventDispatcher{}, m_pSceneManager{}, m_frequency{}, m_startCounter{}, m_lastCounter{}, m_isGuiSetup{} {}
+Application::Application() : m_pWindow{}, m_pRenderer{}, m_pTextureManager{}, m_pMeshManager{}, m_pModelManager{}, m_pPhysicsManager{}, m_pInput{}, m_pSoundManager{}, m_pEventDispatcher{}, m_pSceneManager{}, m_frequency{}, m_startCounter{}, m_lastCounter{}, m_isGuiSetup{} {}
 Application::~Application() = default;
 
 //------------------------------------------
@@ -52,6 +53,7 @@ bool Application::init(int argc, char* argv[])
     m_pTextureManager = std::make_unique<TextureManager>();             // テクスチャ
     m_pMeshManager = std::make_unique<MeshManager>(*m_pRenderer.get()); // メッシュ
     m_pModelManager = std::make_unique<ModelManager>();                 // モデル
+    m_pInput = std::make_unique<Input>();                               // 入力
     m_pSoundManager = std::make_unique<SoundManager>();                 // サウンド
     m_pEventDispatcher = std::make_unique<EventDispatcher>();           // イベント
     m_pSceneManager = std::make_unique<SceneManager>();                 // シーン
@@ -103,6 +105,9 @@ bool Application::update()
 
     // 保存
     m_lastCounter = currentCounter;
+
+    // 入力の更新
+    m_pInput->update();
     
     // ゲームの更新
     if (!onUpdate(elapsedTime, deltaTime)) return false;
@@ -140,6 +145,7 @@ bool Application::handleEvent(SDL_Event* event)
     // 固定のイベント
     if (m_isGuiSetup) ImGui_ImplSDL3_ProcessEvent(event); // Gui
     if (!m_pWindow->handleEvent(event)) return false;     // ウインドウ
+    if (!m_pInput->handleEvent(event)) return false;      // 入力
 
     // ゲームのイベント
     return onEvent(event);

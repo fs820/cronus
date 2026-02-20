@@ -14,6 +14,7 @@ class TextureManager;
 class MeshManager;
 class ModelManager;
 class PhysicsManager;
+class Input;
 class SoundManager;
 class EventDispatcher;
 class SceneManager;
@@ -63,6 +64,7 @@ private:
     std::unique_ptr<MeshManager> m_pMeshManager;
     std::unique_ptr<ModelManager> m_pModelManager;
     std::unique_ptr<PhysicsManager> m_pPhysicsManager;
+    std::unique_ptr<Input> m_pInput;
     std::unique_ptr<SoundManager> m_pSoundManager;
     std::unique_ptr<EventDispatcher> m_pEventDispatcher;
     std::unique_ptr<SceneManager> m_pSceneManager;
