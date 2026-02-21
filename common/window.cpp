@@ -252,6 +252,14 @@ void Window::setCursorVisible(bool visible)
 }
 
 //------------------------------------------
+// マウスの相対モード切り替え
+//------------------------------------------
+void Window::setMouseRelMode(bool rel)
+{
+    SDL_SetWindowRelativeMouseMode(m_pWindow.get(), rel);
+}
+
+//------------------------------------------
 // ウィンドウの取得 (限定的)
 //------------------------------------------
 SDL_Window* Window::getWindow() const { return m_pWindow.get(); }

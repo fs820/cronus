@@ -50,6 +50,7 @@ public:
     void setSize(int width, int height);
     void setFullscreen(bool fullscreen);
     void setCursorVisible(bool visible);
+    void setMouseRelMode(bool rel);
 
     void* getNativeWindow() const { return m_pNativeWindow; }
 
