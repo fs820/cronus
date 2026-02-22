@@ -142,6 +142,8 @@ public:
     void setDeadZone(float deadZone) { m_deadZone = deadZone; }
     void setTriggerThreshold(float triggerThreshold) { m_triggerThreshold = triggerThreshold; }
 
+    void swapGamepad(size_t srcId, size_t destId);
+
 private:
     std::unordered_map<ActionCode, KeyCode> m_actionKeyConfig;                                  // アクションとキーのバインディング
     std::unordered_map<ActionCode, MouseButtonCode> m_actionMouseConfig;                        // アクションとマウスボタンのバインディング

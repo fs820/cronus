@@ -657,3 +657,12 @@ bool Input::isActionDown(ActionCode action, size_t id) const
 
     return isGamepadButtonDown(gamepadButton, id);
 }
+
+//-------------------------
+// ゲームパッドの順番を入れ替える
+//-------------------------
+void Input::swapGamepad(size_t srcId, size_t destId)
+{
+    if (m_gamepads.size() >= srcId || m_gamepads.size() >= destId) return;
+    std::swap(m_gamepads[srcId], m_gamepads[destId]);
+}
