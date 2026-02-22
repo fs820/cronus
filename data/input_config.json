@@ -1,0 +1,30 @@
+{
+    "Keyboard":
+    {
+        "Up": "W",
+        "Left": "A",
+        "Right": "S",
+        "Down": "D",
+        "Jump": "Space",
+        "Attack": "B"
+    },
+
+    "Mouse":
+    {
+        "Jump": "Right",
+        "Attack": "Left"
+    },
+
+    "Gamepad":
+    {
+        "0":
+        {
+            "Up": "Up",
+            "Left": "Left",
+            "Right": "Right",
+            "Down": "Down",
+            "Jump": "South",
+            "Attack": "RightTrigger"
+        }
+    }
+}

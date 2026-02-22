@@ -11,6 +11,7 @@
 #include "log.h"
 #include "window.h"
 #include "title.h"
+#include "input.h"
 
 //---------------------------------
 // Cronus (ゲーム本体)
@@ -83,9 +84,16 @@ bool Cronus::onUpdate(float elapsedTime, float deltaTime)
         ImGui::SliderFloat("test", &testValue, 0.0f, 1.0f);
     }
     ImGui::End(); // ウィンドウ終了
-
     BinaryWriter writer("data/test.bin");
     writer.write(testValue);
+
+    static bool testInput = false;
+    if (getInput()->isActionPressed(ActionCode::Attack, 0)) testInput = !testInput; // 入力のテスト
+    if (ImGui::Begin("Input")) // ウィンドウ開始
+    {
+        ImGui::Checkbox("test", &testInput);
+    }
+    ImGui::End(); // ウィンドウ終了
 #endif // _DEBUG
     return true;
 }

@@ -8,6 +8,7 @@
 #include <SDL3/SDL.h>
 #include "log.h"
 #include "gui.h"
+#include "json_loader.h"
 
 namespace
 {
@@ -111,6 +112,115 @@ namespace
         { GamepadButtonCode::Right, SDL_GAMEPAD_BUTTON_DPAD_RIGHT },
         { GamepadButtonCode::Count, SDL_GAMEPAD_BUTTON_INVALID }
     };
+
+    // 文字列からキーコードへのマッピング
+    const std::unordered_map<std::string_view, KeyCode> stringToKeyCode
+    {
+        { "A", KeyCode::A },
+        { "B", KeyCode::B },
+        { "C", KeyCode::C },
+        { "D", KeyCode::D },
+        { "E", KeyCode::E },
+        { "F", KeyCode::F },
+        { "G", KeyCode::G },
+        { "H", KeyCode::H },
+        { "I", KeyCode::I },
+        { "J", KeyCode::J },
+        { "K", KeyCode::K },
+        { "L", KeyCode::L },
+        { "M", KeyCode::M },
+        { "N", KeyCode::N },
+        { "O", KeyCode::O },
+        { "P", KeyCode::P },
+        { "Q", KeyCode::Q },
+        { "R", KeyCode::R },
+        { "S", KeyCode::S },
+        { "T", KeyCode::T },
+        { "U", KeyCode::U },
+        { "V", KeyCode::V },
+        { "W", KeyCode::W },
+        { "X", KeyCode::X },
+        { "Y", KeyCode::Y },
+        { "Z", KeyCode::Z },
+        { "Num0", KeyCode::Num0 },
+        { "Num1", KeyCode::Num1 },
+        { "Num2", KeyCode::Num2 },
+        { "Num3", KeyCode::Num3 },
+        { "Num4", KeyCode::Num4 },
+        { "Num5", KeyCode::Num5 },
+        { "Num6", KeyCode::Num6 },
+        { "Num7", KeyCode::Num7 },
+        { "Num8", KeyCode::Num8 },
+        { "Num9", KeyCode::Num9 },
+        { "Space", KeyCode::Space },
+        { "Enter", KeyCode::Enter },
+        { "Escape", KeyCode::Escape },
+        { "LeftShift", KeyCode::LeftShift },
+        { "RightShift", KeyCode::RightShift },
+        { "LeftCtrl", KeyCode::LeftCtrl },
+        { "RightCtrl", KeyCode::RightCtrl },
+        { "LeftAlt", KeyCode::LeftAlt },
+        { "RightAlt", KeyCode::RightAlt },
+        { "Tab", KeyCode::Tab },
+        { "Backspace", KeyCode::Backspace },
+        { "CapsLock", KeyCode::CapsLock },
+        { "Left", KeyCode::Left },
+        { "Right", KeyCode::Right },
+        { "Up", KeyCode::Up },
+        { "Down", KeyCode::Down },
+        { "F1", KeyCode::F1 },
+        { "F2", KeyCode::F2 },
+        { "F3", KeyCode::F3 },
+        { "F4", KeyCode::F4 },
+        { "F5", KeyCode::F5 },
+        { "F6", KeyCode::F6 },
+        { "F7", KeyCode::F7 },
+        { "F8", KeyCode::F8 },
+        { "F9", KeyCode::F9 },
+        { "F10", KeyCode::F10 },
+        { "F11", KeyCode::F11 },
+        { "F12", KeyCode::F12 }
+    };
+
+    // 文字列からマウスボタンコードへのマッピング
+    const std::unordered_map<std::string_view, MouseButtonCode> stringToMouseButtonCode
+    {
+        { "Left", MouseButtonCode::Left },
+        { "Right", MouseButtonCode::Right },
+        { "Middle", MouseButtonCode::Middle }
+    };
+
+    // 文字列からゲームパッドボタンコードへのマッピング
+    const std::unordered_map<std::string_view, GamepadButtonCode> stringToGamepadButtonCode
+    {
+        { "South", GamepadButtonCode::South },
+        { "East", GamepadButtonCode::East },
+        { "West", GamepadButtonCode::West },
+        { "North", GamepadButtonCode::North },
+        { "LeftShoulder", GamepadButtonCode::LeftShoulder },
+        { "RightShoulder", GamepadButtonCode::RightShoulder },
+        { "LeftTrigger", GamepadButtonCode::LeftTrigger },
+        { "RightTrigger", GamepadButtonCode::RightTrigger },
+        { "Select", GamepadButtonCode::Select },
+        { "Start", GamepadButtonCode::Start },
+        { "LeftStick", GamepadButtonCode::LeftStick },
+        { "RightStick", GamepadButtonCode::RightStick },
+        { "Up", GamepadButtonCode::Up },
+        { "Down", GamepadButtonCode::Down },
+        { "Left", GamepadButtonCode::Left },
+        { "Right", GamepadButtonCode::Right }
+    };
+
+    // 文字列からアクションコードへのマッピング
+    const std::unordered_map<std::string_view, ActionCode> stringToActionCode
+    {
+        { "Up", ActionCode::Up },
+        { "Down", ActionCode::Down },
+        { "Left", ActionCode::Left },
+        { "Right", ActionCode::Right },
+        { "Jump", ActionCode::Jump },
+        { "Attack", ActionCode::Attack }
+    };
 }
 
 //--------------------------------------
@@ -118,6 +228,98 @@ namespace
 // 入力クラス
 //
 //--------------------------------------
+
+//-------------------------
+// コンフィグの読み込み
+//-------------------------
+void Input::loadConfig(std::filesystem::path configFile)
+{
+    // JSONファイルを読み込む
+    auto config = file::loadJson(configFile);
+
+    // JSONの構造を解析して、アクションとキー/マウスボタン/ゲームパッドボタンのバインディングを設定する
+    for (const auto& type : config.getMemberNames())
+    {
+        if (type =="Keyboard")
+        {
+            auto keyboardConfig = config[type];
+            for (const auto& key : keyboardConfig.getMemberNames())
+            {
+                if (!stringToActionCode.contains(key))
+                {
+                    spdlog::warn("Unknown action: {}", key);
+                    continue;
+                }
+                else if (!stringToKeyCode.contains(keyboardConfig[key].asString()))
+                {
+                    spdlog::warn("Unknown key: {}", keyboardConfig[key].asString());
+                    continue;
+                }
+
+                ActionCode action = stringToActionCode.at(key);
+                KeyCode keyCode = stringToKeyCode.at(keyboardConfig[key].asString());
+                m_actionKeyConfig.try_emplace(action, KeyCode::Count);
+                m_actionKeyConfig[action] = keyCode;
+            }
+        }
+
+        if (type == "Mouse")
+        {
+            auto mouseConfig = config[type];
+            for (const auto& key : mouseConfig.getMemberNames())
+            {
+                if (!stringToActionCode.contains(key))
+                {
+                    spdlog::warn("Unknown action: {}", key);
+                    continue;
+                }
+                else if (!stringToMouseButtonCode.contains(mouseConfig[key].asString()))
+                {
+                    spdlog::warn("Unknown mouse button: {}", mouseConfig[key].asString());
+                    continue;
+                }
+
+                ActionCode action = stringToActionCode.at(key);
+                MouseButtonCode buttonCode = stringToMouseButtonCode.at(mouseConfig[key].asString());
+                m_actionMouseConfig.try_emplace(action, MouseButtonCode::Count);
+                m_actionMouseConfig[action] = buttonCode;
+            }
+        }
+
+        if (type == "Gamepad")
+        {
+            auto id = config[type];
+            for (const auto& number : id.getMemberNames())
+            {
+                for (size_t cnt = 0; cnt < MAX_GAMEPADS; ++cnt)
+                {
+                    if (number == cnt + "0")
+                    {
+                        auto gamepadConfig = id[number];
+                        for (const auto& key : gamepadConfig.getMemberNames())
+                        {
+                            if (!stringToActionCode.contains(key))
+                            {
+                                spdlog::warn("Unknown action: {}", key);
+                                continue;
+                            }
+                            else if (!stringToGamepadButtonCode.contains(gamepadConfig[key].asString()))
+                            {
+                                spdlog::warn("Unknown gamepad button: {}", gamepadConfig[key].asString());
+                                continue;
+                            }
+
+                            ActionCode action = stringToActionCode.at(key);
+                            GamepadButtonCode buttonCode = stringToGamepadButtonCode.at(gamepadConfig[key].asString());
+                            m_actionGamepadConfig.try_emplace(action, GamepadButtonCode::Count, -1);
+                            m_actionGamepadConfig[action] = { buttonCode, cnt };
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 //-------------------------
 // 更新
@@ -135,11 +337,9 @@ void Input::update()
         for (size_t count = 0; count < size_t(KeyCode::Count); ++count)
         {
             KeyCode key = KeyCode(count);
-            if (keyboardState[keyCodeToScancode.at(key)])
-            {
-                m_keyboard.currentKeyState.try_emplace(key, false);
-                m_keyboard.currentKeyState[key] = true;
-            }
+            m_keyboard.currentKeyState.try_emplace(key, false);
+            m_keyboard.currentKeyState[key] = keyboardState[keyCodeToScancode.at(key)];
+            spdlog::trace("Key: {}, State: {}", static_cast<int>(key), m_keyboard.currentKeyState[key]);
         }
     }
 
@@ -154,15 +354,14 @@ void Input::update()
         for (size_t count = 0; count < size_t(MouseButtonCode::Count); ++count)
         {
             MouseButtonCode button = MouseButtonCode(count);
-            if (mouseState & SDL_BUTTON_MASK(mouseButtonCodeToFlag.at(button)))
-            {
-                m_mouse.currentButtonState.try_emplace(button, false);
-                m_mouse.currentButtonState[button] = true;
-            }
+            m_mouse.currentButtonState.try_emplace(button, false);
+            m_mouse.currentButtonState[button] = mouseState & SDL_BUTTON_MASK(mouseButtonCodeToFlag.at(button));
+            spdlog::trace("Mouse Button: {}, State: {}", static_cast<int>(button), m_mouse.currentButtonState[button]);
         }
     }
+    spdlog::trace("Mouse Position: ({}, {}), Relative Movement: ({}, {})", m_mouse.x, m_mouse.y, m_mouse.relX, m_mouse.relY);
 
-    for (Gamepad gamepad : m_gamepads)
+    for (Gamepad& gamepad : m_gamepads)
     {
         // ボタン
         for (size_t count = 0; count < size_t(GamepadButtonCode::Count); ++count)
@@ -172,6 +371,7 @@ void Input::update()
 
             gamepad.currentButtonState.try_emplace(button, false);
             gamepad.currentButtonState[button] = SDL_GetGamepadButton(gamepad.device, gamepadButtonCodeToButton.at(button));
+            spdlog::trace("Gamepad Button: {}, State: {}", static_cast<int>(button), gamepad.currentButtonState[button]);
         }
 
         // スティック
@@ -221,6 +421,7 @@ void Input::update()
             gamepad.rightStickY = static_cast<float>(rawY) / 32767.0f;
         }
         if (std::abs(gamepad.rightStickX) < m_deadZone) gamepad.rightStickX = 0.0f; // デッドゾーンを適用
+        spdlog::trace("Gamepad Left Stick: ({}, {}), Right Stick: ({}, {})", gamepad.leftStickX, gamepad.leftStickY, gamepad.rightStickX, gamepad.rightStickY);
 
         // トリガー
         rawX = SDL_GetGamepadAxis(gamepad.device, SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
@@ -257,6 +458,7 @@ void Input::update()
             gamepad.currentButtonState.try_emplace(GamepadButtonCode::RightTrigger, false);
             gamepad.currentButtonState[GamepadButtonCode::RightTrigger] = true;
         }
+        spdlog::trace("Gamepad Left Trigger: {}, Right Trigger: {}", gamepad.leftTrigger, gamepad.rightTrigger);
     }
 }
 
@@ -386,15 +588,72 @@ bool Input::isGamepadButtonDown(GamepadButtonCode button, size_t id) const
 
     return gamepad.currentButtonState.at(button);
 }
-bool Input::isActionPressed(ActionCode action) const
+bool Input::isActionPressed(ActionCode action, size_t id) const
 {
-    return false;
+    // アクションに対応するキー、マウスボタン、ゲームパッドボタンのいずれかが押されたかをチェックする
+    if (m_actionKeyConfig.contains(action))
+    {
+        KeyCode key = m_actionKeyConfig.at(action);
+        if (isKeyPressed(key)) return true;
+    }
+
+    if (m_actionMouseConfig.contains(action))
+    {
+        MouseButtonCode mouseButton = m_actionMouseConfig.at(action);
+        if (isMouseButtonPressed(mouseButton)) return true;
+    }
+
+    if (!m_actionGamepadConfig.contains(action)) return false;
+
+    auto config = m_actionGamepadConfig.at(action);
+    if (id != config.second) return false;
+    GamepadButtonCode gamepadButton = config.first;
+
+    return isGamepadButtonPressed(gamepadButton, id);
 }
-bool Input::isActionReleased(ActionCode action) const
+bool Input::isActionReleased(ActionCode action, size_t id) const
 {
-    return false;
+    // アクションに対応するキー、マウスボタン、ゲームパッドボタンのいずれかが離されたかをチェックする
+    if (m_actionKeyConfig.contains(action))
+    {
+        KeyCode key = m_actionKeyConfig.at(action);
+        if (isKeyReleased(key)) return true;
+    }
+
+    if (m_actionMouseConfig.contains(action))
+    {
+        MouseButtonCode mouseButton = m_actionMouseConfig.at(action);
+        if (isMouseButtonReleased(mouseButton)) return true;
+    }
+
+    if (!m_actionGamepadConfig.contains(action)) return false;
+
+    auto config = m_actionGamepadConfig.at(action);
+    if (id != config.second) return false;
+    GamepadButtonCode gamepadButton = config.first;
+
+    return isGamepadButtonReleased(gamepadButton, id);
 }
-bool Input::isActionDown(ActionCode action) const
+bool Input::isActionDown(ActionCode action, size_t id) const
 {
-    return false;
+    // アクションに対応するキー、マウスボタン、ゲームパッドボタンのいずれかが押されているかをチェックする
+    if (m_actionKeyConfig.contains(action))
+    {
+        KeyCode key = m_actionKeyConfig.at(action);
+        if (isKeyDown(key)) return true;
+    }
+
+    if (m_actionMouseConfig.contains(action))
+    {
+        MouseButtonCode mouseButton = m_actionMouseConfig.at(action);
+        if (isMouseButtonDown(mouseButton)) return true;
+    }
+
+    if (!m_actionGamepadConfig.contains(action)) return false;
+
+    auto config = m_actionGamepadConfig.at(action);
+    if (id != config.second) return false;
+    GamepadButtonCode gamepadButton = config.first;
+
+    return isGamepadButtonDown(gamepadButton, id);
 }

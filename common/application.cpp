@@ -50,10 +50,13 @@ bool Application::init(int argc, char* argv[])
     m_pPhysicsManager = std::make_unique<PhysicsManager>();
     m_pPhysicsManager->init();
 
+    // 入力
+    m_pInput = std::make_unique<Input>();
+    m_pInput->loadConfig("data/input_config.json");
+
     m_pTextureManager = std::make_unique<TextureManager>();             // テクスチャ
     m_pMeshManager = std::make_unique<MeshManager>(*m_pRenderer.get()); // メッシュ
     m_pModelManager = std::make_unique<ModelManager>();                 // モデル
-    m_pInput = std::make_unique<Input>();                               // 入力
     m_pSoundManager = std::make_unique<SoundManager>();                 // サウンド
     m_pEventDispatcher = std::make_unique<EventDispatcher>();           // イベント
     m_pSceneManager = std::make_unique<SceneManager>();                 // シーン
@@ -160,6 +163,7 @@ TextureManager* Application::getTextureManager() { return m_pTextureManager.get(
 MeshManager* Application::getMeshManager() { return m_pMeshManager.get(); }
 ModelManager* Application::getModelManager() { return m_pModelManager.get(); }
 PhysicsManager* Application::getPhysicsManager() { return m_pPhysicsManager.get(); }
+Input* Application::getInput() { return m_pInput.get(); }
 SoundManager* Application::getSoundManager() { return m_pSoundManager.get(); }
 EventDispatcher* Application::getEventDispatcher() { return m_pEventDispatcher.get(); }
 SceneManager* Application::getSceneManager() { return m_pSceneManager.get(); }

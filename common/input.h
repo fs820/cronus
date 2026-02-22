@@ -5,13 +5,16 @@
 //
 //--------------------------------------------
 #pragma once
+#include <vector>
 #include <unordered_map>
+#include <filesystem>
 
 union SDL_Event;
 struct SDL_Gamepad;
 
 constexpr float DEFAULT_DEAD_ZONE = 0.2f;         // デッドゾーンのデフォルト値
 constexpr float DEFAULT_TRIGGER_THRESHOLD = 0.5f; // トリガーのデフォルト閾値
+constexpr int MAX_GAMEPADS = 4;                   // 最大ゲームパッド数
 
 //-------------------------
 // キーコードの列挙型
@@ -115,6 +118,8 @@ public:
     Input() : m_deadZone(DEFAULT_DEAD_ZONE), m_triggerThreshold(DEFAULT_TRIGGER_THRESHOLD) {}
     ~Input() = default;
 
+    void loadConfig(std::filesystem::path configFile);
+
     void update();
     bool handleEvent(SDL_Event* event);
 
@@ -130,17 +135,21 @@ public:
     bool isGamepadButtonReleased(GamepadButtonCode button, size_t id = 0u) const;
     bool isGamepadButtonDown(GamepadButtonCode button, size_t id = 0u) const;
 
-    bool isActionPressed(ActionCode action) const;
-    bool isActionReleased(ActionCode action) const;
-    bool isActionDown(ActionCode action) const;
+    bool isActionPressed(ActionCode action, size_t id = 0u) const;
+    bool isActionReleased(ActionCode action, size_t id = 0u) const;
+    bool isActionDown(ActionCode action, size_t id = 0u) const;
 
     void setDeadZone(float deadZone) { m_deadZone = deadZone; }
     void setTriggerThreshold(float triggerThreshold) { m_triggerThreshold = triggerThreshold; }
 
 private:
-    Keyboard m_keyboard;
-    Mouse m_mouse;
-    std::vector<Gamepad> m_gamepads;
+    std::unordered_map<ActionCode, KeyCode> m_actionKeyConfig;                                  // アクションとキーのバインディング
+    std::unordered_map<ActionCode, MouseButtonCode> m_actionMouseConfig;                        // アクションとマウスボタンのバインディング
+    std::unordered_map<ActionCode, std::pair<GamepadButtonCode, size_t>> m_actionGamepadConfig; // アクションとゲームパッドボタンのバインディング
+
+    Keyboard m_keyboard;             // キーボードの状態
+    Mouse m_mouse;                   // マウスの状態
+    std::vector<Gamepad> m_gamepads; // ゲームパッドの状態
 
     float m_deadZone;         // スティックのデッドゾーン
     float m_triggerThreshold; // トリガーの閾値

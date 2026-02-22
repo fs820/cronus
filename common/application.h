@@ -46,6 +46,7 @@ public:
     MeshManager* getMeshManager();
     ModelManager* getModelManager();
     PhysicsManager* getPhysicsManager();
+    Input* getInput();
     SoundManager* getSoundManager();
     EventDispatcher* getEventDispatcher();
     SceneManager* getSceneManager();

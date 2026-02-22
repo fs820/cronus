@@ -26,7 +26,7 @@ namespace file
         content.resize(fileSize);
 
         // 書き込む
-        if (file.read(content.data(), fileSize) == fileSize)
+        if (file.read(content.data(), fileSize) <= fileSize)
         {
             return content;
         }
