@@ -21,6 +21,20 @@ class Scene;
 struct TextureData;
 
 //----------------------------
+// レンダリングキュー
+//----------------------------
+enum class RenderQueue : unsigned char
+{
+    Shadow,
+    Geometry,
+    Decal,
+    Sky,
+    Outline,
+    Transparent,
+    UI
+};
+
+//----------------------------
 // レンダラー (外部インターフェース)
 //----------------------------
 class Renderer

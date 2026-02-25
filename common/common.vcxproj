@@ -178,6 +178,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="physics.h" />
     <ClInclude Include="physics_types.h" />
+    <ClInclude Include="render.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="sound.h" />
@@ -204,6 +205,7 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="physics.cpp" />
+    <ClCompile Include="render.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="sound.cpp" />

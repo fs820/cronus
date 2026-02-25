@@ -7,6 +7,7 @@
 #pragma once
 #include <unordered_map>
 #include <typeindex>
+#include <stdexcept>
 #include "component.h"
 
 //---------------------------------
@@ -44,8 +45,12 @@ public:
     template<typename T>
     bool Has() const
     {
-        auto type = std::type_index(typeid(T));
-        return m_components.contains(type);
+        for (auto& [type, comp] : m_components)
+        {
+            if (dynamic_cast<T*>(comp.get()) != nullptr)
+                return true;
+        }
+        return false;
     }
 
     //-----------------------

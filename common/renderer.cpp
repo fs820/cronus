@@ -34,6 +34,7 @@ namespace
 #include "mymath.h"
 #include "scene.h"
 #include "camera.h"
+#include "render.h"
 
 static constexpr wchar_t SHADER_DIRECTORY[] = L"data/SHADER";
 
@@ -233,7 +234,7 @@ public:
 
     void init(HWND handle, long width, long height);
     void uninit();
-    bool render(const Scene& scene);
+    bool render(const Scene& scene, const Renderer& inter);
     void beginShadow(Matrix lightView, Matrix lightProj);
     void endShadow();
     void beginGeometry(Matrix cameraView, Matrix cameraProj);
@@ -562,10 +563,17 @@ void RendererImpl::uninit()
 //-------------------------------------------
 // 描画
 //-------------------------------------------
-bool RendererImpl::render(const Scene& scene)
+bool RendererImpl::render(const Scene& scene, const Renderer& inter)
 {
     scene.getCamera()->GetViewMatrix();
     scene.getCamera()->GetProjectionMatrix();
+
+    auto renderComponents = scene.getGameObjectsOfType<RenderComponent>();
+    for (auto& renderComponent : renderComponents)
+    {
+        renderComponent->Draw(inter);
+    }
+
     return true;
 }
 
@@ -2783,7 +2791,7 @@ bool Renderer::render(const Scene& scene)
 {
     if (m_pImpl != nullptr)
     {
-        return m_pImpl->render(scene);
+        return m_pImpl->render(scene, *this);
     }
     return false;
 }

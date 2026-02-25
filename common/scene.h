@@ -8,10 +8,12 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
+#include <vector>
+#include <span>
+#include "object.h"
 
 class Scene;
 class Renderer;
-class GameObject;
 class Camera;
 
 //---------------------------------------------
@@ -50,6 +52,23 @@ public:
     void addGameObject(std::unique_ptr<GameObject> gameObject);
 
     Camera* getCamera() const { return m_camera.get(); }
+
+    //-------------------------------------------------------------------
+    // ゲームオブジェクトのうち、指定したコンポーネントを持つものを取得
+    //-------------------------------------------------------------------
+    template<typename T>
+    std::span<T*> getGameObjectsOfType() const
+    {
+        std::vector<T*> result;
+        for (const auto& gameObject : m_gameObjects)
+        {
+            if (gameObject->Has<T>())
+            {
+                result.push_back(&gameObject->Get<T>());
+            }
+        }
+        return result;
+    }
 
 protected:
     virtual void onUpdate(float, float) {}
