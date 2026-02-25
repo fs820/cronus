@@ -5,6 +5,8 @@
 //
 //--------------------------------------------
 #include "scene.h"
+#include "object.h"
+#include "camera.h"
 
 //---------------------------------------------
 // 
@@ -42,19 +44,60 @@ void SceneManager::changeScene(std::string_view sceneName)
 //------------------
 void SceneManager::update(float elapsedTime, float deltaTime)
 {
+    // シーンの更新
     if (m_activeScene != nullptr)
     {
-        m_activeScene->update(elapsedTime, deltaTime); // アクティブシーンの更新
+        m_activeScene->update(elapsedTime, deltaTime);
+    }
+}
+
+//---------------------------------------------
+//
+// シーンクラス
+//
+//---------------------------------------------
+Scene::Scene() = default;
+Scene::~Scene() = default;
+
+//------------------
+// 更新
+//------------------
+void Scene::update(float elapsedTime, float deltaTime)
+{
+    if (m_camera == nullptr) m_camera = std::make_unique<Camera>(); // カメラの生成
+    m_camera->Set(); // カメラの設定
+
+    // StartしていないゲームオブジェクトのStartを呼び出す
+    for (auto& gameObject : m_noStartObjects)
+    {
+        if (!gameObject->Start())
+        {
+            gameObject->markForDestroy(); // Startに失敗したゲームオブジェクトは破棄予定にする
+        }
+    }
+    m_noStartObjects.clear(); // Startしていないゲームオブジェクトのリストをクリア
+
+    // ゲームオブジェクトの更新
+    for (auto& gameObject : m_gameObjects)
+    {
+        gameObject->Update(deltaTime);
+    }
+
+    // 破棄予定のゲームオブジェクトを削除
+    for (auto& gameObject : m_gameObjects)
+    {
+        if (gameObject->isMarkedForDestroy())
+        {
+            gameObject->Destroy();
+        }
     }
 }
 
 //------------------
-// シーンの描画
+// ゲームオブジェクトを追加
 //------------------
-void SceneManager::render(const Renderer& renderer)
+void Scene::addGameObject(std::unique_ptr<GameObject> gameObject)
 {
-    if (m_activeScene != nullptr)
-    {
-        m_activeScene->render(renderer); // アクティブシーンの描画
-    }
+    m_noStartObjects.push_back(gameObject.get());   // Startしていないゲームオブジェクトのリストに追加
+    m_gameObjects.push_back(std::move(gameObject)); // ゲームオブジェクトのリストに追加
 }

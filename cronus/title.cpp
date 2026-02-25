@@ -30,7 +30,7 @@ void TitleScene::onExit()
 //------------------------
 // 更新処理
 //------------------------
-void TitleScene::update(float elapsedTime, float deltaTime)
+void TitleScene::onUpdate(float elapsedTime, float deltaTime)
 {
 #ifdef _DEBUG
     if (ImGui::Begin("Title Scene")) // ウィンドウ開始
@@ -39,12 +39,4 @@ void TitleScene::update(float elapsedTime, float deltaTime)
     }
     ImGui::End(); // ウィンドウ終了
 #endif // _DEBUG
-}
-
-//------------------------
-// 描画処理
-//------------------------
-void TitleScene::render(const Renderer& renderer)
-{
-
 }

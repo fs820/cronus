@@ -17,8 +17,7 @@ public:
     ~TitleScene() override = default;
     void onEnter() override;
     void onExit() override;
-    void update(float elapsedTime, float deltaTime) override;
-    void render(const Renderer& renderer) override;
+    void onUpdate(float elapsedTime, float deltaTime) override;
 
 private:
 };

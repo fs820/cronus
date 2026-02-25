@@ -32,6 +32,8 @@ namespace
 #include "renderer.h"
 #include "texture.h"
 #include "mymath.h"
+#include "scene.h"
+#include "camera.h"
 
 static constexpr wchar_t SHADER_DIRECTORY[] = L"data/SHADER";
 
@@ -231,6 +233,7 @@ public:
 
     void init(HWND handle, long width, long height);
     void uninit();
+    bool render(const Scene& scene);
     void beginShadow(Matrix lightView, Matrix lightProj);
     void endShadow();
     void beginGeometry(Matrix cameraView, Matrix cameraProj);
@@ -554,6 +557,16 @@ void RendererImpl::uninit()
 
     // デバイス破棄
     m_pDevice.Reset();
+}
+
+//-------------------------------------------
+// 描画
+//-------------------------------------------
+bool RendererImpl::render(const Scene& scene)
+{
+    scene.getCamera()->GetViewMatrix();
+    scene.getCamera()->GetProjectionMatrix();
+    return true;
 }
 
 //-------------------------------------------
@@ -2764,6 +2777,15 @@ void Renderer::uninit()
     {
         m_pImpl->uninit();
     }
+}
+
+bool Renderer::render(const Scene& scene)
+{
+    if (m_pImpl != nullptr)
+    {
+        return m_pImpl->render(scene);
+    }
+    return false;
 }
 
 void Renderer::beginShadow(Matrix lightView, Matrix lightProj)

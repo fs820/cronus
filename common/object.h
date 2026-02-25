@@ -1,0 +1,75 @@
+//-------------------------------------
+//
+//　ゲームオブジェクト [object.h]
+// Author: Fuma Sato
+//
+//-------------------------------------
+#pragma once
+#include <unordered_map>
+#include <typeindex>
+#include "component.h"
+
+//---------------------------------
+// ゲームオブジェクトクラス
+//---------------------------------
+class GameObject
+{
+public:
+    GameObject() : m_isMarkedForDestroy{} {}
+    ~GameObject();
+
+    //-----------------------
+    // コンポーネントの追加
+    //-----------------------
+    template<typename T>
+    T& Add()
+    {
+        auto type = std::type_index(typeid(T));
+        if (m_components.contains(type))
+        {
+            throw std::runtime_error("Component already exists");
+        }
+        auto component = std::make_unique<T>();
+        component->SetOwner(this);
+        component->Awake();
+
+        T& ref = *component;
+        m_components[type] = std::move(component);
+        return ref;
+    }
+
+    //-----------------------
+    // コンポーネントの取得
+    //-----------------------
+    template<typename T>
+    bool Has() const
+    {
+        auto type = std::type_index(typeid(T));
+        return m_components.contains(type);
+    }
+
+    //-----------------------
+    // コンポーネントの取得
+    //-----------------------
+    template<typename T>
+    T& Get()
+    {
+        auto type = std::type_index(typeid(T));
+        if (!m_components.contains(type))
+        {
+            throw std::runtime_error("Component does not exist");
+        }
+        return *static_cast<T*>(m_components[type].get());
+    }
+
+    bool Start();
+    void Update(float deltaTime);
+    void Render(const Renderer& renderer);
+    void Destroy();
+    void markForDestroy() { m_isMarkedForDestroy = true; }
+    bool isMarkedForDestroy() const { return m_isMarkedForDestroy; }
+
+private:
+    std::unordered_map<std::type_index, std::unique_ptr<Component>> m_components; // コンポーネントのマップ
+    bool m_isMarkedForDestroy;                                                    // 破棄予定フラグ
+};

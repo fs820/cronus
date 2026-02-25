@@ -17,6 +17,7 @@ namespace gui
 
 class RendererImpl;
 class TextureManager;
+class Scene;
 struct TextureData;
 
 //----------------------------
@@ -30,6 +31,7 @@ public:
 
     void init(HWND handle, long width, long height);
     void uninit();
+    bool render(const Scene& scene);
     void beginShadow(Matrix lightView, Matrix lightProj);
     void endShadow();
     void beginGeometry(Matrix cameraView, Matrix cameraProj);

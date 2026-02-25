@@ -130,14 +130,7 @@ bool Application::update()
 //------------------------------------------
 bool Application::render()
 {
-    m_pRenderer->beginUI(true); // 描画開始
-
-    gui::draw();     // Gui描画
-
-    m_pRenderer->endUI(); // 描画終了
-
-    m_pRenderer->present(); // 表示
-    return true;
+    return m_pRenderer->render(*m_pSceneManager->getActiveScene()); // 描画
 }
 
 //------------------------------------------
