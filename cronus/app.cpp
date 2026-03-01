@@ -53,7 +53,7 @@ bool Cronus::onStart()
     getRenderer()->setPostProcessShaderMask(PostProcessShaderMask::FXAA | PostProcessShaderMask::Bloom); // アンチエイリアスとブルームを行う
     getRenderer()->setToneMappingType(ToneMappingType::Anime);                                           // アニメ調の色彩
 
-    getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/test.jpg");
+    getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/test.png");
     getTextureManager()->load(1);
     getRenderer()->uploadTextures(*getTextureManager(), 1);
 
