@@ -17,7 +17,7 @@ namespace factory
     {
         std::unique_ptr<GameObject> logo = std::make_unique<GameObject>();
 
-        auto pTrans = logo->Add<TransformComponent>(Transform(Vector3(960, 540, 0), Quaternion::Identity(), Vector3(450, 600, 0)));
+        auto pTrans = logo->Add<TransformComponent>(Transform(Vector3(960, 540, 0), Quaternion::Identity(), Vector3(1344, 1050, 0)));
 
         MeshHandle mesh = meshManager.sprite();
         Material material{};   // UIはそのままでもいい
