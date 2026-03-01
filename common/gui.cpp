@@ -52,7 +52,7 @@ namespace gui
         ImGui::Render();
     }
 
-    void draw()
+    void render()
     {
         // 描画
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

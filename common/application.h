@@ -55,7 +55,6 @@ protected:
     virtual bool onStart() = 0;
     virtual void onEnd() = 0;
     virtual bool onUpdate(float elapsedTime, float deltaTime) = 0;
-    virtual bool onRender(const Renderer& renderer) = 0;
     virtual bool onEvent(SDL_Event* event) = 0;
 
 private:

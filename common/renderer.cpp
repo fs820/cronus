@@ -237,7 +237,7 @@ public:
 
     void init(HWND handle, long width, long height);
     void uninit();
-    bool render(const Scene& scene, Renderer& inter);
+    bool render(const Scene& scene, std::function<void()> guiRender, Renderer& inter);
     void beginShadow(Matrix lightView, Matrix lightProj);
     void endShadow();
     void beginGeometry(Matrix cameraView, Matrix cameraProj);
@@ -572,7 +572,7 @@ void RendererImpl::uninit()
 //-------------------------------------------
 // 描画
 //-------------------------------------------
-bool RendererImpl::render(const Scene& scene, Renderer& inter)
+bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, Renderer& inter)
 {
     auto cameras = scene.getGameObjectsOfType<CameraComponent>();
     auto lights = scene.getGameObjectsOfType<LightComponent>();
@@ -729,6 +729,9 @@ bool RendererImpl::render(const Scene& scene, Renderer& inter)
     //-------------------------
     // String終了
     //-------------------------
+
+    // Gui描画(あれば)
+    if (guiRender!=nullptr) guiRender();
 
     // 全描画を終了し切り替えを行う
     present();
@@ -2956,11 +2959,11 @@ void Renderer::uninit()
     }
 }
 
-bool Renderer::render(const Scene& scene)
+bool Renderer::render(const Scene& scene, std::function<void()> guiRender)
 {
     if (m_pImpl != nullptr)
     {
-        return m_pImpl->render(scene, *this);
+        return m_pImpl->render(scene, guiRender, *this);
     }
     return false;
 }

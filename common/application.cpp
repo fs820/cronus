@@ -130,7 +130,7 @@ bool Application::update()
 //------------------------------------------
 bool Application::render()
 {
-    return m_pRenderer->render(*m_pSceneManager->getActiveScene()); // 描画
+    return m_pRenderer->render(*m_pSceneManager->getActiveScene(), gui::render); // 描画
 }
 
 //------------------------------------------

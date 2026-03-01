@@ -5,9 +5,13 @@
 //
 //--------------------------------------------
 #pragma once
+#include <memory>
 
 class GameObject;
+class MeshManager;
+struct TextureHandle;
+
 namespace factory
 {
-    GameObject createTitleLogo();
+    std::unique_ptr<GameObject> createTitleLogo(MeshManager meshManager, TextureHandle texture);
 }

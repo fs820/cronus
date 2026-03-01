@@ -11,5 +11,5 @@ namespace gui
     void uninit();
     void beginFrame();
     void endFrame();
-    void draw();
+    void render();
 }

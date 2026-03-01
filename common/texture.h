@@ -5,6 +5,11 @@
 //
 //--------------------------------------------
 #pragma once
+#include <filesystem>
+#include <mutex>
+#include <functional>
+#include <span>
+#include "pch.h"
 #include "graphics_types.h"
 
 // stbカスタムデリータ

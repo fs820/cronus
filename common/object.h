@@ -5,10 +5,9 @@
 //
 //-------------------------------------
 #pragma once
-#include <unordered_map>
-#include <typeindex>
 #include <stdexcept>
 #include <memory>
+#include <vector>
 #include "component.h"
 
 //---------------------------------
@@ -20,24 +19,24 @@ public:
     GameObject() : m_isMarkedForDestroy{} {}
     ~GameObject();
 
+    GameObject(GameObject&&) noexcept = default;
+    GameObject& operator=(GameObject&&) noexcept = default;
+    GameObject(const GameObject&) = delete;
+    GameObject& operator=(const GameObject&) = delete;
+
     //-----------------------
     // コンポーネントの追加
     //-----------------------
     template<typename T, typename... Args>
         requires std::derived_from<T, Component>
-    T& Add(Args&&... args)
+    T* Add(Args&&... args)
     {
-        auto type = std::type_index(typeid(T));
-        if (m_components.contains(type))
-        {
-            throw std::runtime_error("Component already exists");
-        }
         auto component = std::make_unique<T>(std::forward<Args>(args)...);
         component->setOwner(this);
         component->awake();
 
-        T& ref = *component;
-        m_components[type] = std::move(component);
+        T* ref = component.get();
+        m_components.push_back(std::move(component));
         return ref;
     }
 
@@ -48,9 +47,9 @@ public:
         requires std::derived_from<T, Component>
     bool Has() const
     {
-        for (auto& [type, comp] : m_components)
+        for (auto& component : m_components)
         {
-            if (dynamic_cast<T*>(comp.get()) != nullptr)
+            if (dynamic_cast<T*>(component.get()) != nullptr)
                 return true;
         }
         return false;
@@ -61,24 +60,25 @@ public:
     //-----------------------
     template<typename T>
         requires std::derived_from<T, Component>
-    T& Get()
+    std::vector<T*> Get()
     {
-        auto type = std::type_index(typeid(T));
-        if (!m_components.contains(type))
+        std::vector<T*> components;
+        for (auto& component : m_components)
         {
-            throw std::runtime_error("Component does not exist");
+            auto pComp = dynamic_cast<T*>(component.get());
+            if (pComp != nullptr)
+                components.push_back(pComp);
         }
-        return *static_cast<T*>(m_components[type].get());
+        return components;
     }
 
     bool Start();
     void Update(float deltaTime);
-    void Render(Renderer& renderer);
     void Destroy();
     void markForDestroy() { m_isMarkedForDestroy = true; }
     bool isMarkedForDestroy() const { return m_isMarkedForDestroy; }
 
 private:
-    std::unordered_map<std::type_index, std::unique_ptr<Component>> m_components; // コンポーネントのマップ
-    bool m_isMarkedForDestroy;                                                    // 破棄予定フラグ
+    std::vector<std::unique_ptr<Component>> m_components; // コンポーネント
+    bool m_isMarkedForDestroy;                            // 破棄予定フラグ
 };

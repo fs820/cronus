@@ -56,7 +56,7 @@ void SceneManager::update(float elapsedTime, float deltaTime)
 // シーンクラス
 //
 //---------------------------------------------
-Scene::Scene() = default;
+Scene::Scene(Application* pApp) : m_pApp(pApp) {}
 Scene::~Scene() = default;
 
 //------------------

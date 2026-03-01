@@ -6,6 +6,10 @@
 //--------------------------------------------
 #include "title.h"
 #include "gui.h"
+#include "title_rogo.h"
+#include "mesh.h"
+#include "application.h"
+#include "texture.h"
 
 //-----------------------------
 // 
@@ -18,6 +22,8 @@
 //------------------------
 void TitleScene::onEnter()
 {
+    auto pLogo = factory::createTitleLogo(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("logo")));
+    getApp()->getSceneManager()->getActiveScene()->addGameObject(std::move(pLogo));
 }
 
 //------------------------

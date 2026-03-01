@@ -7,13 +7,22 @@
 #include "title_rogo.h"
 #include "object.h"
 #include "trans_comp.h"
+#include "render_mesh.h"
+#include "mesh.h"
+#include "texture.h"
 
 namespace factory
 {
-    GameObject createTitleLogo()
+    std::unique_ptr<GameObject> createTitleLogo(MeshManager meshManager, TextureHandle texture)
     {
-        GameObject logo{};
-        logo.Add<TransformComponent>(Transform(Vector3(500,500,0), Quaternion::Identity(), Vector3::One()));
+        std::unique_ptr<GameObject> logo = std::make_unique<GameObject>();
+
+        auto pTrans = logo->Add<TransformComponent>(Transform(Vector3(960, 540, 0), Quaternion::Identity(), Vector3(450, 600, 0)));
+
+        MeshHandle mesh = meshManager.sprite();
+        Material material{};   // UIはそのままでもいい
+
+        logo->Add<MeshRenderComponent>(RenderQueue::UI, RasMode::Back, mesh, material, texture);
         return logo;
     }
 }

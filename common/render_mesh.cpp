@@ -26,7 +26,11 @@ void MeshRenderComponent::render(Renderer& renderer)
     auto& owner = getOwner();
     if (owner.Has<TransformComponent>())
     {
-        transform = owner.Get<TransformComponent>().get();
+        auto comps = owner.Get<TransformComponent>();
+        if (comps.size() == 1)
+        {
+            transform = comps[0]->get();
+        }
     }
     else
     {

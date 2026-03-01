@@ -6,6 +6,8 @@
 //--------------------------------------------
 #pragma once
 #include "graphics_types.h" // Vertex3D
+#include <span>
+#include <functional>
 
 class Renderer;
 class Window;
@@ -34,7 +36,7 @@ public:
 
     void init(HWND handle, long width, long height);
     void uninit();
-    bool render(const Scene& scene);
+    bool render(const Scene& scene, std::function<void()> guiRender = {});
 
     bool uploadTextures(const TextureManager& textureManager, unsigned int maxThread, std::function<bool(std::string_view, int, int)> progressCallback = {});
 

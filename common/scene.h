@@ -9,12 +9,12 @@
 #include <unordered_map>
 #include <memory>
 #include <vector>
-#include <span>
 #include "object.h"
 
 class Scene;
 class Renderer;
 class Camera;
+class Application;
 
 //---------------------------------------------
 // シーン管理クラス
@@ -42,7 +42,7 @@ private:
 class Scene
 {
 public:
-    Scene();
+    Scene(Application* pApp);
     virtual ~Scene();
 
     virtual void onEnter() {}                                  // シーンに入るときの処理
@@ -55,14 +55,15 @@ public:
     // ゲームオブジェクトのうち、指定したコンポーネントを持つものを取得
     //-------------------------------------------------------------------
     template<typename T>
-    std::span<T*> getGameObjectsOfType() const
+    std::vector<T*> getGameObjectsOfType() const
     {
         std::vector<T*> result;
         for (const auto& gameObject : m_gameObjects)
         {
             if (gameObject->Has<T>())
             {
-                result.push_back(&gameObject->Get<T>());
+                auto comps = gameObject->Get<T>();
+                result.insert(result.end(), comps.begin(), comps.end());
             }
         }
         return result;
@@ -70,8 +71,11 @@ public:
 
 protected:
     virtual void onUpdate(float, float) {}
+    Application* getApp() { return m_pApp; }
 
 private:
+    Application* m_pApp;
+
     std::vector<std::unique_ptr<GameObject>> m_gameObjects;  // ゲームオブジェクトのリスト
     std::vector<GameObject*> m_noStartObjects;               // Startしていないゲームオブジェクトのリスト
 };

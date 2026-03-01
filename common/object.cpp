@@ -17,7 +17,7 @@ GameObject::~GameObject() { Destroy(); }
 //-----------------------
 bool GameObject::Start()
 {
-    for (auto& [type, component] : m_components)
+    for (auto& component : m_components)
     {
         if (!component->start())
         {
@@ -32,20 +32,9 @@ bool GameObject::Start()
 //-----------------------
 void GameObject::Update(float deltaTime)
 {
-    for (auto& [type, component] : m_components)
+    for (auto& component : m_components)
     {
         component->update(deltaTime);
-    }
-}
-
-//-----------------------
-// コンポーネントの描画
-//-----------------------
-void GameObject::Render(Renderer& renderer)
-{
-    for (auto& [type, component] : m_components)
-    {
-        component->render(renderer);
     }
 }
 
@@ -54,7 +43,7 @@ void GameObject::Render(Renderer& renderer)
 //-----------------------
 void GameObject::Destroy()
 {
-    for (auto& [type, component] : m_components)
+    for (auto& component : m_components)
     {
         component->destroy();
     }

@@ -13,6 +13,7 @@
 #include "title.h"
 #include "input.h"
 #include "renderer.h"
+#include "texture.h"
 
 //---------------------------------
 // Cronus (ゲーム本体)
@@ -26,7 +27,6 @@ public:
     bool onStart() override;
     void onEnd() override;
     bool onUpdate(float elapsedTime, float deltaTime) override;
-    bool onRender(const Renderer& renderer) override;
     bool onEvent(SDL_Event* event) override;
 
 private:
@@ -53,8 +53,12 @@ bool Cronus::onStart()
     getRenderer()->setPostProcessShaderMask(PostProcessShaderMask::FXAA | PostProcessShaderMask::Bloom); // アンチエイリアスとブルームを行う
     getRenderer()->setToneMappingType(ToneMappingType::Anime);                                           // アニメ調の色彩
 
-    getSceneManager()->addScene("Title", new TitleScene); // タイトルシーンを追加
-    getSceneManager()->changeScene("Title");              // タイトルシーンに切り替え
+    getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/test.jpg");
+    getTextureManager()->load(1);
+    getRenderer()->uploadTextures(*getTextureManager(), 1);
+
+    getSceneManager()->addScene("Title", new TitleScene(this)); // タイトルシーンを追加
+    getSceneManager()->changeScene("Title");                    // タイトルシーンに切り替え
     return true;
 }
 
@@ -99,14 +103,6 @@ bool Cronus::onUpdate(float elapsedTime, float deltaTime)
     }
     ImGui::End(); // ウィンドウ終了
 #endif // _DEBUG
-    return true;
-}
-
-//------------------------
-// 描画
-//------------------------
-bool Cronus::onRender(const Renderer& renderer)
-{
     return true;
 }
 
