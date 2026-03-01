@@ -18,13 +18,17 @@ public:
     Component() : m_owner{} {}
     virtual ~Component() = default;
 
-    virtual bool Awake() { return true; }
-    virtual bool Start() { return true; }
-    virtual void Update(float deltaTime) {}
-    virtual void Draw(const Renderer& renderer) {}
-    virtual void Destroy() {}
+    virtual bool awake() { return true; }
+    virtual bool start() { return true; }
+    virtual void update(float deltaTime) {}
+    virtual void render(Renderer& renderer) {}
+    virtual void destroy() {}
 
-    void SetOwner(GameObject* owner) { m_owner = owner; }
+    void setOwner(GameObject* owner) { m_owner = owner; }
+
+protected:
+        GameObject& getOwner() { return *m_owner; }
+        const GameObject& getOwner() const { return *m_owner; }
 
 private:
      GameObject* m_owner;

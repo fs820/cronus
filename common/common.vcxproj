@@ -160,6 +160,7 @@
     <ClInclude Include="application.h" />
     <ClInclude Include="binary_stream.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="camera_comp.h" />
     <ClInclude Include="component.h" />
     <ClInclude Include="easing.h" />
     <ClInclude Include="entry.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="gui.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="json_loader.h" />
+    <ClInclude Include="light_comp.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="math_types.h" />
     <ClInclude Include="mesh.h" />
@@ -180,10 +182,12 @@
     <ClInclude Include="physics_types.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="render_mesh.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="sound.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="text_loader.h" />
+    <ClInclude Include="trans_comp.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="yaml_loader.h" />
   </ItemGroup>
@@ -207,6 +211,7 @@
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="render_mesh.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="texture.cpp" />

@@ -35,6 +35,8 @@ namespace
 #include "scene.h"
 #include "camera.h"
 #include "render.h"
+#include "camera_comp.h"
+#include "light_comp.h"
 
 static constexpr wchar_t SHADER_DIRECTORY[] = L"data/SHADER";
 
@@ -200,10 +202,11 @@ struct PostProcessBufferData
 // メッシュ
 struct MeshData
 {
-    ComPtr<ID3D11Buffer> pVertex; // 頂点バッファ
-    ComPtr<ID3D11Buffer> pIndex;  // インデックスバッファ
-    unsigned int stride;          // 頂点サイズ
-    size_t indicesCount;          // インデックスカウント
+    VertexShaderType vertexhaderType; // 頂点シェーダーの種類
+    ComPtr<ID3D11Buffer> pVertex;     // 頂点バッファ
+    ComPtr<ID3D11Buffer> pIndex;      // インデックスバッファ
+    unsigned int stride;              // 頂点サイズ
+    size_t indicesCount;              // インデックスカウント
 
     MeshData() : pVertex{}, pIndex{}, stride{}, indicesCount{} {}
     ~MeshData() = default;
@@ -234,7 +237,7 @@ public:
 
     void init(HWND handle, long width, long height);
     void uninit();
-    bool render(const Scene& scene, const Renderer& inter);
+    bool render(const Scene& scene, Renderer& inter);
     void beginShadow(Matrix lightView, Matrix lightProj);
     void endShadow();
     void beginGeometry(Matrix cameraView, Matrix cameraProj);
@@ -243,7 +246,7 @@ public:
     void endDecal();
     void beginForward(Matrix cameraView, Matrix cameraProj);
     void endForward();
-    void beginUI(bool isUIOnly);
+    void beginUI();
     void endUI();
     void present();
 
@@ -252,7 +255,7 @@ public:
 
     bool uploadTextures(const TextureManager& textureManager, unsigned int maxThread, std::function<bool(std::string_view, int, int)> progressCallback = {});
 
-    MeshHandle createMesh(unsigned int stride, const void* vertices, size_t verticesCount, const void* indices, size_t indicesCount);
+    MeshHandle createMesh(VertexShaderType type, const void* vertices, size_t verticesCount, const void* indices, size_t indicesCount);
     bool setMesh(const MeshHandle& handle);
 
     bool setTexture(const TextureHandle& handle);
@@ -263,13 +266,13 @@ public:
     bool setMaterial(const Material& material);
     bool setLight(std::span<const LightData> lights, const Color& ambient);
     bool setFog(const FogData& fog);
-    bool drawMesh(VertexShaderType vertexShaderType, const MeshHandle& handle);
+    bool drawMesh(const MeshHandle& handle);
     bool drawIndexedPrimitive(VertexShaderType vertexShaderType, unsigned int indexCount, unsigned int startIndexLocation, unsigned int baseVertexLocation);
     bool setBoneTransforms(std::span<const Matrix> boneTransforms);
     void drawDecal(Matrix transform, const MeshHandle& handle, Color color);
     void drawLightingPass();
     void drawPostProcessPass(PostProcessShaderMask mask, ToneMappingType type);
-    void drawString(std::string_view string, Vector2 pos, Color color, float angle, Vector2 scale);
+    void drawString(std::string_view string, Vector2 pos = { 0,0 }, Color color = Color::White(), float angle = 0.0f, Vector2 scale = { 1,1 });
 
     void setShadowMode();
     void setGeometryMode();
@@ -286,6 +289,9 @@ public:
     void setScissorRect(int left, int top, int right, int bottom);
     void setPass(RenderPass pass) { m_currentPass = pass; }
     void setForwardPass(ForwardSubPass subPass) { m_currentForwardSubPass = subPass; }
+
+    void setPostProcessShaderMask(PostProcessShaderMask mask) { m_postProcessMask = mask; }
+    void setToneMappingType(ToneMappingType type) { m_toneMappingType = type; }
 
     void onResize(int width, int height);
     void getViewportSize(Vector2& size) const { size = m_viewportSize; }
@@ -414,6 +420,9 @@ private:
     RenderPass m_currentPass;               // 現在のレンダーパス
     ForwardSubPass m_currentForwardSubPass; // 現在のフォワードサブパス
 
+    PostProcessShaderMask m_postProcessMask; // ポストプロセス
+    ToneMappingType m_toneMappingType;       // 色調補正
+
     // 登録されたメッシュのキャッシュ
     std::vector<MeshData> m_meshs;
 
@@ -434,7 +443,7 @@ private:
     std::unique_ptr<DirectX::SpriteFont> m_spriteFont;
 };
 
-RendererImpl::RendererImpl() : m_pDevice(nullptr), m_pContext(nullptr), m_pSwapChain(nullptr), m_hWnd{}, m_pRenderTargetView(nullptr), m_pDepthStencilView(nullptr), m_pDepthStencilTexture(nullptr), m_pSceneTexture{}, m_pSceneRTV{}, m_pSceneSRV{}, m_pVertexShader2D(nullptr), m_pVertexShader3D(nullptr), m_pGeometryPS(nullptr), m_pInputLayout2D(nullptr), m_pInputLayout3D(nullptr), m_pWMatBuffer(nullptr), m_wMatData{}, m_pMtlBuffer(nullptr), m_mtlData{}, m_pVPMatBuffer(nullptr), m_vpMatData{}, m_pLightBuffer(nullptr), m_lightData{}, m_samplerStates{}, m_pDummyTextureWhite(nullptr), m_pDummyTextureBlack(nullptr), m_pInputLayoutModel(nullptr), m_pBoneBuffer(nullptr), m_boneData{}, m_pVertexShaderModel(nullptr), m_pGBufferTextures{}, m_pGBufferRTVs{}, m_pGBufferSRVs{}, m_pScreenVS{}, m_blendStates{}, m_depthStates{}, m_rasStates{}, m_textures{}, m_screenSize{}, m_screenMagnification{}, m_viewportSize{}, m_pShadowTexture{}, m_pShadowDSV{}, m_pShadowSRV{}, m_currentPass{}, m_currentForwardSubPass{}, m_pShadowConstantBuffer{}, m_lightVPMatrix{}, m_pSkyPS{}, m_pTransparentPS{}, m_pOutline3DVS{}, m_pOutlineModelVS{}, m_pOutlinePS{}, m_pOutlineBuffer{}, m_outlineData{}, m_pShadowPS{}, m_pFogBuffer{}, m_texMutex{}, m_spriteBatch{}, m_spriteFont{}, m_pDecalBuffer(nullptr), m_pDecalVS(nullptr), m_pDecalPS(nullptr), m_pPostProcessShaders{}, m_pPostProcessBuffer{}, m_pWorkTexture{}, m_pWorkRTV{}, m_pWorkSRV{}, m_pBloomRTVs{}, m_pBloomSRVs{}, m_meshs{}, m_pUnifiedLighting_DL_PS{}, m_pUIPS{} {}
+RendererImpl::RendererImpl() : m_pDevice(nullptr), m_pContext(nullptr), m_pSwapChain(nullptr), m_hWnd{}, m_pRenderTargetView(nullptr), m_pDepthStencilView(nullptr), m_pDepthStencilTexture(nullptr), m_pSceneTexture{}, m_pSceneRTV{}, m_pSceneSRV{}, m_pVertexShader2D(nullptr), m_pVertexShader3D(nullptr), m_pGeometryPS(nullptr), m_pInputLayout2D(nullptr), m_pInputLayout3D(nullptr), m_pWMatBuffer(nullptr), m_wMatData{}, m_pMtlBuffer(nullptr), m_mtlData{}, m_pVPMatBuffer(nullptr), m_vpMatData{}, m_pLightBuffer(nullptr), m_lightData{}, m_samplerStates{}, m_pDummyTextureWhite(nullptr), m_pDummyTextureBlack(nullptr), m_pInputLayoutModel(nullptr), m_pBoneBuffer(nullptr), m_boneData{}, m_pVertexShaderModel(nullptr), m_pGBufferTextures{}, m_pGBufferRTVs{}, m_pGBufferSRVs{}, m_pScreenVS{}, m_blendStates{}, m_depthStates{}, m_rasStates{}, m_textures{}, m_screenSize{}, m_screenMagnification{}, m_viewportSize{}, m_pShadowTexture{}, m_pShadowDSV{}, m_pShadowSRV{}, m_currentPass{}, m_currentForwardSubPass{}, m_pShadowConstantBuffer{}, m_lightVPMatrix{}, m_pSkyPS{}, m_pTransparentPS{}, m_pOutline3DVS{}, m_pOutlineModelVS{}, m_pOutlinePS{}, m_pOutlineBuffer{}, m_outlineData{}, m_pShadowPS{}, m_pFogBuffer{}, m_texMutex{}, m_spriteBatch{}, m_spriteFont{}, m_pDecalBuffer(nullptr), m_pDecalVS(nullptr), m_pDecalPS(nullptr), m_pPostProcessShaders{}, m_pPostProcessBuffer{}, m_pWorkTexture{}, m_pWorkRTV{}, m_pWorkSRV{}, m_pBloomRTVs{}, m_pBloomSRVs{}, m_meshs{}, m_pUnifiedLighting_DL_PS{}, m_pUIPS{}, m_postProcessMask{}, m_toneMappingType{} {}
 RendererImpl::~RendererImpl() { uninit(); }
 
 //-------------------------------------------
@@ -563,16 +572,166 @@ void RendererImpl::uninit()
 //-------------------------------------------
 // 描画
 //-------------------------------------------
-bool RendererImpl::render(const Scene& scene, const Renderer& inter)
+bool RendererImpl::render(const Scene& scene, Renderer& inter)
 {
-    scene.getCamera()->GetViewMatrix();
-    scene.getCamera()->GetProjectionMatrix();
-
+    auto cameras = scene.getGameObjectsOfType<CameraComponent>();
+    auto lights = scene.getGameObjectsOfType<LightComponent>();
     auto renderComponents = scene.getGameObjectsOfType<RenderComponent>();
+
+    for (size_t cnt = 0; cnt < cameras.size(); cnt++)
+    {
+        // レンダラーにカメラの位置を渡す(スペキュラー用)
+        setCameraPosition(cameras[cnt]->get().GetPosition());
+
+        // Cameraの行列
+        Matrix CameraView = cameras[cnt]->get().GetViewMatrix(), CameraProj = cameras[cnt]->get().GetProjectionMatrix();
+
+        //-------------------------
+        // シャドウ開始
+        //-------------------------
+        for (const auto& light : lights)
+        {
+            Vector3 eye{}, target, up{};
+            if (light->getShadowInfo(&eye, &target, &up))
+            {
+                beginShadow(Matrix::LookAtLH(eye, target, up), Matrix::Orthographic(40.0f, 40.0f, 0.5f, 100.0f)); // シャドウマップ範囲
+
+                for (auto& renderComponent : renderComponents)
+                {
+                    if (renderComponent->getRenderQueue() == RenderQueue::Shadow)
+                        renderComponent->render(inter);
+                }
+
+                endShadow();
+            }
+        }
+        //-------------------------
+        // シャドウ終了
+        //-------------------------
+
+        //------------------
+        // ジオメトリ開始
+        //------------------
+        beginGeometry(CameraView, CameraProj);
+
+        // プレイヤー
+        setRasMode(RasMode::None);
+        setRasMode(RasMode::Back);
+
+        for (auto& renderComponent : renderComponents)
+        {
+            if (renderComponent->getRenderQueue() == RenderQueue::Geometry)
+                renderComponent->render(inter);
+        }
+
+        endGeometry();
+        //-------------------------
+        // ジオメトリ終了
+        //-------------------------
+
+        //------------------
+        // デカール開始
+        //------------------
+        beginDecal(CameraView, CameraProj);
+
+        for (auto& renderComponent : renderComponents)
+        {
+            if (renderComponent->getRenderQueue() == RenderQueue::Decal)
+                renderComponent->render(inter);
+        }
+
+        endDecal();
+        //-------------------------
+        // デカール終了
+        //-------------------------
+
+        //------------------
+        // ライティング
+        //------------------
+        drawLightingPass();
+
+        //----------
+        // フォワード開始
+        //----------
+        beginForward(CameraView, CameraProj);
+
+        // 空
+        setSkyMode();
+
+        for (auto& renderComponent : renderComponents)
+        {
+            if (renderComponent->getRenderQueue() == RenderQueue::Sky)
+                renderComponent->render(inter);
+        }
+
+        setForwardMode();
+
+        //-----------------------------------------------------------------------
+        // アウトライン (フォワードの中でsetOutlineModeを呼ぶとアウトライン)
+        //-----------------------------------------------------------------------
+        setOutlineMode();
+        setOutlineData(Color::Black(), 0.0005f);
+
+        for (auto& renderComponent : renderComponents)
+        {
+            if (renderComponent->getRenderQueue() == RenderQueue::Outline)
+                renderComponent->render(inter);
+        }
+
+        setForwardMode();
+        //-----------------------------------------------------------------------
+        // アウトライン終了
+        //-----------------------------------------------------------------------
+
+        for (auto& renderComponent : renderComponents)
+        {
+            if (renderComponent->getRenderQueue() == RenderQueue::Transparent)
+                renderComponent->render(inter);
+        }
+
+        endForward();
+        //-------------------------
+        // フォワード終了
+        //-------------------------
+    }
+
+    //------------------
+    // ポストプロセス
+    //------------------
+    drawPostProcessPass(m_postProcessMask, m_toneMappingType);
+
+    //----------
+    // UI開始
+    //----------
+    beginUI();
+
     for (auto& renderComponent : renderComponents)
     {
-        renderComponent->Draw(inter);
+        if (renderComponent->getRenderQueue() == RenderQueue::UI)
+            renderComponent->render(inter);
     }
+
+    endUI();
+    //-------------------------
+    // UI終了
+    //-------------------------
+
+    //----------
+    // String開始
+    //----------
+
+    for (auto& renderComponent : renderComponents)
+    {
+        if (renderComponent->getRenderQueue() == RenderQueue::String)
+            renderComponent->render(inter);
+    }
+
+    //-------------------------
+    // String終了
+    //-------------------------
+
+    // 全描画を終了し切り替えを行う
+    present();
 
     return true;
 }
@@ -762,7 +921,7 @@ void RendererImpl::endForward()
 //-------------------------------------------
 // UI描画開始
 //-------------------------------------------
-void RendererImpl::beginUI(bool isUIOnly)
+void RendererImpl::beginUI()
 {
     // 正射影行列のセット
     setOrthographic();
@@ -770,11 +929,6 @@ void RendererImpl::beginUI(bool isUIOnly)
     // レンダーターゲットビューを設定
     ID3D11RenderTargetView* rtv = m_pRenderTargetView.Get();
     m_pContext->OMSetRenderTargets(1, &rtv, nullptr);
-    if (isUIOnly)
-    {
-        clearRenderTarget(rtv);
-        clearDepthStencil(m_pDepthStencilView.Get());
-    }
 
     // ビューポート設定
     D3D11_VIEWPORT vp = {};
@@ -937,11 +1091,25 @@ bool RendererImpl::uploadTextures(const TextureManager& textureManager, unsigned
 //-------------------------------------------
 // メッシュデータを生成
 //-------------------------------------------
-MeshHandle RendererImpl::createMesh(unsigned int stride, const void* vertices, size_t verticesCount, const void* indices, size_t indicesCount)
+MeshHandle RendererImpl::createMesh(VertexShaderType type, const void* vertices, size_t verticesCount, const void* indices, size_t indicesCount)
 {
     MeshData mesh{};                   // メッシュ
     D3D11_BUFFER_DESC bd{};            // バッファ設定
     D3D11_SUBRESOURCE_DATA initData{}; // データ
+
+    unsigned int stride{}; // 頂点のサイズ (ストライド)
+    switch (type)
+    {
+    case VertexShaderType::Vertex2D:
+        stride = sizeof(Vertex2D);
+        break;
+    case VertexShaderType::Vertex3D:
+        stride = sizeof(Vertex3D);
+        break;
+    case VertexShaderType::VertexModel:
+        stride = sizeof(VertexModel);
+        break;
+    }
 
     // 頂点バッファ
     bd.ByteWidth = static_cast<UINT>(stride * verticesCount);
@@ -969,6 +1137,7 @@ MeshHandle RendererImpl::createMesh(unsigned int stride, const void* vertices, s
         return MeshHandle();
     }
 
+    mesh.vertexhaderType = type;
     mesh.stride = stride;
     mesh.indicesCount = indicesCount;
 
@@ -1127,7 +1296,7 @@ void RendererImpl::setOutlineData(Color color, float width)
 //-------------------------------------------
 // メッシュ描画
 //-------------------------------------------
-bool RendererImpl::drawMesh(VertexShaderType vertexShaderType, const MeshHandle& handle)
+bool RendererImpl::drawMesh( const MeshHandle& handle)
 {
     if (handle.isValid())
     {
@@ -1136,7 +1305,7 @@ bool RendererImpl::drawMesh(VertexShaderType vertexShaderType, const MeshHandle&
             setMesh(handle);
 
             // 描画
-            drawIndexedPrimitive(vertexShaderType, unsigned int(m_meshs[handle.id].indicesCount), 0, 0);
+            drawIndexedPrimitive(m_meshs[handle.id].vertexhaderType, unsigned int(m_meshs[handle.id].indicesCount), 0, 0);
             return true;
         }
     }
@@ -2796,94 +2965,6 @@ bool Renderer::render(const Scene& scene)
     return false;
 }
 
-void Renderer::beginShadow(Matrix lightView, Matrix lightProj)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->beginShadow(lightView, lightProj);
-    }
-}
-
-void Renderer::endShadow()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->endShadow();
-    }
-}
-
-void Renderer::beginGeometry(Matrix cameraView, Matrix cameraProj)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->beginGeometry(cameraView, cameraProj);
-    }
-}
-
-void Renderer::endGeometry()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->endGeometry();
-    }
-}
-
-void Renderer::beginDecal(Matrix cameraView, Matrix cameraProj)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->beginDecal(cameraView, cameraProj);
-    }
-}
-
-void Renderer::endDecal()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->endDecal();
-    }
-}
-
-void Renderer::beginForward(Matrix cameraView, Matrix cameraProj)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->beginForward(cameraView, cameraProj);
-    }
-}
-
-void Renderer::endForward()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->endForward();
-    }
-}
-
-void Renderer::beginUI(bool isUIOnly)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->beginUI(isUIOnly);
-    }
-}
-
-void Renderer::endUI()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->endUI();
-    }
-}
-
-void Renderer::present()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->present();
-    }
-}
-
 bool Renderer::uploadTextures(const TextureManager& textureManager, unsigned int maxThread, std::function<bool(std::string_view, int, int)> progressCallback)
 {
     if (m_pImpl != nullptr)
@@ -2893,11 +2974,11 @@ bool Renderer::uploadTextures(const TextureManager& textureManager, unsigned int
     return false;
 }
 
-MeshHandle Renderer::createMesh(unsigned int stride, const void* vertices, size_t verticesCount, const void* indices, size_t indicesCount)
+MeshHandle Renderer::createMesh(VertexShaderType type, const void* vertices, size_t verticesCount, const void* indices, size_t indicesCount)
 {
     if (m_pImpl != nullptr)
     {
-        return m_pImpl->createMesh(stride, vertices, verticesCount, indices, indicesCount);
+        return m_pImpl->createMesh(type, vertices, verticesCount, indices, indicesCount);
     }
     return MeshHandle();
 }
@@ -2983,11 +3064,19 @@ bool Renderer::setFog(const FogData& fog)
     return false;
 }
 
-bool Renderer::drawMesh(VertexShaderType vertexShaderType, const MeshHandle& handle)
+void Renderer::setRasMode(RasMode rasMode)
 {
     if (m_pImpl != nullptr)
     {
-        return m_pImpl->drawMesh(vertexShaderType, handle);
+        m_pImpl->setRasMode(rasMode);
+    }
+}
+
+bool Renderer::drawMesh(const MeshHandle& handle)
+{
+    if (m_pImpl != nullptr)
+    {
+        return m_pImpl->drawMesh(handle);
     }
     return false;
 }
@@ -3006,22 +3095,6 @@ void Renderer::drawDecal(Matrix transform, const MeshHandle& handle, Color color
     if (m_pImpl != nullptr)
     {
         m_pImpl->drawDecal(transform,handle, color);
-    }
-}
-
-void Renderer::drawLightingPass()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->drawLightingPass();
-    }
-}
-
-void Renderer::drawPostProcessPass(PostProcessShaderMask mask, ToneMappingType type)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->drawPostProcessPass(mask, type);
     }
 }
 
@@ -3050,95 +3123,18 @@ void Renderer::setOutlineData(Color color, float width)
     }
 }
 
-void Renderer::setShadowMode()
+void Renderer::setPostProcessShaderMask(PostProcessShaderMask mask)
 {
     if (m_pImpl != nullptr)
     {
-        m_pImpl->setShadowMode();
+        m_pImpl->setPostProcessShaderMask(mask);
     }
 }
-
-void Renderer::setGeometryMode()
+void Renderer::setToneMappingType(ToneMappingType type)
 {
     if (m_pImpl != nullptr)
     {
-        m_pImpl->setGeometryMode();
-    }
-}
-
-void Renderer::setDecalMode()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setDecalMode();
-    }
-}
-
-void Renderer::setForwardMode()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setForwardMode();
-    }
-}
-
-void Renderer::setUIMode()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setUIMode();
-    }
-}
-
-void Renderer::setOutlineMode()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setOutlineMode();
-    }
-}
-
-void Renderer::setSkyMode()
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setSkyMode();
-    }
-}
-
-void Renderer::setBlendMode(BlendMode blendMode)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setBlendMode(blendMode);
-    }
-}
-void Renderer::setRasMode(RasMode rasMode)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setRasMode(rasMode);
-    }
-}
-void Renderer::setDepthMode(DepthMode depthMode)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setDepthMode(depthMode);
-    }
-}
-void Renderer::setSampMode(SampMode sampMode)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setSampMode(sampMode);
-    }
-}
-void Renderer::setScissorRect(int left, int top, int right, int bottom)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setScissorRect(left, top, right, bottom);
+        m_pImpl->setToneMappingType(type);
     }
 }
 

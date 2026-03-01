@@ -160,6 +160,7 @@
   <ItemGroup>
     <ClCompile Include="app.cpp" />
     <ClCompile Include="game_loader.cpp" />
+    <ClCompile Include="title_rogo.cpp" />
     <ClCompile Include="title.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game_loader.h" />
+    <ClInclude Include="title_rogo.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="title.h" />
   </ItemGroup>

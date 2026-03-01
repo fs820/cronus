@@ -16,6 +16,19 @@ constexpr float WORLD_SIZE = 100.0f; // 1,0f = 1mの世界 (主にmodel変換な
 // UIはこの基準の位置と大きさにしてrendererから比率を取り出して拡縮する
 const Vector2 DEFAULT_SCREEN_SIZE = { 1920.0f, 1080.0f };
 
+// レンダリングキュー
+enum class RenderQueue : unsigned char
+{
+    Shadow,
+    Geometry,
+    Decal,
+    Sky,
+    Outline,
+    Transparent,
+    UI,
+    String
+};
+
 // 頂点シェーダーの種類
 enum class VertexShaderType : unsigned char
 {

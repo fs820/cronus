@@ -6,8 +6,7 @@
 //--------------------------------------------
 #pragma once
 #include "component.h"
-
-enum class RenderQueue : unsigned char;
+#include "graphics_types.h"
 
 //-------------------------------------
 // 描画用コンポーネントクラス [抽象]
@@ -15,14 +14,17 @@ enum class RenderQueue : unsigned char;
 class RenderComponent : public Component
 {
 public:
-    RenderComponent(const RenderQueue& renderQueue);
+    RenderComponent(const RenderQueue& renderQueue, const RasMode& rasMode);
     virtual ~RenderComponent();
 
-    virtual void Draw(const Renderer& renderer) override = 0;
+    virtual void render(Renderer& renderer) override = 0;
 
-    void SetRenderQueue(const RenderQueue& renderQueue) { m_renderQueue = renderQueue; }
-    RenderQueue GetRenderQueue() const;
+    void setRenderQueue(const RenderQueue& renderQueue) { m_renderQueue = renderQueue; }
+    RenderQueue getRenderQueue() const { return m_renderQueue; }
+    void setRasMode(RasMode mode) { m_rasMode = mode; }
+    RasMode getRasMode() { return m_rasMode; }
 
 private:
     RenderQueue m_renderQueue;
+    RasMode m_rasMode;
 };

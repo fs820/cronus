@@ -12,6 +12,7 @@
 #include "window.h"
 #include "title.h"
 #include "input.h"
+#include "renderer.h"
 
 //---------------------------------
 // Cronus (ゲーム本体)
@@ -48,6 +49,9 @@ bool Cronus::onStart()
     Config config = file::loadConfig("data/custom.yaml");          // 設定ファイルの読み込み
     getWindow()->setTitle(config.title.c_str());                   // ウィンドウタイトルを設定
     getWindow()->setSize(config.windowWidth, config.windowHeight); // ウィンドウタイトルを設定
+
+    getRenderer()->setPostProcessShaderMask(PostProcessShaderMask::FXAA | PostProcessShaderMask::Bloom); // アンチエイリアスとブルームを行う
+    getRenderer()->setToneMappingType(ToneMappingType::Anime);                                           // アニメ調の色彩
 
     getSceneManager()->addScene("Title", new TitleScene); // タイトルシーンを追加
     getSceneManager()->changeScene("Title");              // タイトルシーンに切り替え

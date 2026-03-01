@@ -64,9 +64,6 @@ Scene::~Scene() = default;
 //------------------
 void Scene::update(float elapsedTime, float deltaTime)
 {
-    if (m_camera == nullptr) m_camera = std::make_unique<Camera>(); // カメラの生成
-    m_camera->Set(); // カメラの設定
-
     // StartしていないゲームオブジェクトのStartを呼び出す
     for (auto& gameObject : m_noStartObjects)
     {

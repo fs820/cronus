@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <stdexcept>
+#include <memory>
 #include "component.h"
 
 //---------------------------------
@@ -22,17 +23,18 @@ public:
     //-----------------------
     // コンポーネントの追加
     //-----------------------
-    template<typename T>
-    T& Add()
+    template<typename T, typename... Args>
+        requires std::derived_from<T, Component>
+    T& Add(Args&&... args)
     {
         auto type = std::type_index(typeid(T));
         if (m_components.contains(type))
         {
             throw std::runtime_error("Component already exists");
         }
-        auto component = std::make_unique<T>();
-        component->SetOwner(this);
-        component->Awake();
+        auto component = std::make_unique<T>(std::forward<Args>(args)...);
+        component->setOwner(this);
+        component->awake();
 
         T& ref = *component;
         m_components[type] = std::move(component);
@@ -43,6 +45,7 @@ public:
     // コンポーネントの取得
     //-----------------------
     template<typename T>
+        requires std::derived_from<T, Component>
     bool Has() const
     {
         for (auto& [type, comp] : m_components)
@@ -57,6 +60,7 @@ public:
     // コンポーネントの取得
     //-----------------------
     template<typename T>
+        requires std::derived_from<T, Component>
     T& Get()
     {
         auto type = std::type_index(typeid(T));
@@ -69,7 +73,7 @@ public:
 
     bool Start();
     void Update(float deltaTime);
-    void Render(const Renderer& renderer);
+    void Render(Renderer& renderer);
     void Destroy();
     void markForDestroy() { m_isMarkedForDestroy = true; }
     bool isMarkedForDestroy() const { return m_isMarkedForDestroy; }

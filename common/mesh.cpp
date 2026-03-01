@@ -45,7 +45,7 @@ MeshHandle MeshManager::sprite()
     indices[5] = 0;
 
     // メッシュの作成
-    m_cache.try_emplace(desc, m_renderer.createMesh(sizeof(Vertex2D), vertices.data(), vertices.size(), indices.data(), indices.size()));
+    m_cache.try_emplace(desc, m_renderer.createMesh(VertexShaderType::Vertex2D, vertices.data(), vertices.size(), indices.data(), indices.size()));
     return m_cache[desc];
 }
 
@@ -85,7 +85,7 @@ MeshHandle MeshManager::quad(float texUMax, float texVMax)
     indices[5] = 0;
 
     // メッシュの作成
-    m_cache.try_emplace(desc, m_renderer.createMesh(sizeof(Vertex3D), vertices.data(), vertices.size(), indices.data(), indices.size()));
+    m_cache.try_emplace(desc, m_renderer.createMesh(VertexShaderType::Vertex3D, vertices.data(), vertices.size(), indices.data(), indices.size()));
     return m_cache[desc];
 }
 
@@ -162,7 +162,7 @@ MeshHandle MeshManager::box(float texUMax, float texVMax)
     }
 
     // メッシュの作成
-    m_cache.try_emplace(desc, m_renderer.createMesh(sizeof(Vertex3D), vertices.data(), vertices.size(), indices.data(), indices.size()));
+    m_cache.try_emplace(desc, m_renderer.createMesh(VertexShaderType::Vertex3D, vertices.data(), vertices.size(), indices.data(), indices.size()));
     return m_cache[desc];
 }
 
@@ -296,7 +296,7 @@ MeshHandle MeshManager::cylinder(float texUMax, float texVMax, unsigned int spli
     }
 
     // メッシュの作成
-    m_cache.try_emplace(desc, m_renderer.createMesh(sizeof(Vertex3D), vertices.data(), vertices.size(), indices.data(), indices.size()));
+    m_cache.try_emplace(desc, m_renderer.createMesh(VertexShaderType::Vertex3D, vertices.data(), vertices.size(), indices.data(), indices.size()));
     return m_cache[desc];
 }
 
@@ -458,6 +458,6 @@ MeshHandle MeshManager::sphere(float texUMax, float texVMax, unsigned int splits
     }
 
     // メッシュの作成
-    m_cache.try_emplace(desc, m_renderer.createMesh(sizeof(Vertex3D), vertices.data(), vertices.size(), indices.data(), indices.size()));
+    m_cache.try_emplace(desc, m_renderer.createMesh(VertexShaderType::Vertex3D, vertices.data(), vertices.size(), indices.data(), indices.size()));
     return m_cache[desc];
 }

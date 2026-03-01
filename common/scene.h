@@ -51,8 +51,6 @@ public:
     void update(float elapsedTime, float deltaTime); // 更新処理
     void addGameObject(std::unique_ptr<GameObject> gameObject);
 
-    Camera* getCamera() const { return m_camera.get(); }
-
     //-------------------------------------------------------------------
     // ゲームオブジェクトのうち、指定したコンポーネントを持つものを取得
     //-------------------------------------------------------------------
@@ -74,7 +72,6 @@ protected:
     virtual void onUpdate(float, float) {}
 
 private:
-    std::unique_ptr<Camera> m_camera;                        // カメラ
     std::vector<std::unique_ptr<GameObject>> m_gameObjects;  // ゲームオブジェクトのリスト
     std::vector<GameObject*> m_noStartObjects;               // Startしていないゲームオブジェクトのリスト
 };

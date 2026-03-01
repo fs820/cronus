@@ -759,7 +759,7 @@ void ModelResource::processAnimations(const aiScene* scene)
 void ModelResource::setupMeshs()
 {
     // メッシュの作成
-    m_mesh = m_renderer.createMesh(sizeof(VertexModel), m_vertices.data(), m_vertices.size(), m_indices.data(), m_indices.size());
+    m_mesh = m_renderer.createMesh(VertexShaderType::VertexModel, m_vertices.data(), m_vertices.size(), m_indices.data(), m_indices.size());
 }
 
 //----------------------------
