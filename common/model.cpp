@@ -464,7 +464,8 @@ void ModelResource::processMaterials(const aiScene* scene, TextureManager& textu
             // 色とスペキュラーの強さを取得
             aiColor4D color;
             float shininess = 0.0f;
-            if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE, color))
+            if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE, color) ||
+                AI_SUCCESS == mat->Get(AI_MATKEY_BASE_COLOR, color))
             {
                 matData.diffuseColor = Color(color.r, color.g, color.b, color.a);
             }
@@ -480,9 +481,18 @@ void ModelResource::processMaterials(const aiScene* scene, TextureManager& textu
             {
                 matData.shininess = shininess;
             }
+            else
+            {
+                // PBRの場合Shininessの代わりにRoughnessから計算する
+                float roughness = 1.0f;
+                if (AI_SUCCESS == mat->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness))
+                {
+                    matData.shininess = (1.0f - roughness) * 128.0f;
+                }
+            }
 
             aiString path;
-            if (AI_SUCCESS == mat->GetTexture(aiTextureType_DIFFUSE, 0, &path))
+            if (AI_SUCCESS == mat->GetTexture(aiTextureType_DIFFUSE, 0, &path) || AI_SUCCESS == mat->GetTexture(aiTextureType_BASE_COLOR, 0, &path))
             {
                 std::string pathStr = path.C_Str();
                 std::filesystem::path u8path = reinterpret_cast<const char8_t*>(path.C_Str());
@@ -587,7 +597,7 @@ void ModelResource::processMesh(aiMesh* mesh, const aiScene* scene, const Matrix
 
         // 位置
         vertex.pos = Vector3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-        if (hasBones)
+        if (!hasBones)
         {
             vertex.pos.transformCoord(transform);
         }
@@ -596,7 +606,7 @@ void ModelResource::processMesh(aiMesh* mesh, const aiScene* scene, const Matrix
         if (mesh->HasNormals())
         {
             vertex.nor = Vector3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-            if (hasBones)
+            if (!hasBones)
             {
                 vertex.nor.transformNormal(transform);
                 vertex.nor.normalize(); // 正規化しておく
@@ -614,7 +624,15 @@ void ModelResource::processMesh(aiMesh* mesh, const aiScene* scene, const Matrix
             vertex.uv = Vector2(0.0f, 0.0f);
         }
 
-        vertex.col = Color(1.0f, 1.0f, 1.0f, 1.0f); // デフォルトは白
+        // 頂点カラーを取得するように修正
+        if (mesh->HasVertexColors(0))
+        {
+            vertex.col = Color(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b, mesh->mColors[0][i].a);
+        }
+        else
+        {
+            vertex.col = Color(1.0f, 1.0f, 1.0f, 1.0f); // デフォルトは白
+        }
 
         // ウェイトとボーンIDを初期化
         for (int k = 0; k < 4; ++k)
