@@ -9,6 +9,8 @@
 #include <span>
 #include <functional>
 
+#undef near
+
 class Renderer;
 class Window;
 
@@ -38,23 +40,23 @@ public:
     void uninit();
     bool render(const Scene& scene, std::function<void()> guiRender = {});
 
+    MeshHandle createMesh(VertexShaderType type, const void* vertices, size_t verticesCount, const void* indices, size_t indicesCount);
     bool uploadTextures(const TextureManager& textureManager, unsigned int maxThread, std::function<bool(std::string_view, int, int)> progressCallback = {});
 
-    MeshHandle createMesh(VertexShaderType type, const void* vertices, size_t verticesCount, const void* indices, size_t indicesCount);
+    void setPostProcessShaderMask(PostProcessShaderMask mask);
+    void setToneMappingType(ToneMappingType type);
+    void setShadowMapArea(float width, float height, float near, float fur);
+    void setAmbient(const Color& ambient);
+    bool setFog(const FogData& fog);
+
     bool setMesh(const MeshHandle& handle);
     bool setTexture(const TextureHandle& handle);
     bool setTransformWorld(const Matrix& matrix);
-    bool setTransformView(const Matrix& matrix);
-    bool setTransformProjection(const Matrix& matrix);
-    bool setCameraPosition(const Vector3& cameraPos);
     bool setMaterial(const Material& material);
-    bool setLight(std::span<const LightData> lights, const Color& ambient);
-    bool setFog(const FogData& fog);
     bool setBoneTransforms(std::span<const Matrix> boneTransforms);
     void setOutlineData(Color color, float width);
-    void setPostProcessShaderMask(PostProcessShaderMask mask);
-    void setToneMappingType(ToneMappingType type);
     void setRasMode(RasMode rasMode);
+
     bool drawMesh(const MeshHandle& handle);
     bool drawIndexedPrimitive(VertexShaderType vertexShaderType, int indexCount, unsigned int startIndexLocation, unsigned int baseVertexLocation);
     void drawDecal(Matrix transform, const MeshHandle& handle, Color color);

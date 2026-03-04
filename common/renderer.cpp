@@ -208,7 +208,7 @@ struct MeshData
     unsigned int stride;              // 頂点サイズ
     size_t indicesCount;              // インデックスカウント
 
-    MeshData() : pVertex{}, pIndex{}, stride{}, indicesCount{} {}
+    MeshData() : vertexhaderType{}, pVertex{}, pIndex{}, stride{}, indicesCount{} {}
     ~MeshData() = default;
 };
 
@@ -229,8 +229,8 @@ class RendererImpl
 {
 public:
     // MRT用の定数
-    static constexpr int GBUFFER_COUNT = 4;     // ColorD, Normal, Position, ColorE
-    static constexpr int SHADOWMAP_SIZE = 8192; // シャドウマップの解像度 2048,4096,8192
+    static constexpr int GBUFFER_COUNT = 4;             // ColorD, Normal, Position, ColorE
+    static constexpr int DEFAULT_SHADOWMAP_SIZE = 8192; // シャドウマップの基本解像度 2048,4096,8192
 
     RendererImpl();
     ~RendererImpl();
@@ -292,6 +292,8 @@ public:
 
     void setPostProcessShaderMask(PostProcessShaderMask mask) { m_postProcessMask = mask; }
     void setToneMappingType(ToneMappingType type) { m_toneMappingType = type; }
+    void setShadowMapArea(float width, float height, float near, float fur) { m_shadowMapProj = Matrix::Orthographic(width, height, near, fur); }
+    void setAmbient(const Color& ambient) { m_ambient = ambient; }
 
     void onResize(int width, int height);
     void getViewportSize(Vector2& size) const { size = m_viewportSize; }
@@ -420,6 +422,10 @@ private:
     RenderPass m_currentPass;               // 現在のレンダーパス
     ForwardSubPass m_currentForwardSubPass; // 現在のフォワードサブパス
 
+    int m_shadowMapSize;    // シャドウマップの解像度 2048,4096,8192 (上げるほど影がきれいですが処理が増えます) ※影の範囲には関係ありません
+    Matrix m_shadowMapProj; // シャドウマップ時のプロジェクション行列 (影を落とす範囲)
+
+    Color m_ambient;                         // 環境光
     PostProcessShaderMask m_postProcessMask; // ポストプロセス
     ToneMappingType m_toneMappingType;       // 色調補正
 
@@ -443,7 +449,7 @@ private:
     std::unique_ptr<DirectX::SpriteFont> m_spriteFont;
 };
 
-RendererImpl::RendererImpl() : m_pDevice(nullptr), m_pContext(nullptr), m_pSwapChain(nullptr), m_hWnd{}, m_pRenderTargetView(nullptr), m_pDepthStencilView(nullptr), m_pDepthStencilTexture(nullptr), m_pSceneTexture{}, m_pSceneRTV{}, m_pSceneSRV{}, m_pVertexShader2D(nullptr), m_pVertexShader3D(nullptr), m_pGeometryPS(nullptr), m_pInputLayout2D(nullptr), m_pInputLayout3D(nullptr), m_pWMatBuffer(nullptr), m_wMatData{}, m_pMtlBuffer(nullptr), m_mtlData{}, m_pVPMatBuffer(nullptr), m_vpMatData{}, m_pLightBuffer(nullptr), m_lightData{}, m_samplerStates{}, m_pDummyTextureWhite(nullptr), m_pDummyTextureBlack(nullptr), m_pInputLayoutModel(nullptr), m_pBoneBuffer(nullptr), m_boneData{}, m_pVertexShaderModel(nullptr), m_pGBufferTextures{}, m_pGBufferRTVs{}, m_pGBufferSRVs{}, m_pScreenVS{}, m_blendStates{}, m_depthStates{}, m_rasStates{}, m_textures{}, m_screenSize{}, m_screenMagnification{}, m_viewportSize{}, m_pShadowTexture{}, m_pShadowDSV{}, m_pShadowSRV{}, m_currentPass{}, m_currentForwardSubPass{}, m_pShadowConstantBuffer{}, m_lightVPMatrix{}, m_pSkyPS{}, m_pTransparentPS{}, m_pOutline3DVS{}, m_pOutlineModelVS{}, m_pOutlinePS{}, m_pOutlineBuffer{}, m_outlineData{}, m_pShadowPS{}, m_pFogBuffer{}, m_texMutex{}, m_spriteBatch{}, m_spriteFont{}, m_pDecalBuffer(nullptr), m_pDecalVS(nullptr), m_pDecalPS(nullptr), m_pPostProcessShaders{}, m_pPostProcessBuffer{}, m_pWorkTexture{}, m_pWorkRTV{}, m_pWorkSRV{}, m_pBloomRTVs{}, m_pBloomSRVs{}, m_meshs{}, m_pUnifiedLighting_DL_PS{}, m_pUIPS{}, m_postProcessMask{}, m_toneMappingType{} {}
+RendererImpl::RendererImpl() : m_pDevice(nullptr), m_pContext(nullptr), m_pSwapChain(nullptr), m_hWnd{}, m_pRenderTargetView(nullptr), m_pDepthStencilView(nullptr), m_pDepthStencilTexture(nullptr), m_pSceneTexture{}, m_pSceneRTV{}, m_pSceneSRV{}, m_pVertexShader2D(nullptr), m_pVertexShader3D(nullptr), m_pGeometryPS(nullptr), m_pInputLayout2D(nullptr), m_pInputLayout3D(nullptr), m_pWMatBuffer(nullptr), m_wMatData{}, m_pMtlBuffer(nullptr), m_mtlData{}, m_pVPMatBuffer(nullptr), m_vpMatData{}, m_pLightBuffer(nullptr), m_lightData{}, m_samplerStates{}, m_pDummyTextureWhite(nullptr), m_pDummyTextureBlack(nullptr), m_pInputLayoutModel(nullptr), m_pBoneBuffer(nullptr), m_boneData{}, m_pVertexShaderModel(nullptr), m_pGBufferTextures{}, m_pGBufferRTVs{}, m_pGBufferSRVs{}, m_pScreenVS{}, m_blendStates{}, m_depthStates{}, m_rasStates{}, m_textures{}, m_screenSize{}, m_screenMagnification{}, m_viewportSize{}, m_pShadowTexture{}, m_pShadowDSV{}, m_pShadowSRV{}, m_currentPass{}, m_currentForwardSubPass{}, m_pShadowConstantBuffer{}, m_lightVPMatrix{}, m_pSkyPS{}, m_pTransparentPS{}, m_pOutline3DVS{}, m_pOutlineModelVS{}, m_pOutlinePS{}, m_pOutlineBuffer{}, m_outlineData{}, m_pShadowPS{}, m_pFogBuffer{}, m_texMutex{}, m_spriteBatch{}, m_spriteFont{}, m_pDecalBuffer(nullptr), m_pDecalVS(nullptr), m_pDecalPS(nullptr), m_pPostProcessShaders{}, m_pPostProcessBuffer{}, m_pWorkTexture{}, m_pWorkRTV{}, m_pWorkSRV{}, m_pBloomRTVs{}, m_pBloomSRVs{}, m_meshs{}, m_pUnifiedLighting_DL_PS{}, m_pUIPS{}, m_postProcessMask{}, m_toneMappingType{}, m_ambient{}, m_shadowMapSize{ DEFAULT_SHADOWMAP_SIZE }, m_shadowMapProj{} {}
 RendererImpl::~RendererImpl() { uninit(); }
 
 //-------------------------------------------
@@ -578,6 +584,12 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
     auto lights = scene.getGameObjectsOfType<LightComponent>();
     auto renderComponents = scene.getGameObjectsOfType<RenderComponent>();
 
+    // ライトを設定
+    std::vector<LightData> lightDatas{};
+    for (const auto& light : lights)
+        lightDatas.push_back(light->get());
+    setLight(lightDatas, m_ambient);
+
     for (size_t cnt = 0; cnt < cameras.size(); cnt++)
     {
         // レンダラーにカメラの位置を渡す(スペキュラー用)
@@ -594,7 +606,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
             Vector3 eye{}, target, up{};
             if (light->getShadowInfo(&eye, &target, &up))
             {
-                beginShadow(Matrix::LookAtLH(eye, target, up), Matrix::Orthographic(40.0f, 40.0f, 0.5f, 100.0f)); // シャドウマップ範囲
+                beginShadow(Matrix::LookAtLH(eye, target, up), m_shadowMapProj); // シャドウマップ範囲
 
                 for (auto& renderComponent : renderComponents)
                 {
@@ -613,10 +625,6 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
         // ジオメトリ開始
         //------------------
         beginGeometry(CameraView, CameraProj);
-
-        // プレイヤー
-        setRasMode(RasMode::None);
-        setRasMode(RasMode::Back);
 
         for (auto& renderComponent : renderComponents)
         {
@@ -759,8 +767,8 @@ void RendererImpl::beginShadow(Matrix lightView, Matrix lightProj)
 
     // シャドウマップ用ビューポート
     D3D11_VIEWPORT vp = {};
-    vp.Width = (float)SHADOWMAP_SIZE;
-    vp.Height = (float)SHADOWMAP_SIZE;
+    vp.Width = float(m_shadowMapSize);
+    vp.Height = float(m_shadowMapSize);
     vp.MinDepth = 0.0f;
     vp.MaxDepth = 1.0f;
     vp.TopLeftX = 0.0f;
@@ -2333,8 +2341,8 @@ void RendererImpl::setupShadowMap()
 {
     // テクスチャの作成
     D3D11_TEXTURE2D_DESC texDesc = {};
-    texDesc.Width = SHADOWMAP_SIZE;
-    texDesc.Height = SHADOWMAP_SIZE;
+    texDesc.Width = m_shadowMapSize;
+    texDesc.Height = m_shadowMapSize;
     texDesc.MipLevels = 1;
     texDesc.ArraySize = 1;
     texDesc.Format = DXGI_FORMAT_R32_TYPELESS; // 32bit深度
@@ -3013,47 +3021,11 @@ bool Renderer::setTransformWorld(const Matrix& matrix)
     return false;
 }
 
-bool Renderer::setTransformView(const Matrix& matrix)
-{
-    if (m_pImpl != nullptr)
-    {
-        return m_pImpl->setTransformView(matrix);
-    }
-    return false;
-}
-
-bool Renderer::setTransformProjection(const Matrix& matrix)
-{
-    if (m_pImpl != nullptr)
-    {
-        return m_pImpl->setTransformProjection(matrix);
-    }
-    return false;
-}
-
-bool Renderer::setCameraPosition(const Vector3& cameraPos)
-{
-    if (m_pImpl != nullptr)
-    {
-        return m_pImpl->setCameraPosition(cameraPos);
-    }
-        return false;
-}
-
 bool Renderer::setMaterial(const Material& material)
 {
     if (m_pImpl != nullptr)
     {
         return m_pImpl->setMaterial(material);
-    }
-    return false;
-}
-
-bool Renderer::setLight(std::span<const LightData> lights, const Color& ambient)
-{
-    if (m_pImpl != nullptr)
-    {
-        return m_pImpl->setLight(lights, ambient);
     }
     return false;
 }
@@ -3138,6 +3110,20 @@ void Renderer::setToneMappingType(ToneMappingType type)
     if (m_pImpl != nullptr)
     {
         m_pImpl->setToneMappingType(type);
+    }
+}
+void Renderer::setShadowMapArea(float width, float height, float near, float fur)
+{
+    if (m_pImpl != nullptr)
+    {
+        m_pImpl->setShadowMapArea(width, height, near, fur);
+    }
+}
+void Renderer::setAmbient(const Color& ambient)
+{
+    if (m_pImpl != nullptr)
+    {
+        m_pImpl->setAmbient(ambient);
     }
 }
 

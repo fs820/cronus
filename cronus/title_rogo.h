@@ -10,8 +10,9 @@
 class GameObject;
 class MeshManager;
 struct TextureHandle;
+struct Transform;
 
 namespace factory
 {
-    std::unique_ptr<GameObject> createTitleLogo(MeshManager meshManager, TextureHandle texture);
+    std::unique_ptr<GameObject> createTitleLogo(MeshManager meshManager, TextureHandle texture, Transform transform);
 }

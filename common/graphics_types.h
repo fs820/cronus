@@ -196,7 +196,7 @@ struct Material
         pixelShaderType = PixelShaderType::BlinnPhong;
     }
 
-    Material() : Diffuse{ 1,1,1,1 }, Specular{ 0,0,0,1 }, Emissive{ 0,0,0,1 }, Power{ 32.0f }, AlphaCutoff{ 0.01f }, pixelShaderType{ PixelShaderType::Unlit } {}
+    Material() : Diffuse{ Color::White() }, Specular{ Color::Black() }, Emissive{ Color::Black() }, Power{ 32.0f }, AlphaCutoff{ 0.01f }, pixelShaderType{ PixelShaderType::Unlit } {}
     Material(const Color& diffuse, const Color& specular, const Color& emissive, float power, float alphaCutoff, PixelShaderType pixelShaderType)
         : Diffuse{ diffuse }, Specular{ specular }, Emissive{ emissive }, Power{ power }, AlphaCutoff{ alphaCutoff }, pixelShaderType{ pixelShaderType } {}
     ~Material() = default;

@@ -11,6 +11,7 @@
 #include "log.h"
 #include "window.h"
 #include "title.h"
+#include "game.h"
 #include "input.h"
 #include "renderer.h"
 #include "texture.h"
@@ -50,14 +51,12 @@ bool Cronus::onStart()
     getWindow()->setTitle(config.title.c_str());                   // ウィンドウタイトルを設定
     getWindow()->setSize(config.windowWidth, config.windowHeight); // ウィンドウタイトルを設定
 
-    getRenderer()->setPostProcessShaderMask(PostProcessShaderMask::FXAA | PostProcessShaderMask::Bloom); // アンチエイリアスとブルームを行う
-    getRenderer()->setToneMappingType(ToneMappingType::Anime);                                           // アニメ調の色彩
-
     getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/test.png");
     getTextureManager()->load(1);
     getRenderer()->uploadTextures(*getTextureManager(), 1);
 
     getSceneManager()->addScene("Title", new TitleScene(this)); // タイトルシーンを追加
+    getSceneManager()->addScene("Game", new GameScene(this));   // タイトルシーンを追加
     getSceneManager()->changeScene("Title");                    // タイトルシーンに切り替え
     return true;
 }

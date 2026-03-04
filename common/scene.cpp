@@ -74,6 +74,8 @@ void Scene::update(float elapsedTime, float deltaTime)
     }
     m_noStartObjects.clear(); // Startしていないゲームオブジェクトのリストをクリア
 
+    onUpdate(elapsedTime, deltaTime);
+
     // ゲームオブジェクトの更新
     for (auto& gameObject : m_gameObjects)
     {
