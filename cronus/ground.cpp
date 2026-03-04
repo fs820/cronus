@@ -13,13 +13,19 @@
 
 namespace factory
 {
-    std::unique_ptr<GameObject> createGround(MeshManager meshManager, TextureHandle texture, Transform transform)
+    std::unique_ptr<GameObject> createGround(MeshManager& meshManager, const TextureManager& textureManager, TextureHandle texture, Transform transform, float tileMag)
     {
         std::unique_ptr<GameObject> ground = std::make_unique<GameObject>();
 
-        auto pTrans = ground->Add<TransformComponent>(transform);
+        ground->Add<TransformComponent>(transform);
 
-        MeshHandle mesh = meshManager.quad();
+        // テクスチャの登録
+        int width{ 100 }, height{ 100 };
+        textureManager.getTextureSize(texture, width, height);
+
+        // メッシュ
+        MeshHandle mesh = meshManager.quad((transform.scale.x / width) * tileMag, (transform.scale.y / height) * tileMag);
+
         Material material{};
         material.pixelShaderType = PixelShaderType::Toon;
 

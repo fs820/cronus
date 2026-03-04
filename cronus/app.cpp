@@ -51,13 +51,17 @@ bool Cronus::onStart()
     getWindow()->setTitle(config.title.c_str());                   // ウィンドウタイトルを設定
     getWindow()->setSize(config.windowWidth, config.windowHeight); // ウィンドウタイトルを設定
 
-    getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/test.png");
+    getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/test__.png");
+    getTextureManager()->registerPath(Hash("ground"), u8"data/TEXTURE/test.png");
     getTextureManager()->load(1);
     getRenderer()->uploadTextures(*getTextureManager(), 1);
 
-    getSceneManager()->addScene("Title", new TitleScene(this)); // タイトルシーンを追加
-    getSceneManager()->addScene("Game", new GameScene(this));   // タイトルシーンを追加
-    getSceneManager()->changeScene("Title");                    // タイトルシーンに切り替え
+    // シーンを追加
+    getSceneManager()->addScene("Title", new TitleScene(this)); // タイトル
+    getSceneManager()->addScene("Game", new GameScene(this));   // ゲーム
+
+    // シーン切り替え
+    getSceneManager()->changeScene("Game");
     return true;
 }
 
@@ -81,18 +85,6 @@ bool Cronus::onUpdate(float elapsedTime, float deltaTime)
         ImGui::Text("Delta Time: %.3f sec", deltaTime);
     }
     ImGui::End(); // ウィンドウ終了
-
-    static float testValue = 0.0f;
-    BinaryReader reader("data/test.bin");
-    if(reader.isValid()) testValue = reader.read<float>();
-
-    if (ImGui::Begin("File")) // ウィンドウ開始
-    {
-        ImGui::SliderFloat("test", &testValue, 0.0f, 1.0f);
-    }
-    ImGui::End(); // ウィンドウ終了
-    BinaryWriter writer("data/test.bin");
-    writer.write(testValue);
 
     static bool testInput = false;
     if (getInput()->isActionPressed(ActionCode::Attack, 0)) testInput = !testInput; // 入力のテスト

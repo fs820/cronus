@@ -26,7 +26,7 @@ public:
     }
     bool getShadowInfo(Vector3* shadowEye = nullptr, Vector3* shadowTarget = nullptr, Vector3* shadowUp = nullptr)
     {
-        shadowEye = &m_shadowEye; shadowTarget = &m_shadowTarget; shadowUp = &m_shadowUp;
+        *shadowEye = m_shadowEye; *shadowTarget = m_shadowTarget; *shadowUp = m_shadowUp;
         return m_isShadowCast;
     }
 

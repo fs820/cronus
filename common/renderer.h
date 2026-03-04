@@ -45,6 +45,7 @@ public:
 
     void setPostProcessShaderMask(PostProcessShaderMask mask);
     void setToneMappingType(ToneMappingType type);
+    void setShadowMapResolution(int resolution);
     void setShadowMapArea(float width, float height, float near, float fur);
     void setAmbient(const Color& ambient);
     bool setFog(const FogData& fog);

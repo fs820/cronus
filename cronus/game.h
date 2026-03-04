@@ -6,6 +6,9 @@
 //--------------------------------------------
 #pragma once
 #include "scene.h"
+#include "graphics_types.h"
+
+constexpr const char* AMBIENT_FILE = "data/ambient.bin";
 
 //---------------------------------------------
 // ゲームシーンクラス
@@ -13,7 +16,7 @@
 class GameScene : public Scene
 {
 public:
-    GameScene(Application* pApp) : Scene(pApp) {}
+    GameScene(Application* pApp) : Scene(pApp), m_ambient{} {}
     virtual ~GameScene() override = default;
 
     void onEnter() override;
@@ -21,4 +24,5 @@ public:
     void onUpdate(float elapsedTime, float deltaTime) override;
 
 private:
+    Color m_ambient;
 };

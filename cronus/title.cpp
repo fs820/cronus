@@ -23,17 +23,19 @@
 //------------------------
 void TitleScene::onEnter()
 {
+    auto pRederer = getApp()->getRenderer(); // レンダラー
+
     // アンチエイリアスとブルームを行う
-    getApp()->getRenderer()->setPostProcessShaderMask(PostProcessShaderMask::FXAA | PostProcessShaderMask::Bloom);
+    pRederer->setPostProcessShaderMask(PostProcessShaderMask::FXAA | PostProcessShaderMask::Bloom);
 
     // アニメ調の色彩
-    getApp()->getRenderer()->setToneMappingType(ToneMappingType::Anime);
+    pRederer->setToneMappingType(ToneMappingType::Anime);
 
     // 影の描画範囲
-    getApp()->getRenderer()->setShadowMapArea(40.0f, 40.0f, 0.5f, 100.0f);
+    pRederer->setShadowMapArea(40.0f, 40.0f, 0.5f, 100.0f);
 
     // 環境光
-    getApp()->getRenderer()->setAmbient(Color(0.2f,0.2f,0.2f,1.0f));
+    pRederer->setAmbient(Color(0.2f,0.2f,0.2f,1.0f));
 
     // Fog
     FogData fog{};
@@ -44,11 +46,11 @@ void TitleScene::onEnter()
     fog.skyFogHeight = 550.0f;
     fog.fogPower = 1.0f;
     fog.skyFogPower = 3.0f;
-    getApp()->getRenderer()->setFog(fog);
+    pRederer->setFog(fog);
 
     // ロゴの生成
     auto pLogo = factory::createTitleLogo(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("logo")), Transform(Vector3(960, 540, 0), Quaternion::Identity(), Vector3(1344, 1050, 0)));
-    getApp()->getSceneManager()->getActiveScene()->addGameObject(std::move(pLogo));
+    addGameObject(std::move(pLogo));
 }
 
 //------------------------
