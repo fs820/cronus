@@ -786,7 +786,7 @@ void ModelResource::setupMeshs()
 static constexpr size_t START_POSE_ID = ~0u - 1u;  // ブレンド中のポーズからブレンドするときの特殊ID
 static constexpr float MIN_MATERIAL_POWER = 32.0f; // 最小の鋭さ
 
-Model::Model(ModelManager& modelManager, Renderer& renderer, const ModelHandle& handle) : m_modelManager(modelManager), m_renderer(renderer), m_handle(handle), m_nodeInstanceMaps{}, m_boneTransforms{}, m_currentAnimation{}, m_nextAnimation{}, m_blendDuration{}, m_blendTime{}, m_pBlendStartPose{}, m_isSync{}, m_transform{} {}
+Model::Model(ModelManager& modelManager, Renderer& renderer, const ModelHandle& handle) : m_modelManager(modelManager), m_renderer(renderer), m_handle(handle), m_nodeInstanceMaps{}, m_boneTransforms{}, m_currentAnimation{}, m_nextAnimation{}, m_blendDuration{}, m_blendTime{}, m_pBlendStartPose{}, m_isSync{}, m_transform{}, m_pixelShaderType{ PixelShaderType::BlinnPhong } {}
 
 //--------------
 // モデルの初期化
@@ -1105,7 +1105,7 @@ void Model::drawNode(NodeInstance* node)
                     material.Power = matData->shininess;
                 }
                 material.AlphaCutoff = 0.01f; // 固定値
-                material.pixelShaderType = PixelShaderType::Toon;
+                material.pixelShaderType = m_pixelShaderType;
                 m_renderer.setMaterial(material);
 
                 // テクスチャの設定

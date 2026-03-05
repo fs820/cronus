@@ -13,5 +13,5 @@
 // 描画用コンポーネントクラス
 // 
 //----------------------------
-RenderComponent::RenderComponent(const RenderQueue& renderQueue, const RasMode& rasMode) : m_renderQueue(renderQueue), m_rasMode(rasMode){}
+RenderComponent::RenderComponent(const RenderQueueMask& renderQueueMask, const RasMode& rasMode) : m_renderQueueMask(renderQueueMask), m_rasMode(rasMode) {}
 RenderComponent::~RenderComponent() = default;

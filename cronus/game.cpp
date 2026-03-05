@@ -15,6 +15,8 @@
 #include "ground.h"
 #include "mymath.h"
 #include "binary_stream.h"
+#include "player.h"
+#include "model.h"
 
 //-----------------------------
 // 
@@ -92,6 +94,10 @@ void GameScene::onEnter()
     // 地面の生成
     auto pGround = factory::createGround(*getApp()->getMeshManager(), *getApp()->getTextureManager(), getApp()->getTextureManager()->getTextureHandle(Hash("ground")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, math::degreesToRadians(90.0f), 0.0f), Vector3(10.0f, 10.0f, 0)), 1000.0f);
     addGameObject(std::move(pGround));
+
+    // プレイヤーの生成
+    auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getRenderer(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 10.0f);
+    addGameObject(std::move(pPlayer));
 }
 
 //------------------------

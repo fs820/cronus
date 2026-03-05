@@ -14,17 +14,17 @@
 class RenderComponent : public Component
 {
 public:
-    RenderComponent(const RenderQueue& renderQueue, const RasMode& rasMode);
+    RenderComponent(const RenderQueueMask& renderQueueMask, const RasMode& rasMode);
     virtual ~RenderComponent();
 
     virtual void render(Renderer& renderer) override = 0;
 
-    void setRenderQueue(const RenderQueue& renderQueue) { m_renderQueue = renderQueue; }
-    RenderQueue getRenderQueue() const { return m_renderQueue; }
+    void setRenderQueueMask(const RenderQueueMask& renderQueueMask) { m_renderQueueMask = renderQueueMask; }
+    RenderQueueMask getRenderQueueMask() const { return m_renderQueueMask; }
     void setRasMode(RasMode mode) { m_rasMode = mode; }
     RasMode getRasMode() { return m_rasMode; }
 
 private:
-    RenderQueue m_renderQueue;
+    RenderQueueMask m_renderQueueMask;
     RasMode m_rasMode;
 };

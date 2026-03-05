@@ -164,6 +164,7 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="game_loader.cpp" />
     <ClCompile Include="ground.cpp" />
+    <ClCompile Include="player.cpp" />
     <ClCompile Include="title_rogo.cpp" />
     <ClCompile Include="title.cpp" />
   </ItemGroup>
@@ -179,6 +180,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="game_loader.h" />
     <ClInclude Include="ground.h" />
+    <ClInclude Include="player.h" />
     <ClInclude Include="title_rogo.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="title.h" />

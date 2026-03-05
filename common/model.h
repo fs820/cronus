@@ -6,6 +6,7 @@
 //--------------------------------------------
 #pragma once
 
+#include "pch.h"
 #include "graphics_types.h" // VertexModel, Color
 
 // 前方宣言
@@ -70,6 +71,7 @@ public:
     void setAnimation(size_t animationIndex = 0u, double blendDuration = 0.0, bool isSync = false, bool isLoop = false, bool forceReset = false);
     bool isAnimationPlaying() const { return m_currentAnimation.isPlaying || m_nextAnimation.isPlaying; }
     void setScale(float scale);
+    void setPixelShaderType(PixelShaderType pixelShaderType) { m_pixelShaderType = pixelShaderType; }
 
 private:
     void setupNodeInstances(Node* node, const Matrix& parentTransform);
@@ -95,6 +97,8 @@ private:
     double m_blendTime;                                               // ブレンド経過時間
     bool m_isSync;                                                    // 同期ブレンドフラグ
 
+    PixelShaderType m_pixelShaderType;                                // ピクセルシェーダ
+
     Transform m_transform;                                            // モデル全体変換値
 };
 
@@ -109,7 +113,7 @@ public:
 
     bool load(Renderer& renderer, TextureManager& textureManager, unsigned int maxThread, std::function<bool(std::string_view, int, int)> progressCallback = {}, uint64_t id = Hash(""));
 
-    bool registerPath(uint64_t id, const std::filesystem::path& path, bool isAnimationOnly);
+    bool registerPath(uint64_t id, const std::filesystem::path& path, bool isAnimationOnly = false);
     bool setAnimation(uint64_t destModel, uint64_t srcAnim);
 
     void releaseCpuResources();

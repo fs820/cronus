@@ -22,7 +22,7 @@ namespace factory
         MeshHandle mesh = meshManager.sprite();
         Material material{};   // UIはそのままでもいい
 
-        logo->Add<MeshRenderComponent>(RenderQueue::UI, RasMode::Back, mesh, material, texture);
+        logo->Add<MeshRenderComponent>(RenderQueueMask::UI, RasMode::Back, mesh, material, texture);
         return logo;
     }
 }

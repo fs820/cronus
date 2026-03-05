@@ -15,6 +15,7 @@
 #include "input.h"
 #include "renderer.h"
 #include "texture.h"
+#include "model.h"
 
 //---------------------------------
 // Cronus (ゲーム本体)
@@ -51,10 +52,21 @@ bool Cronus::onStart()
     getWindow()->setTitle(config.title.c_str());                   // ウィンドウタイトルを設定
     getWindow()->setSize(config.windowWidth, config.windowHeight); // ウィンドウタイトルを設定
 
+    // リソース読み込み
+    unsigned int hw = std::thread::hardware_concurrency();
+    unsigned int maxThreads = std::max(1u, hw / 2);
+
+    // テクスチャ
     getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/test__.png");
     getTextureManager()->registerPath(Hash("ground"), u8"data/TEXTURE/test.png");
-    getTextureManager()->load(1);
-    getRenderer()->uploadTextures(*getTextureManager(), 1);
+    getTextureManager()->load(maxThreads);
+
+    // モデル
+    getModelManager()->registerPath(Hash("player"), u8"data/MODEL/test_m/test_003.vrm");
+    getModelManager()->load(*getRenderer(), *getTextureManager(), maxThreads);
+
+    // GPUに送る
+    getRenderer()->uploadTextures(*getTextureManager(), maxThreads);
 
     // シーンを追加
     getSceneManager()->addScene("Title", new TitleScene(this)); // タイトル

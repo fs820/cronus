@@ -1,6 +1,6 @@
 //--------------------------------------------
 //
-// タイトルロゴ [title_rogo.cpp]
+// 地面 [ground.cpp]
 // Author: Fuma Sato
 //
 //--------------------------------------------
@@ -29,7 +29,7 @@ namespace factory
         Material material{};
         material.pixelShaderType = PixelShaderType::Toon;
 
-        ground->Add<MeshRenderComponent>(RenderQueue::Geometry, RasMode::Back, mesh, material, texture);
+        ground->Add<MeshRenderComponent>(RenderQueueMask::Geometry, RasMode::Back, mesh, material, texture);
         return ground;
     }
 }

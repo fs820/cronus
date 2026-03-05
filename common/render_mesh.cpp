@@ -43,6 +43,9 @@ void MeshRenderComponent::render(Renderer& renderer)
     renderer.setMaterial(m_material);
     renderer.setTexture(m_texture);
 
+    // アウトライン
+    renderer.setOutlineData(m_outline);
+
     // 描画
     renderer.setRasMode(getRasMode());
     renderer.drawMesh(m_mesh);

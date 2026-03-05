@@ -17,16 +17,16 @@ constexpr float WORLD_SIZE = 100.0f; // 1,0f = 1mの世界 (主にmodel変換な
 const Vector2 DEFAULT_SCREEN_SIZE = { 1920.0f, 1080.0f };
 
 // レンダリングキュー
-enum class RenderQueue : unsigned char
+enum class RenderQueueMask
 {
     Shadow,
-    Geometry,
-    Decal,
-    Sky,
-    Outline,
-    Transparent,
-    UI,
-    String
+    Geometry = 1 << 0,
+    Decal = 1 << 1,
+    Sky = 1 << 2,
+    Outline = 1 << 3,
+    Transparent = 1 << 4,
+    UI = 1 << 5,
+    String = 1 << 6
 };
 
 // 頂点シェーダーの種類
@@ -218,6 +218,17 @@ struct FogData
     ~FogData() = default;
 };
 
+// Outline
+struct OutlineData
+{
+    Color color;     // 色
+    float Thickness; // 太さ
+
+    OutlineData() : color{ Color::Black() }, Thickness{ 0.01f } {}
+    OutlineData(const Color& color, float Thickness) : color{ color }, Thickness{ Thickness } {}
+    ~OutlineData() = default;
+};
+
 // 頂点情報の構造体
 struct Vertex2D
 {
@@ -266,6 +277,62 @@ struct VertexModel
     }
     ~VertexModel() = default;
 };
+
+inline RenderQueueMask operator|(RenderQueueMask lhs, RenderQueueMask rhs)
+{
+    return static_cast<RenderQueueMask>(
+        static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs)
+        );
+}
+
+inline RenderQueueMask& operator|=(RenderQueueMask& lhs, RenderQueueMask rhs)
+{
+    lhs = lhs | rhs;
+    return lhs;
+}
+
+inline RenderQueueMask operator&(RenderQueueMask lhs, RenderQueueMask  rhs)
+{
+    return static_cast<RenderQueueMask>(
+        static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs)
+        );
+}
+
+inline RenderQueueMask& operator&=(RenderQueueMask& lhs, RenderQueueMask rhs)
+{
+    lhs = lhs & rhs;
+    return lhs;
+}
+
+inline RenderQueueMask operator^(RenderQueueMask lhs, RenderQueueMask rhs)
+{
+    return static_cast<RenderQueueMask>(
+        static_cast<uint32_t>(lhs) ^ static_cast<uint32_t>(rhs)
+        );
+}
+
+inline RenderQueueMask& operator^=(RenderQueueMask& lhs, RenderQueueMask rhs)
+{
+    lhs = lhs ^ rhs;
+    return lhs;
+}
+
+inline RenderQueueMask operator~(RenderQueueMask mask)
+{
+    return static_cast<RenderQueueMask>(
+        ~static_cast<uint32_t>(mask)
+        );
+}
+
+inline bool HasFlag(RenderQueueMask mask, RenderQueueMask flag)
+{
+    return (static_cast<uint32_t>(mask) & static_cast<uint32_t>(flag)) != 0;
+}
+
+inline bool Any(RenderQueueMask mask)
+{
+    return static_cast<uint32_t>(mask) != 0;
+}
 
 inline PostProcessShaderMask operator|(PostProcessShaderMask lhs, PostProcessShaderMask rhs)
 {

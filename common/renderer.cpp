@@ -285,7 +285,7 @@ public:
     void setRasMode(RasMode rasMode);
     void setDepthMode(DepthMode depthMode);
     void setSampMode(SampMode sampMode);
-    void setOutlineData(Color color, float width);
+    void setOutlineData(OutlineData data);
     void setScissorRect(int left, int top, int right, int bottom);
     void setPass(RenderPass pass) { m_currentPass = pass; }
     void setForwardPass(ForwardSubPass subPass) { m_currentForwardSubPass = subPass; }
@@ -614,7 +614,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
 
                 for (auto& renderComponent : renderComponents)
                 {
-                    if (renderComponent->getRenderQueue() == RenderQueue::Shadow)
+                    if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Shadow))
                         renderComponent->render(inter);
                 }
 
@@ -632,7 +632,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
 
         for (auto& renderComponent : renderComponents)
         {
-            if (renderComponent->getRenderQueue() == RenderQueue::Geometry)
+            if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Geometry))
                 renderComponent->render(inter);
         }
 
@@ -648,7 +648,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
 
         for (auto& renderComponent : renderComponents)
         {
-            if (renderComponent->getRenderQueue() == RenderQueue::Decal)
+            if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Decal))
                 renderComponent->render(inter);
         }
 
@@ -672,7 +672,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
 
         for (auto& renderComponent : renderComponents)
         {
-            if (renderComponent->getRenderQueue() == RenderQueue::Sky)
+            if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Sky))
                 renderComponent->render(inter);
         }
 
@@ -682,11 +682,10 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
         // アウトライン (フォワードの中でsetOutlineModeを呼ぶとアウトライン)
         //-----------------------------------------------------------------------
         setOutlineMode();
-        setOutlineData(Color::Black(), 0.0005f);
 
         for (auto& renderComponent : renderComponents)
         {
-            if (renderComponent->getRenderQueue() == RenderQueue::Outline)
+            if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Outline))
                 renderComponent->render(inter);
         }
 
@@ -697,7 +696,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
 
         for (auto& renderComponent : renderComponents)
         {
-            if (renderComponent->getRenderQueue() == RenderQueue::Transparent)
+            if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Transparent))
                 renderComponent->render(inter);
         }
 
@@ -719,7 +718,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
 
     for (auto& renderComponent : renderComponents)
     {
-        if (renderComponent->getRenderQueue() == RenderQueue::UI)
+        if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::UI))
             renderComponent->render(inter);
     }
 
@@ -734,7 +733,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
 
     for (auto& renderComponent : renderComponents)
     {
-        if (renderComponent->getRenderQueue() == RenderQueue::String)
+        if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::String))
             renderComponent->render(inter);
     }
 
@@ -743,7 +742,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
     //-------------------------
 
     // Gui描画(あれば)
-    if (guiRender!=nullptr) guiRender();
+    if (guiRender != nullptr) guiRender();
 
     // 全描画を終了し切り替えを行う
     present();
@@ -1302,10 +1301,10 @@ bool RendererImpl::setBoneTransforms(std::span<const Matrix> boneTransforms)
 //-------------------------------------------
 // アウトラインを設定
 //-------------------------------------------
-void RendererImpl::setOutlineData(Color color, float width)
+void RendererImpl::setOutlineData(OutlineData data)
 {
-    m_outlineData.OutlineColor = color;
-    m_outlineData.OutlineWidth = width;
+    m_outlineData.OutlineColor = data.color;
+    m_outlineData.OutlineWidth = data.Thickness;
 }
 
 //-------------------------------------------
@@ -3094,11 +3093,11 @@ bool Renderer::setBoneTransforms(std::span<const Matrix> boneTransforms)
     return false;
 }
 
-void Renderer::setOutlineData(Color color, float width)
+void Renderer::setOutlineData(OutlineData data)
 {
     if (m_pImpl != nullptr)
     {
-        return m_pImpl->setOutlineData(color, width);
+        return m_pImpl->setOutlineData(data);
     }
 }
 

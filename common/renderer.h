@@ -55,7 +55,7 @@ public:
     bool setTransformWorld(const Matrix& matrix);
     bool setMaterial(const Material& material);
     bool setBoneTransforms(std::span<const Matrix> boneTransforms);
-    void setOutlineData(Color color, float width);
+    void setOutlineData(OutlineData data);
     void setRasMode(RasMode rasMode);
 
     bool drawMesh(const MeshHandle& handle);
