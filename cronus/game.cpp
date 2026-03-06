@@ -77,8 +77,8 @@ void GameScene::onEnter()
 
     // ライト
     float distance = 60.0f;
-    float lightTelta = math::degreesToRadians(-45.0f);
-    float lightPhi = math::degreesToRadians(85.0f);
+    float lightTelta = math::degreesToRadians(135.0f);
+    float lightPhi = math::degreesToRadians(30.0f);
     Vector3 targetPos = { 0, 0, 0 };
     Vector3 lightPos = Vector3::FromSpherical(distance, lightTelta, lightPhi);
     LightData light{};
@@ -96,7 +96,7 @@ void GameScene::onEnter()
     addGameObject(std::move(pGround));
 
     // プレイヤーの生成
-    auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getRenderer(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 10.0f);
+    auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getRenderer(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 100.0f);
     addGameObject(std::move(pPlayer));
 }
 

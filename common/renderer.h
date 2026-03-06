@@ -56,7 +56,6 @@ public:
     bool setMaterial(const Material& material);
     bool setBoneTransforms(std::span<const Matrix> boneTransforms);
     void setOutlineData(OutlineData data);
-    void setRasMode(RasMode rasMode);
 
     bool drawMesh(const MeshHandle& handle);
     bool drawIndexedPrimitive(VertexShaderType vertexShaderType, int indexCount, unsigned int startIndexLocation, unsigned int baseVertexLocation);

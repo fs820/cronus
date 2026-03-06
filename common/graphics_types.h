@@ -19,14 +19,15 @@ const Vector2 DEFAULT_SCREEN_SIZE = { 1920.0f, 1080.0f };
 // レンダリングキュー
 enum class RenderQueueMask
 {
-    Shadow,
-    Geometry = 1 << 0,
-    Decal = 1 << 1,
-    Sky = 1 << 2,
-    Outline = 1 << 3,
-    Transparent = 1 << 4,
-    UI = 1 << 5,
-    String = 1 << 6
+    None,
+    Shadow = 1 << 0,
+    Geometry = 1 << 1,
+    Decal = 1 << 2,
+    Sky = 1 << 3,
+    Outline = 1 << 4,
+    Transparent = 1 << 5,
+    UI = 1 << 6,
+    String = 1 << 7
 };
 
 // 頂点シェーダーの種類

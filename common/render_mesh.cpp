@@ -47,7 +47,5 @@ void MeshRenderComponent::render(Renderer& renderer)
     renderer.setOutlineData(m_outline);
 
     // 描画
-    renderer.setRasMode(getRasMode());
     renderer.drawMesh(m_mesh);
-    renderer.setRasMode(RasMode::Back);
 }

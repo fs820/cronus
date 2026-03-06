@@ -633,7 +633,10 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
         for (auto& renderComponent : renderComponents)
         {
             if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Geometry))
+            {
+                setRasMode(renderComponent->getRasMode());
                 renderComponent->render(inter);
+            }
         }
 
         endGeometry();
@@ -697,7 +700,10 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
         for (auto& renderComponent : renderComponents)
         {
             if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Transparent))
+            {
+                setRasMode(renderComponent->getRasMode());
                 renderComponent->render(inter);
+            }
         }
 
         endForward();
@@ -2562,8 +2568,8 @@ void RendererImpl::drawPostProcessPass(PostProcessShaderMask mask, ToneMappingTy
     float h = (float)m_screenSize.y;
     cb.ScreenSize = Vector4(w, h, 1.0f / w, 1.0f / h); // z,w には逆数を入れる
     cb.BlurDir = Vector2::Zero();                      // ブラー方向をいったん初期化
-    cb.bloomThreshold = 0.1f;                          // ブルーム閾値
-    cb.bloomIntensity = 5.0f;                          // ブルーム係数
+    cb.bloomThreshold = 1.2f;                          // ブルーム閾値
+    cb.bloomIntensity = 2.0f;                          // ブルーム係数
     cb.toneMappingType = int(type);                    // トーンマッピングの種類
     m_pContext->UpdateSubresource(m_pPostProcessBuffer.Get(), 0, nullptr, &cb, 0, 0);
     buffer = m_pPostProcessBuffer.Get();
@@ -3040,14 +3046,6 @@ bool Renderer::setFog(const FogData& fog)
         return m_pImpl->setFog(fog);
     }
     return false;
-}
-
-void Renderer::setRasMode(RasMode rasMode)
-{
-    if (m_pImpl != nullptr)
-    {
-        m_pImpl->setRasMode(rasMode);
-    }
 }
 
 bool Renderer::drawMesh(const MeshHandle& handle)

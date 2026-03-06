@@ -44,7 +44,5 @@ void ModelRenderComponent::render(Renderer& renderer)
     renderer.setOutlineData(m_outline);
 
     // 描画
-    renderer.setRasMode(getRasMode());
     m_pModel->draw();
-    renderer.setRasMode(RasMode::Back);
 }

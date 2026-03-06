@@ -29,7 +29,7 @@ namespace factory
         auto pModelComp = player->Add<ModelComponent>(pModel);
 
         OutlineData outline = OutlineData{ Color::Black(),0.001f };
-        player->Add<ModelRenderComponent>(RenderQueueMask::Geometry | RenderQueueMask::Outline, RasMode::None, pModelComp->get(), outline);
+        player->Add<ModelRenderComponent>(RenderQueueMask::Shadow | RenderQueueMask::Geometry | RenderQueueMask::Outline, RasMode::None, pModelComp->get(), outline);
         return player;
     }
 }
