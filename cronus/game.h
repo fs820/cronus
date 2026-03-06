@@ -9,6 +9,7 @@
 #include "graphics_types.h"
 
 constexpr const char* AMBIENT_FILE = "data/ambient.bin";
+constexpr const char* CAMERA_FILE = "data/camera.bin";
 
 //---------------------------------------------
 // ゲームシーンクラス

@@ -68,6 +68,7 @@ void GameScene::onEnter()
     camera.SetTheta(math::degreesToRadians(-90.0f));
     camera.SetPhi(math::degreesToRadians(45.0f));
     camera.SetFovY(math::degreesToRadians(55.0f));
+    camera.Move(0.0f, Vector2::Zero(), 0.0f);
     Vector2 screenMag{};
     pRenderer->getScreenSizeMagnification(screenMag);
     camera.SetAspectRatio(DEFAULT_SCREEN_SIZE.x * screenMag.x / DEFAULT_SCREEN_SIZE.y * screenMag.y);
@@ -86,7 +87,7 @@ void GameScene::onEnter()
     lightDirVec.normalize();
     light.position = { 0,0,0,0 };
     light.direction = { lightDirVec,0 };
-    light.color = { 1,1,1,1 };
+    light.color = Color::White();
     std::unique_ptr<GameObject> pLight = std::make_unique<GameObject>();
     pLight->Add<LightComponent>(light, true, lightPos, targetPos, Vector3{ 0,1,0 });
     addGameObject(std::move(pLight));
@@ -115,6 +116,9 @@ void GameScene::onUpdate(float elapsedTime, float deltaTime)
     auto pApp = getApp();                         // アプリケーション
     auto pRenderer = pApp->getRenderer();         // レンダラー
 
+    auto pCamera = getGameObjectsOfType<CameraComponent>();
+    auto& camera = pCamera[0]->get();
+
     // 環境光
     pRenderer->setAmbient(m_ambient);
 
@@ -124,6 +128,19 @@ void GameScene::onUpdate(float elapsedTime, float deltaTime)
         ImGui::Text("This is the Game Scene.");
     }
     ImGui::End(); // ウィンドウ終了
+
+    // ImGuiで角度を変える
+    if (ImGui::Begin("Game Camera"))
+    {
+        float theta = math::radiansToDegrees(camera.GetTheta());
+        ImGui::SliderFloat("Theta", &theta, 0.0f, 360.0f);
+        camera.SetTheta(math::degreesToRadians(theta));
+        float phi = math::radiansToDegrees(camera.GetPhi());
+        ImGui::SliderFloat("Phi", &phi, 0.0f, 180.0f);
+        camera.SetPhi(math::degreesToRadians(phi));
+        camera.Move(deltaTime, Vector2::Zero(), 0.0f);
+    }
+    ImGui::End();
 
     // ImGuiで色を変える
     if (ImGui::Begin("Game Light"))

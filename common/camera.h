@@ -51,6 +51,7 @@ public:
     const Matrix& GetProjectionMatrix() const { return m_projectionMatrix; }
     const Vector3& GetPosition() const { return m_position; }
     float GetTheta() const { return m_theta; }
+    float GetPhi() const { return m_phi; }
 
 private:
     Pivot m_pivot;             // 回転の基準点
