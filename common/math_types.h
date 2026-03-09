@@ -111,8 +111,9 @@ struct Vector3
             phi = 0.0f;
             return;
         }
-        phi = acosf(z / radius); // 天頂角
-        theta = atan2f(y, x);    // 方位角
+
+        theta = atan2f(z, x);    // 方位角
+        phi = acosf(y / radius); // 天頂角
     }
 
     static Vector3 Zero() { return Vector3(0.0f, 0.0f, 0.0f); }

@@ -47,7 +47,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
         // シャドウマップ範囲内かチェック
         if (shadowUV.x >= 0.0f && shadowUV.x <= 1.0f &&
             shadowUV.y >= 0.0f && shadowUV.y <= 1.0f)
-        {
+        {            
             // シャドウマップから深度値を取得 (ライトから一番近い距離)
             float closestDepth = gShadowMap.Sample(mySampler, shadowUV).r;
 
@@ -55,7 +55,17 @@ float4 PS(VS_OUTPUT input) : SV_Target
             float currentDepth = lightSpacePos.z;
 
             // 今の場所が、一番近い場所より奥にあれば「影」
-            float3 L = normalize(Lights[0].Position.xyz - WorldPos);
+            float3 L;
+            if (Lights[0].Position.w == 0.0f)
+            {
+                // 平行光源の場合はDirectionの逆ベクトル
+                L = normalize(-Lights[0].Direction.xyz);
+            }
+            else
+            {
+                // 点光源の場合はPositionとの差分
+                L = normalize(Lights[0].Position.xyz - WorldPos);
+            }
             float cosTheta = clamp(dot(Normal, L), 0.0, 1.0);
             float bias = 0.005 * tan(acos(cosTheta)); // 角度がきついほどバイアスを増やす
             bias = clamp(bias, 0.0, 0.01);

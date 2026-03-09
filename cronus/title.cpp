@@ -11,6 +11,7 @@
 #include "application.h"
 #include "texture.h"
 #include "renderer.h"
+#include "render_string.h"
 
 //-----------------------------
 // 
@@ -51,6 +52,11 @@ void TitleScene::onEnter()
     // ロゴの生成
     auto pLogo = factory::createTitleLogo(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("logo")), Transform(Vector3(960, 540, 0), Quaternion::Identity(), Vector3(1344, 1050, 0)));
     addGameObject(std::move(pLogo));
+
+    // 文字列生成
+    auto pString = std::make_unique<GameObject>();
+    pString->Add<StringRenderComponent>("タイトル", Vector2{ 100,100 });
+    addGameObject(std::move(pString));
 }
 
 //------------------------

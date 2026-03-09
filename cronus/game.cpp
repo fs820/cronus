@@ -1,6 +1,6 @@
 //--------------------------------------------
 //
-// タイトル [title.cpp]
+// ゲーム [game.cpp]
 // Author: Fuma Sato
 //
 //--------------------------------------------
@@ -17,6 +17,7 @@
 #include "binary_stream.h"
 #include "player.h"
 #include "model.h"
+#include "decal.h"
 
 //-----------------------------
 // 
@@ -42,7 +43,7 @@ void GameScene::onEnter()
     pRenderer->setShadowMapResolution(8192);
 
     // 影の描画範囲
-    pRenderer->setShadowMapArea(40.0f, 40.0f, 0.5f, 100.0f);
+    pRenderer->setShadowMapArea(40.0f,40.0f, 0.5f, 100.0f);
 
     // 環境光
     BinaryReader reader(AMBIENT_FILE);
@@ -81,24 +82,26 @@ void GameScene::onEnter()
     float lightTelta = math::degreesToRadians(135.0f);
     float lightPhi = math::degreesToRadians(30.0f);
     Vector3 targetPos = { 0, 0, 0 };
-    Vector3 lightPos = Vector3::FromSpherical(distance, lightTelta, lightPhi);
-    LightData light{};
-    Vector3 lightDirVec = targetPos - lightPos;
+    Vector3 lightDirVec = targetPos - Vector3::FromSpherical(distance, lightTelta, lightPhi);
     lightDirVec.normalize();
-    light.position = { 0,0,0,0 };
-    light.direction = { lightDirVec,0 };
+    LightData light{};
     light.color = Color::White();
+    light.direction = { lightDirVec,0 };
     std::unique_ptr<GameObject> pLight = std::make_unique<GameObject>();
-    pLight->Add<LightComponent>(light, true, lightPos, targetPos, Vector3{ 0,1,0 });
+    pLight->Add<LightComponent>(light, true, distance, lightTelta, lightPhi, targetPos, Vector3{ 0,1,0 });
     addGameObject(std::move(pLight));
 
     // 地面の生成
-    auto pGround = factory::createGround(*getApp()->getMeshManager(), *getApp()->getTextureManager(), getApp()->getTextureManager()->getTextureHandle(Hash("ground")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, math::degreesToRadians(90.0f), 0.0f), Vector3(10.0f, 10.0f, 0)), 1000.0f);
+    auto pGround = factory::createGround(*getApp()->getMeshManager(), *getApp()->getTextureManager(), getApp()->getTextureManager()->getTextureHandle(Hash("ground")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, math::degreesToRadians(90.0f), 0.0f), Vector3(10.0f, 10.0f, 1.0f)), 1000.0f);
     addGameObject(std::move(pGround));
 
     // プレイヤーの生成
     auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getRenderer(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 100.0f);
     addGameObject(std::move(pPlayer));
+
+    // デカールの生成
+    auto pDecal = factory::createDecal(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("decal")), Transform(Vector3(5, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.960f, 1.280f, 1)));
+    addGameObject(std::move(pDecal));
 }
 
 //------------------------
@@ -113,16 +116,16 @@ void GameScene::onExit()
 //------------------------
 void GameScene::onUpdate(float elapsedTime, float deltaTime)
 {
-    auto pApp = getApp();                         // アプリケーション
-    auto pRenderer = pApp->getRenderer();         // レンダラー
-
     auto pCamera = getGameObjectsOfType<CameraComponent>();
     auto& camera = pCamera[0]->get();
 
-    // 環境光
-    pRenderer->setAmbient(m_ambient);
-
 #ifdef _DEBUG
+    auto pApp = getApp();                         // アプリケーション
+    auto pRenderer = pApp->getRenderer();         // レンダラー
+
+    auto pLight = getGameObjectsOfType<LightComponent>();
+    auto light = pLight[0]->get();
+
     if (ImGui::Begin("Game Scene")) // ウィンドウ開始
     {
         ImGui::Text("This is the Game Scene.");
@@ -138,18 +141,40 @@ void GameScene::onUpdate(float elapsedTime, float deltaTime)
         float phi = math::radiansToDegrees(camera.GetPhi());
         ImGui::SliderFloat("Phi", &phi, 0.0f, 180.0f);
         camera.SetPhi(math::degreesToRadians(phi));
-        camera.Move(deltaTime, Vector2::Zero(), 0.0f);
     }
     ImGui::End();
 
     // ImGuiで色を変える
     if (ImGui::Begin("Game Light"))
     {
+        float radius{}, theta{}, phi{};
+        pLight[0]->getShadowInfo(&radius, &theta, &phi);
+        float dTheta = math::radiansToDegrees(theta);
+        float dPhi = math::radiansToDegrees(phi);
+
+        ImGui::SliderFloat("Radius", &radius, 0.0f, 100.0f);
+        ImGui::SliderFloat("Theta", &dTheta, 0.0f, 360.0f);
+        ImGui::SliderFloat("Phi", &dPhi, 0.0f, 180.0f);
+
+        theta = math::degreesToRadians(dTheta);
+        phi = math::degreesToRadians(dPhi);
+        theta = math::normalizeTheta(theta);
+        phi = math::normalizePhi(phi);
+
+        pLight[0]->setShadowInfo(true, radius, theta, phi, Vector3::Zero(), Vector3{ 0,1,0 });
+
+        Vector3 lightDirVec = Vector3::Zero() - Vector3::FromSpherical(radius, theta, phi);
+        lightDirVec.normalize();
+        light.direction = { lightDirVec,0 };
+        pLight[0]->set(light);
+
         ImGui::ColorEdit4("Ambient", &m_ambient.r); // カラーエディット
 
         // ImGuiの編集が終了した
         if (ImGui::IsItemDeactivatedAfterEdit())
         {
+            pRenderer->setAmbient(m_ambient);
+
             // 色を保存する
             BinaryWriter writer(AMBIENT_FILE);
             writer.write(m_ambient);
@@ -157,4 +182,6 @@ void GameScene::onUpdate(float elapsedTime, float deltaTime)
     }
     ImGui::End();
 #endif // _DEBUG
+
+    camera.Move(deltaTime, Vector2::Zero(), 0.0f);
 }

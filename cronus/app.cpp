@@ -45,8 +45,8 @@ bool Cronus::onStart()
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
-    getWindow()->setIcon("bmp/ICON/icon.bmp");       // アイコンの設定
-    getWindow()->setCursor("bmp/CURSOR/cursor.bmp"); // カーソルの設定
+    getWindow()->setIcon("data/BMP/ICON/icon.bmp");       // アイコンの設定
+    getWindow()->setCursor("data/BMP/CURSOR/cursor.bmp"); // カーソルの設定
 
     Config config = file::loadConfig("data/custom.yaml");          // 設定ファイルの読み込み
     getWindow()->setTitle(config.title.c_str());                   // ウィンドウタイトルを設定
@@ -59,6 +59,7 @@ bool Cronus::onStart()
     // テクスチャ
     getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/test__.png");
     getTextureManager()->registerPath(Hash("ground"), u8"data/TEXTURE/test.png");
+    getTextureManager()->registerPath(Hash("decal"), u8"data/TEXTURE/decal.png");
     getTextureManager()->load(maxThreads);
 
     // モデル

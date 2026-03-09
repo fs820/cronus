@@ -20,7 +20,7 @@ namespace math
         return start + (end - start) * t;
     }
 
-    // ★追加: 角度用のLerp (最短ルートを通る)
+    // ThetaのLerp (最短ルートを通る)
     inline float lerpTheta(float start, float end, float t)
     {
         float diff = end - start;

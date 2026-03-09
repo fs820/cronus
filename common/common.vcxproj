@@ -185,8 +185,10 @@
     <ClInclude Include="physics_types.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="render_decal.h" />
     <ClInclude Include="render_mesh.h" />
     <ClInclude Include="render_model.h" />
+    <ClInclude Include="render_string.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="sound.h" />
     <ClInclude Include="texture.h" />
@@ -216,8 +218,10 @@
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="render_decal.cpp" />
     <ClCompile Include="render_mesh.cpp" />
     <ClCompile Include="render_model.cpp" />
+    <ClCompile Include="render_string.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="texture.cpp" />

@@ -260,8 +260,6 @@ public:
 
     bool setTexture(const TextureHandle& handle);
     bool setTransformWorld(const Matrix& matrix);
-    bool setTransformView(const Matrix& matrix);
-    bool setTransformProjection(const Matrix& matrix);
     bool setCameraPosition(const Vector3& cameraPos);
     bool setMaterial(const Material& material);
     bool setLight(std::span<const LightData> lights, const Color& ambient);
@@ -605,13 +603,22 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
         //-------------------------
         // シャドウ開始
         //-------------------------
+
+        // ShadowInfoがtrueのものの先頭が適応される
         for (const auto& light : lights)
         {
-            Vector3 eye{}, target, up{};
-            if (light->getShadowInfo(&eye, &target, &up))
+            float radius{}, theta{}, phi{};
+            Vector3 target{}, up{};
+            if (light->getShadowInfo(&radius, &theta, &phi, &target, &up))
             {
+                // 視点を算出
+                Vector3 eye = Vector3::FromSpherical(radius, theta, phi);
+                if (std::abs(Vector3::Dot(eye, up)) > 0.99f)
+                    up = { 0,0,1 };
+
                 beginShadow(Matrix::LookAtLH(eye, target, up), m_shadowMapProj); // シャドウマップ範囲
 
+                // 影を落とすオブジェクトを描画
                 for (auto& renderComponent : renderComponents)
                 {
                     if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Shadow))
@@ -619,8 +626,10 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
                 }
 
                 endShadow();
+                break;
             }
         }
+
         //-------------------------
         // シャドウ終了
         //-------------------------
@@ -676,6 +685,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
         for (auto& renderComponent : renderComponents)
         {
             if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Sky))
+                setRasMode(renderComponent->getRasMode());
                 renderComponent->render(inter);
         }
 
@@ -697,6 +707,7 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
         // アウトライン終了
         //-----------------------------------------------------------------------
 
+        // 半透明オブジェクト
         for (auto& renderComponent : renderComponents)
         {
             if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Transparent))
@@ -764,10 +775,6 @@ void RendererImpl::beginShadow(Matrix lightView, Matrix lightProj)
     // 行列のセット
     setVPMatrix(lightView, lightProj);
 
-    // シャドウマップ用のライトのVP行列をセット
-    setTransformView(lightView);
-    setTransformProjection(lightProj);
-
     // 影用デプスステンシルビューを設定 (RTVはなし)
     m_pContext->OMSetRenderTargets(0, nullptr, m_pShadowDSV.Get());
 
@@ -788,7 +795,7 @@ void RendererImpl::beginShadow(Matrix lightView, Matrix lightProj)
     m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // ライトのVP行列を保存
-    m_lightVPMatrix = m_vpMatData.View * m_vpMatData.Proj;
+    m_lightVPMatrix = lightView * lightProj;
 
     // 影用モードに変更
     setShadowMode();
@@ -1214,24 +1221,6 @@ bool RendererImpl::setTexture(const TextureHandle& handle)
 bool RendererImpl::setTransformWorld(const Matrix& matrix)
 {
     m_wMatData.World = matrix;
-    return true;
-}
-
-//-------------------------------------------
-// ビュー行列を設定
-//-------------------------------------------
-bool RendererImpl::setTransformView(const Matrix& matrix)
-{
-    m_vpMatData.View = matrix;
-    return true;
-}
-
-//-------------------------------------------
-// プロジェクション行列を設定
-//-------------------------------------------
-bool RendererImpl::setTransformProjection(const Matrix& matrix)
-{
-    m_vpMatData.Proj = matrix;
     return true;
 }
 

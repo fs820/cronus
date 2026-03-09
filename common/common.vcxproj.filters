@@ -120,6 +120,12 @@
     <ClInclude Include="model_comp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="render_decal.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="render_string.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sound.cpp">
@@ -189,6 +195,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="model_comp.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="render_decal.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="render_string.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
