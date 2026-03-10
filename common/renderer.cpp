@@ -685,8 +685,10 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
         for (auto& renderComponent : renderComponents)
         {
             if (HasFlag(renderComponent->getRenderQueueMask(), RenderQueueMask::Sky))
+            {
                 setRasMode(renderComponent->getRasMode());
                 renderComponent->render(inter);
+            }
         }
 
         setForwardMode();

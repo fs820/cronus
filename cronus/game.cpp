@@ -100,7 +100,7 @@ void GameScene::onEnter()
     addGameObject(std::move(pPlayer));
 
     // デカールの生成
-    auto pDecal = factory::createDecal(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("decal")), Transform(Vector3(5, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.960f, 1.280f, 1)));
+    auto pDecal = factory::createDecal(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("decal")), Transform(Vector3(2, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.960f, 2.0f, 1.280f)));
     addGameObject(std::move(pDecal));
 }
 
