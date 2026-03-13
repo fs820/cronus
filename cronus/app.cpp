@@ -57,9 +57,12 @@ bool Cronus::onStart()
     unsigned int maxThreads = std::max(1u, hw / 2);
 
     // テクスチャ
-    getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/test__.png");
-    getTextureManager()->registerPath(Hash("ground"), u8"data/TEXTURE/test.png");
+    getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/logo.png");
+    getTextureManager()->registerPath(Hash("ground"), u8"data/TEXTURE/ground.png");
     getTextureManager()->registerPath(Hash("decal"), u8"data/TEXTURE/decal.png");
+    getTextureManager()->registerPath(Hash("worldend"), u8"data/TEXTURE/worldend.jpg");
+    getTextureManager()->registerPath(Hash("sky"), u8"data/TEXTURE/sky.jpg");
+    getTextureManager()->registerPath(Hash("board"), u8"data/TEXTURE/board.png");
     getTextureManager()->load(maxThreads);
 
     // モデル

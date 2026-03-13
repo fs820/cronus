@@ -19,8 +19,8 @@ namespace factory
 
         logo->Add<TransformComponent>(transform);
 
-        MeshHandle mesh = meshManager.sprite();
-        Material material{};   // UIはそのままでもいい
+        MeshHandle mesh = meshManager.sprite(); // スプライト
+        Material material{};                    // デフォルトf
 
         logo->Add<MeshRenderComponent>(RenderQueueMask::UI, RasMode::Back, mesh, material, texture);
         return logo;

@@ -5,7 +5,9 @@ class Renderer;
 class Camera
 {
 public:
-    Camera() : m_pivot(Pivot::Target),
+    Camera() : m_minRadius(1.0f),
+        m_maxRadius(10.0f),
+        m_pivot(Pivot::Target),
         m_radius(5.0f),
         m_theta(0.0f),
         m_phi(90.0f),
@@ -39,6 +41,8 @@ public:
 
     void SetPivot(Pivot pivot) { m_pivot = pivot; }
     void SetPivotPosition(const Vector3& position, bool isImmediate = false);
+    void SetMinRadius(float radius) { m_minRadius = radius; }
+    void SetMaxRadius(float radius) { m_maxRadius = radius; }
     void SetRadius(float radius) { m_radius = radius; }
     void SetTheta(float theta) { m_theta = theta; m_targetTheta = theta; }
     void SetPhi(float phi) { m_phi = phi; m_targetPhi = phi; }
@@ -50,10 +54,16 @@ public:
     const Matrix& GetViewMatrix() const { return m_viewMatrix; }
     const Matrix& GetProjectionMatrix() const { return m_projectionMatrix; }
     const Vector3& GetPosition() const { return m_position; }
+    float GetMinRadius() const { return m_minRadius; }
+    float GetMaxRadius() const { return m_maxRadius; }
+    float GetRadius() const { return m_radius; }
     float GetTheta() const { return m_theta; }
     float GetPhi() const { return m_phi; }
 
 private:
+    float m_minRadius; // 最小の距離
+    float m_maxRadius; // 最大の距離
+
     Pivot m_pivot;             // 回転の基準点
     float m_radius;            // 球座標系の半径
     float m_theta;             // 球座標系の角度

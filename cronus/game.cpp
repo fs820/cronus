@@ -18,6 +18,9 @@
 #include "player.h"
 #include "model.h"
 #include "decal.h"
+#include "worldend.h"
+#include "sky.h"
+#include "board.h"
 
 //-----------------------------
 // 
@@ -65,6 +68,8 @@ void GameScene::onEnter()
     Camera camera{};
     camera.SetPivot(Camera::Pivot::Target);
     camera.SetPivotPosition({ 0.0f, 1.5f, 0.0f }, true);
+    camera.SetMinRadius(1.0f);
+    camera.SetMaxRadius(1000.0f);
     camera.SetRadius(5.0f);
     camera.SetTheta(math::degreesToRadians(-90.0f));
     camera.SetPhi(math::degreesToRadians(45.0f));
@@ -92,8 +97,16 @@ void GameScene::onEnter()
     addGameObject(std::move(pLight));
 
     // 地面の生成
-    auto pGround = factory::createGround(*getApp()->getMeshManager(), *getApp()->getTextureManager(), getApp()->getTextureManager()->getTextureHandle(Hash("ground")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, math::degreesToRadians(90.0f), 0.0f), Vector3(10.0f, 10.0f, 1.0f)), 1000.0f);
+    auto pGround = factory::createGround(*getApp()->getMeshManager(), *getApp()->getTextureManager(), getApp()->getTextureManager()->getTextureHandle(Hash("ground")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, math::degreesToRadians(90.0f), 0.0f), Vector3(100.0f, 100.0f, 1.0f)), 1000.0f);
     addGameObject(std::move(pGround));
+
+    // 果ての生成
+    auto pWorldEnd = factory::createWorldEnd(*getApp()->getMeshManager(), *getApp()->getTextureManager(), getApp()->getTextureManager()->getTextureHandle(Hash("worldend")), Transform(Vector3(0, 5, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(100.0f, 10.0f, 100.0f)));
+    addGameObject(std::move(pWorldEnd));
+
+    // 空の生成
+    auto pSky = factory::createSky(*getApp()->getMeshManager(), *getApp()->getTextureManager(), getApp()->getTextureManager()->getTextureHandle(Hash("sky")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1000.0f, 1000.0f, 1000.0f)));
+    addGameObject(std::move(pSky));
 
     // プレイヤーの生成
     auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getRenderer(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 100.0f);
@@ -102,6 +115,10 @@ void GameScene::onEnter()
     // デカールの生成
     auto pDecal = factory::createDecal(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("decal")), Transform(Vector3(2, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.960f, 2.0f, 1.280f)));
     addGameObject(std::move(pDecal));
+
+    // デカールの生成
+    auto pBoard = factory::createBoard(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("board")), Transform(Vector3(0, 0.3305f * 5.0f, 2), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.469f * 5.0f, 0.661f * 5.0f, 1.0f)));
+    addGameObject(std::move(pBoard));
 }
 
 //------------------------
@@ -135,6 +152,9 @@ void GameScene::onUpdate(float elapsedTime, float deltaTime)
     // ImGuiで角度を変える
     if (ImGui::Begin("Game Camera"))
     {
+        float radius = camera.GetRadius(), minRadius = camera.GetMinRadius(), maxRadius = camera.GetMaxRadius();
+        ImGui::SliderFloat("Radius", &radius, minRadius, maxRadius);
+        camera.SetRadius(radius);
         float theta = math::radiansToDegrees(camera.GetTheta());
         ImGui::SliderFloat("Theta", &theta, 0.0f, 360.0f);
         camera.SetTheta(math::degreesToRadians(theta));

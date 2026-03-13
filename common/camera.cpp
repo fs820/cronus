@@ -39,7 +39,7 @@ void Camera::Move(float deltaTime, const Vector2& direction, float speed, float 
     m_theta = math::normalizeTheta(m_theta);
     m_phi = math::normalizePhi(m_phi);
 
-    m_radius = std::clamp(m_radius, 1.0f, 10.0f); // 半径の制限
+    m_radius = std::clamp(m_radius, m_minRadius, m_maxRadius); // 半径の制限
 
     switch (m_pivot)
     {
