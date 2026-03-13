@@ -792,10 +792,12 @@ inline void Vector3::transformCoord(const Matrix& mat)
 inline void Matrix::inverse()
 {
     Matrix inv;
-    if (Inverse(*this, inv)) {
+    if (Inverse(*this, inv))
+    {
         std::memcpy(m, inv.m, sizeof(m));
     }
-    else {
+    else
+    {
         identity();
     }
 }

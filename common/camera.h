@@ -54,6 +54,8 @@ public:
     const Matrix& GetViewMatrix() const { return m_viewMatrix; }
     const Matrix& GetProjectionMatrix() const { return m_projectionMatrix; }
     const Vector3& GetPosition() const { return m_position; }
+    const Vector3& GetTarget() const { return m_target; }
+    const Vector3& GetUp() const { return m_up; }
     float GetMinRadius() const { return m_minRadius; }
     float GetMaxRadius() const { return m_maxRadius; }
     float GetRadius() const { return m_radius; }

@@ -113,11 +113,12 @@ void GameScene::onEnter()
     addGameObject(std::move(pPlayer));
 
     // デカールの生成
-    auto pDecal = factory::createDecal(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("decal")), Transform(Vector3(2, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.960f, 2.0f, 1.280f)));
+    auto pDecal = factory::createDecal(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("decal")), Transform(Vector3(2, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.8f, 2.0f, 0.8f)));
     addGameObject(std::move(pDecal));
 
-    // デカールの生成
-    auto pBoard = factory::createBoard(*getApp()->getMeshManager(), getApp()->getTextureManager()->getTextureHandle(Hash("board")), Transform(Vector3(0, 0.3305f * 5.0f, 2), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.469f * 5.0f, 0.661f * 5.0f, 1.0f)));
+    // ボードの生成
+    auto cameraComp = getGameObjectsOfType<CameraComponent>();
+    auto pBoard = factory::createBoard(*getApp()->getMeshManager(), cameraComp[0]->get(), getApp()->getTextureManager()->getTextureHandle(Hash("board")), Transform(Vector3(0, 0.4f * 5.0f, 2), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.8f * 5.0f, 0.8f * 5.0f, 1.0f)));
     addGameObject(std::move(pBoard));
 }
 

@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="billboard_comp.h" />
     <ClInclude Include="binary_stream.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="camera_comp.h" />
@@ -199,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="billboard_comp.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="input.cpp" />
