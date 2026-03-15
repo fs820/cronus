@@ -9,6 +9,7 @@
 #include "log.h"
 #include "gui.h"
 #include "json_loader.h"
+#include "window.h"
 
 namespace
 {
@@ -214,10 +215,14 @@ namespace
     // 文字列からアクションコードへのマッピング
     const std::unordered_map<std::string_view, ActionCode> stringToActionCode
     {
-        { "Up", ActionCode::Up },
-        { "Down", ActionCode::Down },
-        { "Left", ActionCode::Left },
-        { "Right", ActionCode::Right },
+        { "MoveForward", ActionCode::MoveForward },
+        { "MoveBackward", ActionCode::MoveBackward },
+        { "MoveLeft", ActionCode::MoveLeft },
+        { "MoveRight", ActionCode::MoveRight },
+        { "LookUp", ActionCode::LookUp },
+        { "LookDown", ActionCode::LookDown },
+        { "LookLeft", ActionCode::LookLeft },
+        { "LookRight", ActionCode::LookRight },
         { "Jump", ActionCode::Jump },
         { "Attack", ActionCode::Attack }
     };
@@ -228,6 +233,11 @@ namespace
 // 入力クラス
 //
 //--------------------------------------
+
+Input::Input(Window& window) : m_pWindow{}, m_deadZone(DEFAULT_DEAD_ZONE), m_triggerThreshold(DEFAULT_TRIGGER_THRESHOLD)
+{
+    m_pWindow = window.getWindow();
+}
 
 //-------------------------
 // コンフィグの読み込み
@@ -344,8 +354,7 @@ void Input::update()
     }
 
     // マウス
-    m_mouse.relX = 0.0f; // 相対X座標をリセット
-    m_mouse.relY = 0.0f; // 相対Y座標をリセット
+    m_mouse.relPos.zero(); // 相対座標をリセット
     m_mouse.previousButtonState = m_mouse.currentButtonState; // 前回の状態を保存
     if (!io.WantCaptureMouse)
     {
@@ -359,7 +368,7 @@ void Input::update()
             spdlog::trace("Mouse Button: {}, State: {}", static_cast<int>(button), m_mouse.currentButtonState[button]);
         }
     }
-    spdlog::trace("Mouse Position: ({}, {}), Relative Movement: ({}, {})", m_mouse.x, m_mouse.y, m_mouse.relX, m_mouse.relY);
+    spdlog::trace("Mouse Position: ({}, {}), Relative Movement: ({}, {})", m_mouse.pos.x, m_mouse.pos.y, m_mouse.relPos.x, m_mouse.relPos.y);
 
     for (Gamepad& gamepad : m_gamepads)
     {
@@ -380,48 +389,48 @@ void Input::update()
         if (rawX < 0)
         {
             // 負の値は 32768.0f で割る
-            gamepad.leftStickX = static_cast<float>(rawX) / 32768.0f;
+            gamepad.leftStick.x = static_cast<float>(rawX) / 32768.0f;
         }
         else
         {
             // 正の値は 32767.0f で割る
-            gamepad.leftStickX = static_cast<float>(rawX) / 32767.0f;
+            gamepad.leftStick.x = static_cast<float>(rawX) / 32767.0f;
         }
         if (rawY < 0)
         {
             // 負の値は 32768.0f で割る
-            gamepad.leftStickY = static_cast<float>(rawY) / 32768.0f;
+            gamepad.leftStick.y = static_cast<float>(rawY) / 32768.0f;
         }
         else
         {
             // 正の値は 32767.0f で割る
-            gamepad.leftStickY = static_cast<float>(rawY) / 32767.0f;
+            gamepad.leftStick.y = static_cast<float>(rawY) / 32767.0f;
         }
-        if (std::abs(gamepad.leftStickX) < m_deadZone) gamepad.leftStickX = 0.0f; // デッドゾーンを適用
+        if (gamepad.leftStick.length() < m_deadZone) gamepad.leftStick.zero(); // デッドゾーンを適用
         rawX = SDL_GetGamepadAxis(gamepad.device, SDL_GAMEPAD_AXIS_RIGHTX);
         rawY = SDL_GetGamepadAxis(gamepad.device, SDL_GAMEPAD_AXIS_RIGHTY);
         if (rawX < 0)
         {
             // 負の値は 32768.0f で割る
-            gamepad.rightStickX = static_cast<float>(rawX) / 32768.0f;
+            gamepad.rightStick.x = static_cast<float>(rawX) / 32768.0f;
         }
         else
         {
             // 正の値は 32767.0f で割る
-            gamepad.rightStickX = static_cast<float>(rawX) / 32767.0f;
+            gamepad.rightStick.x = static_cast<float>(rawX) / 32767.0f;
         }
         if (rawY < 0)
         {
             // 負の値は 32768.0f で割る
-            gamepad.rightStickY = static_cast<float>(rawY) / 32768.0f;
+            gamepad.rightStick.y = static_cast<float>(rawY) / 32768.0f;
         }
         else
         {
             // 正の値は 32767.0f で割る
-            gamepad.rightStickY = static_cast<float>(rawY) / 32767.0f;
+            gamepad.rightStick.y = static_cast<float>(rawY) / 32767.0f;
         }
-        if (std::abs(gamepad.rightStickX) < m_deadZone) gamepad.rightStickX = 0.0f; // デッドゾーンを適用
-        spdlog::trace("Gamepad Left Stick: ({}, {}), Right Stick: ({}, {})", gamepad.leftStickX, gamepad.leftStickY, gamepad.rightStickX, gamepad.rightStickY);
+        if (gamepad.rightStick.length() < m_deadZone) gamepad.rightStick.zero(); // デッドゾーンを適用
+        spdlog::trace("Gamepad Left Stick: ({}, {}), Right Stick: ({}, {})", gamepad.leftStick.x, gamepad.leftStick.y, gamepad.rightStick.x, gamepad.rightStick.y);
 
         // トリガー
         rawX = SDL_GetGamepadAxis(gamepad.device, SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
@@ -471,19 +480,19 @@ bool Input::handleEvent(SDL_Event* event)
     if (event->type == SDL_EVENT_MOUSE_MOTION)
     {
         // 絶対座標を更新 (UIなどで使う用)
-        m_mouse.x = event->motion.x;
-        m_mouse.y = event->motion.y;
+        m_mouse.pos.x = event->motion.x;
+        m_mouse.pos.y = event->motion.y;
 
         // 移動量を蓄積 (カメラ操作などで使う用)
-        m_mouse.relX += event->motion.xrel;
-        m_mouse.relY += event->motion.yrel;
+        m_mouse.relPos.x += event->motion.xrel;
+        m_mouse.relPos.y += event->motion.yrel;
     }
 
     // マウスホイール
     if (event->type == SDL_EVENT_MOUSE_WHEEL)
     {
-        m_mouse.wheelX += event->wheel.x;
-        m_mouse.wheelY += event->wheel.y;
+        m_mouse.wheel.x += event->wheel.x;
+        m_mouse.wheel.y += event->wheel.y;
     }
 
     // コントローラーの接続
@@ -656,6 +665,157 @@ bool Input::isActionDown(ActionCode action, size_t id) const
     GamepadButtonCode gamepadButton = config.first;
 
     return isGamepadButtonDown(gamepadButton, id);
+}
+
+//-------------------
+// 抽象軸
+//-------------------
+Vector2 Input::getAxis2D(ActionCode action)
+{
+    switch (action)
+    {
+    case ActionCode::Move:
+    {
+        // コントローラー
+        Vector2 stick = getGamePadLeftStickValue();
+        if (stick.length() >= 0.01f)
+        {
+            stick.y = -stick.y;
+            stick.normalize();
+            return stick;
+        }
+
+        // キーボード
+        bool forward = isActionDown(ActionCode::MoveForward),
+            backward = isActionDown(ActionCode::MoveBackward),
+            left = isActionDown(ActionCode::MoveLeft),
+            right = isActionDown(ActionCode::MoveRight);
+        Vector2 axis{};
+        if (right) axis.x = 1.0f;
+        if (left) axis.x = -1.0f;
+        if (backward) axis.y = 1.0f;
+        if (forward) axis.y = -1.0f;
+        axis.normalize();
+        return axis;
+    }
+    case ActionCode::Look:
+    {
+        // コントローラー
+        Vector2 stick = getGamePadRightStickValue();
+        if (stick.length() >= 0.01f)
+        {
+            stick.y = -stick.y;
+            stick.normalize();
+            return stick;
+        }
+
+        // マウス
+        Vector2 mouse = getMouseRelative();
+        if (mouse.length() >= 0.01f)
+        {
+            mouse.y = -mouse.y;
+            mouse.normalize();
+            return mouse;
+        }
+
+        // キーボード
+        bool up = isActionDown(ActionCode::LookUp),
+            down = isActionDown(ActionCode::LookDown),
+            left = isActionDown(ActionCode::LookLeft),
+            right = isActionDown(ActionCode::LookRight);
+        Vector2 axis{};
+        if (right) axis.x = 1.0f;
+        if (left) axis.x = -1.0f;
+        if (down) axis.y = 1.0f;
+        if (up) axis.y = -1.0f;
+        axis.normalize();
+        return axis;
+    }
+    default:
+        spdlog::warn("ActionCode:{} getAxis2Dに対応するActionではありません");
+        return Vector2::Zero();
+    }
+}
+float Input::getAxis1D(ActionCode action)
+{
+    switch (action)
+    {
+    case ActionCode::Zoom:
+    {
+        Vector2 wheel = getMouseWheel();
+        return wheel.y;
+    }
+    default:
+        spdlog::warn("ActionCode:{} getAxis1Dに対応するActionではありません");
+        return 0.0f;
+    }
+}
+
+//----------------------
+// 具体的なアナログ入力
+//-----------------------
+Vector2 Input::getGamePadLeftStickValue(size_t id)
+{
+    if (m_gamepads.empty()) return Vector2::Zero();
+    if (id >= m_gamepads.size()) return Vector2::Zero();
+    const Gamepad& gamepad = m_gamepads[id];
+    return gamepad.leftStick;
+}
+Vector2 Input::getGamePadRightStickValue(size_t id)
+{
+    if (m_gamepads.empty()) return Vector2::Zero();
+    if (id >= m_gamepads.size()) return Vector2::Zero();
+    const Gamepad& gamepad = m_gamepads[id];
+    return gamepad.rightStick;
+}
+float Input::getGamePadLeftTriggerValue(size_t id)
+{
+    if (m_gamepads.empty()) return 0.0f;
+    if (id >= m_gamepads.size()) return 0.0f;
+    const Gamepad& gamepad = m_gamepads[id];
+    return gamepad.leftTrigger;
+}
+float Input::getGamePadRightTriggerValue(size_t id)
+{
+    if (m_gamepads.empty()) return 0.0f;
+    if (id >= m_gamepads.size()) return 0.0f;
+    const Gamepad& gamepad = m_gamepads[id];
+    return gamepad.rightTrigger;
+}
+Vector2 Input::getMousePosition()
+{
+    return m_mouse.pos;
+}
+Vector2 Input::getMouseRelative()
+{
+    return m_mouse.relPos;
+}
+Vector2 Input::getMouseWheel()
+{
+    return m_mouse.wheel;
+}
+
+//----------------------------------------------------------------------------------------------------
+// マウスを移動量モードにする (マウスが非表示になりウィンドウに固定される) (視点の回転などに使う)
+//----------------------------------------------------------------------------------------------------
+void Input::setRelativeMouseMode(bool enable)
+{
+    if (m_pWindow != nullptr)
+    {
+        SDL_SetWindowRelativeMouseMode(m_pWindow, enable);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+// マウスが移動量モードかを確認する
+//----------------------------------------------------------------------------------------------------
+bool Input::getRelativeMouseMode()
+{
+    if (m_pWindow != nullptr)
+    {
+        return SDL_GetWindowRelativeMouseMode(m_pWindow);
+    }
+    return false;
 }
 
 //-------------------------

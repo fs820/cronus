@@ -19,6 +19,7 @@ class SoundManager;
 class EventDispatcher;
 class SceneManager;
 
+constexpr const char* INPUT_CONFIG_PATH = "data/input_config.json";
 constexpr const char* DEFAULT_WINDOW_TITLE = "アプリケーション";
 constexpr int DEFAULT_WINDOW_WIDTH = 1920;
 constexpr int DEFAULT_WINDOW_HEIGHT = 1080;

@@ -8,7 +8,10 @@
 #include <vector>
 #include <unordered_map>
 #include <filesystem>
+#include "math_types.h"
 
+class Window;
+struct SDL_Window;
 union SDL_Event;
 struct SDL_Gamepad;
 
@@ -54,7 +57,7 @@ enum class GamepadButtonCode : unsigned char
 //-------------------------
 enum class ActionCode : unsigned char
 {
-    Up, Down, Left, Right, Jump, Attack, Count
+    MoveForward, MoveBackward, MoveLeft, MoveRight, LookUp, LookDown, LookLeft, LookRight, Jump, Attack, Move, Look, Zoom, Count
 };
 
 //-------------------------
@@ -76,14 +79,11 @@ struct Mouse
 {
     std::unordered_map<MouseButtonCode, bool> currentButtonState;  // 現在のボタン状態
     std::unordered_map<MouseButtonCode, bool> previousButtonState; // 前回のボタン状態
-    float x;                                                       // X座標
-    float y;                                                       // Y座標
-    float relX;                                                    // 相対X座標
-    float relY;                                                    // 相対Y座標
-    float wheelX;                                                  // ホイールの水平スクロール量
-    float wheelY;                                                  // ホイールの垂直スクロール量
+    Vector2 pos;                                                   // 座標
+    Vector2 relPos;                                                // 相対座標
+    Vector2 wheel;                                                 // ホイールのスクロール量
 
-    Mouse() : x(0.0f), y(0.0f), relX(0.0f), relY(0.0f), wheelX(0.0f), wheelY(0.0f) {}
+    Mouse() : currentButtonState{}, previousButtonState{}, pos{}, relPos{}, wheel{} {}
     ~Mouse() = default;
 };
 
@@ -96,14 +96,12 @@ struct Gamepad
 
     std::unordered_map<GamepadButtonCode, bool> currentButtonState;  // 現在のボタン状態
     std::unordered_map<GamepadButtonCode, bool> previousButtonState; // 前回のボタン状態
-    float leftStickX;                                                // 左スティックのX軸
-    float leftStickY;                                                // 左スティックのY軸
-    float rightStickX;                                               // 右スティックのX軸
-    float rightStickY;                                               // 右スティックのY軸
+    Vector2 leftStick;                                               // 左スティックのX軸
+    Vector2 rightStick;                                              // 右スティックのX軸
     float leftTrigger;                                               // 左トリガーの値
     float rightTrigger;                                              // 右トリガーの値
 
-    Gamepad(SDL_Gamepad* device) : device(device), leftStickX(0.0f), leftStickY(0.0f), rightStickX(0.0f), rightStickY(0.0f), leftTrigger(0.0f), rightTrigger(0.0f) {}
+    Gamepad(SDL_Gamepad* device) : device(device), currentButtonState{}, previousButtonState{}, leftStick{}, rightStick{}, leftTrigger(0.0f), rightTrigger(0.0f) {}
     ~Gamepad() = default;
 };
 
@@ -115,7 +113,7 @@ struct Gamepad
 class Input
 {
 public:
-    Input() : m_deadZone(DEFAULT_DEAD_ZONE), m_triggerThreshold(DEFAULT_TRIGGER_THRESHOLD) {}
+    Input(Window& window);
     ~Input() = default;
 
     void loadConfig(std::filesystem::path configFile);
@@ -139,12 +137,28 @@ public:
     bool isActionReleased(ActionCode action, size_t id = 0u) const;
     bool isActionDown(ActionCode action, size_t id = 0u) const;
 
+    Vector2 getAxis2D(ActionCode action);
+    float getAxis1D(ActionCode action);
+
+    Vector2 getGamePadLeftStickValue(size_t id = 0u);
+    Vector2 getGamePadRightStickValue(size_t id = 0u);
+    float getGamePadLeftTriggerValue(size_t id = 0u);
+    float getGamePadRightTriggerValue(size_t id = 0u);
+    Vector2 getMousePosition();
+    Vector2 getMouseRelative();
+    Vector2 getMouseWheel();
+
+    bool getRelativeMouseMode();
+    void setRelativeMouseMode(bool enable);
+
     void setDeadZone(float deadZone) { m_deadZone = deadZone; }
     void setTriggerThreshold(float triggerThreshold) { m_triggerThreshold = triggerThreshold; }
 
     void swapGamepad(size_t srcId, size_t destId);
 
 private:
+    SDL_Window* m_pWindow; // ウインドウへのポインタ
+
     std::unordered_map<ActionCode, KeyCode> m_actionKeyConfig;                                  // アクションとキーのバインディング
     std::unordered_map<ActionCode, MouseButtonCode> m_actionMouseConfig;                        // アクションとマウスボタンのバインディング
     std::unordered_map<ActionCode, std::pair<GamepadButtonCode, size_t>> m_actionGamepadConfig; // アクションとゲームパッドボタンのバインディング

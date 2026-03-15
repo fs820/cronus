@@ -12,6 +12,7 @@
 #include "texture.h"
 #include "renderer.h"
 #include "render_string.h"
+#include "input.h"
 
 //-----------------------------
 // 
@@ -25,6 +26,10 @@
 void TitleScene::onEnter()
 {
     auto pRederer = getApp()->getRenderer(); // レンダラー
+    auto pInput = getApp()->getInput();      // インプット
+
+    // マウスを通常モードにする (マウスが表示される)
+    pInput->setRelativeMouseMode(false);
 
     // アンチエイリアスとブルームを行う
     pRederer->setPostProcessShaderMask(PostProcessShaderMask::FXAA | PostProcessShaderMask::Bloom);

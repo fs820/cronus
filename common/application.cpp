@@ -51,8 +51,8 @@ bool Application::init(int argc, char* argv[])
     m_pPhysicsManager->init();
 
     // 入力
-    m_pInput = std::make_unique<Input>();
-    m_pInput->loadConfig("data/input_config.json");
+    m_pInput = std::make_unique<Input>(*m_pWindow.get());
+    m_pInput->loadConfig(INPUT_CONFIG_PATH);
 
     m_pTextureManager = std::make_unique<TextureManager>();             // テクスチャ
     m_pMeshManager = std::make_unique<MeshManager>(*m_pRenderer.get()); // メッシュ

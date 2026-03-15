@@ -95,6 +95,8 @@ void Cronus::onEnd()
 bool Cronus::onUpdate(float elapsedTime, float deltaTime)
 {
 #ifdef _DEBUG
+    if (getInput()->isKeyPressed(KeyCode::LeftAlt)) getInput()->setRelativeMouseMode(!getInput()->getRelativeMouseMode());
+
     if (ImGui::Begin("Time")) // ウィンドウ開始
     {
         ImGui::Text("Elapsed Time: %.3f sec", elapsedTime);

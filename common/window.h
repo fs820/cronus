@@ -8,6 +8,7 @@
 
 class Renderer;
 class Window;
+class  Input;
 
 namespace gui
 {
@@ -50,12 +51,12 @@ public:
     void setSize(int width, int height);
     void setFullscreen(bool fullscreen);
     void setCursorVisible(bool visible);
-    void setMouseRelMode(bool rel);
 
     void* getNativeWindow() const { return m_pNativeWindow; }
 
 private:
-    // ↓ friend Gui
+    // ↓ friend
+    friend class Input;
     friend void gui::init(const Window& window, const Renderer& renderer);
     SDL_Window* getWindow() const;
     // ↑

@@ -21,6 +21,7 @@
 #include "worldend.h"
 #include "sky.h"
 #include "board.h"
+#include "input.h"
 
 //-----------------------------
 // 
@@ -33,8 +34,12 @@
 //------------------------
 void GameScene::onEnter()
 {
-    auto pApp = getApp();                         // アプリケーション
-    auto pRenderer = pApp->getRenderer();         // レンダラー
+    auto pApp = getApp();                    // アプリケーション
+    auto pRenderer = pApp->getRenderer();    // レンダラー
+    auto pInput = getApp()->getInput();      // インプット
+
+    // マウスを移動量モードにする (マウスが非表示になりウィンドウに固定される)
+    pInput->setRelativeMouseMode(true);
 
     // アンチエイリアスとブルームを行う
     pRenderer->setPostProcessShaderMask(PostProcessShaderMask::FXAA | PostProcessShaderMask::Bloom);
