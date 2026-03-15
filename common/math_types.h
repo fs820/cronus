@@ -49,7 +49,7 @@ struct Vector2
     void normalize()
     {
         float len = length();
-        if (len != 0.0f) { x /= len; y /= len; }
+        if (len > 0.0f) { x /= len; y /= len; }
     }
 
     static Vector2 Zero() { return Vector2(0.0f, 0.0f); }

@@ -347,14 +347,14 @@ void Input::update()
         for (size_t count = 0; count < size_t(KeyCode::Count); ++count)
         {
             KeyCode key = KeyCode(count);
-            m_keyboard.currentKeyState.try_emplace(key, false);
-            m_keyboard.currentKeyState[key] = keyboardState[keyCodeToScancode.at(key)];
-            spdlog::trace("Key: {}, State: {}", static_cast<int>(key), m_keyboard.currentKeyState[key]);
+            m_keyboard.currentKeyState[static_cast<size_t>(key)] = keyboardState[keyCodeToScancode.at(key)];
+            spdlog::trace("Key: {}, State: {}", static_cast<int>(key), m_keyboard.currentKeyState[static_cast<size_t>(key)]);
         }
     }
 
     // マウス
     m_mouse.relPos.zero(); // 相対座標をリセット
+    m_mouse.wheel.zero();  // ホイールをリセット
     m_mouse.previousButtonState = m_mouse.currentButtonState; // 前回の状態を保存
     if (!io.WantCaptureMouse)
     {
@@ -363,24 +363,24 @@ void Input::update()
         for (size_t count = 0; count < size_t(MouseButtonCode::Count); ++count)
         {
             MouseButtonCode button = MouseButtonCode(count);
-            m_mouse.currentButtonState.try_emplace(button, false);
-            m_mouse.currentButtonState[button] = mouseState & SDL_BUTTON_MASK(mouseButtonCodeToFlag.at(button));
-            spdlog::trace("Mouse Button: {}, State: {}", static_cast<int>(button), m_mouse.currentButtonState[button]);
+            m_mouse.currentButtonState[static_cast<size_t>(button)] = mouseState & SDL_BUTTON_MASK(mouseButtonCodeToFlag.at(button));
+            spdlog::trace("Mouse Button: {}, State: {}", static_cast<int>(button), m_mouse.currentButtonState[static_cast<size_t>(button)]);
         }
     }
     spdlog::trace("Mouse Position: ({}, {}), Relative Movement: ({}, {})", m_mouse.pos.x, m_mouse.pos.y, m_mouse.relPos.x, m_mouse.relPos.y);
 
     for (Gamepad& gamepad : m_gamepads)
     {
+        gamepad.previousButtonState = gamepad.currentButtonState; // 前回の状態を保存
+
         // ボタン
         for (size_t count = 0; count < size_t(GamepadButtonCode::Count); ++count)
         {
             GamepadButtonCode button = GamepadButtonCode(count);
             if (gamepadButtonCodeToButton.at(button) == SDL_GAMEPAD_BUTTON_INVALID) continue;
 
-            gamepad.currentButtonState.try_emplace(button, false);
-            gamepad.currentButtonState[button] = SDL_GetGamepadButton(gamepad.device, gamepadButtonCodeToButton.at(button));
-            spdlog::trace("Gamepad Button: {}, State: {}", static_cast<int>(button), gamepad.currentButtonState[button]);
+            gamepad.currentButtonState[static_cast<size_t>(button)] = SDL_GetGamepadButton(gamepad.device, gamepadButtonCodeToButton.at(button));
+            spdlog::trace("Gamepad Button: {}, State: {}", static_cast<int>(button), gamepad.currentButtonState[static_cast<size_t>(button)]);
         }
 
         // スティック
@@ -457,16 +457,8 @@ void Input::update()
         }
 
         // トリガーの状態を更新
-        if (gamepad.leftTrigger >= m_triggerThreshold)
-        {
-            gamepad.currentButtonState.try_emplace(GamepadButtonCode::LeftTrigger, false);
-            gamepad.currentButtonState[GamepadButtonCode::LeftTrigger] = true;
-        }
-        if (gamepad.rightTrigger >= m_triggerThreshold)
-        {
-            gamepad.currentButtonState.try_emplace(GamepadButtonCode::RightTrigger, false);
-            gamepad.currentButtonState[GamepadButtonCode::RightTrigger] = true;
-        }
+        gamepad.currentButtonState[static_cast<size_t>(GamepadButtonCode::LeftTrigger)] = (gamepad.leftTrigger >= m_triggerThreshold);
+        gamepad.currentButtonState[static_cast<size_t>(GamepadButtonCode::RightTrigger)] = (gamepad.rightTrigger >= m_triggerThreshold);
         spdlog::trace("Gamepad Left Trigger: {}, Right Trigger: {}", gamepad.leftTrigger, gamepad.rightTrigger);
     }
 }
@@ -532,39 +524,27 @@ bool Input::handleEvent(SDL_Event* event)
 //-------------------------
 bool Input::isKeyPressed(KeyCode key) const
 {
-    if (!m_keyboard.currentKeyState.contains(key) || !m_keyboard.previousKeyState.contains(key)) return false;
-
-    return m_keyboard.currentKeyState.at(key) && !m_keyboard.previousKeyState.at(key);
+    return m_keyboard.currentKeyState.at(static_cast<size_t>(key)) && !m_keyboard.previousKeyState.at(static_cast<size_t>(key));
 }
 bool Input::isKeyReleased(KeyCode key) const
 {
-    if (!m_keyboard.currentKeyState.contains(key) || !m_keyboard.previousKeyState.contains(key)) return false;
-
-    return !m_keyboard.currentKeyState.at(key) && m_keyboard.previousKeyState.at(key);
+    return !m_keyboard.currentKeyState.at(static_cast<size_t>(key)) && m_keyboard.previousKeyState.at(static_cast<size_t>(key));
 }
 bool Input::isKeyDown(KeyCode key) const
 {
-    if (!m_keyboard.currentKeyState.contains(key)) return false;
-
-    return m_keyboard.currentKeyState.at(key);
+    return m_keyboard.currentKeyState.at(static_cast<size_t>(key));
 }
 bool Input::isMouseButtonPressed(MouseButtonCode button) const
 {
-    if (!m_mouse.currentButtonState.contains(button) || !m_mouse.previousButtonState.contains(button)) return false;
-
-    return m_mouse.currentButtonState.at(button) && !m_mouse.previousButtonState.at(button);
+    return m_mouse.currentButtonState.at(static_cast<size_t>(button)) && !m_mouse.previousButtonState.at(static_cast<size_t>(button));
 }
 bool Input::isMouseButtonReleased(MouseButtonCode button) const
 {
-    if (!m_mouse.currentButtonState.contains(button) || !m_mouse.previousButtonState.contains(button)) return false;
-
-    return !m_mouse.currentButtonState.at(button) && m_mouse.previousButtonState.at(button);
+    return !m_mouse.currentButtonState.at(static_cast<size_t>(button)) && m_mouse.previousButtonState.at(static_cast<size_t>(button));
 }
 bool Input::isMouseButtonDown(MouseButtonCode button) const
 {
-    if (!m_mouse.currentButtonState.contains(button)) return false;
-
-    return m_mouse.currentButtonState.at(button);
+    return m_mouse.currentButtonState.at(static_cast<size_t>(button));
 }
 bool Input::isGamepadButtonPressed(GamepadButtonCode button, size_t id) const
 {
@@ -572,9 +552,7 @@ bool Input::isGamepadButtonPressed(GamepadButtonCode button, size_t id) const
     if (id >= m_gamepads.size()) return false;
 
     const Gamepad& gamepad = m_gamepads[id];
-    if (!gamepad.currentButtonState.contains(button) || !gamepad.previousButtonState.contains(button)) return false;
-
-    return gamepad.currentButtonState.at(button) && !gamepad.previousButtonState.at(button);
+    return gamepad.currentButtonState.at(static_cast<size_t>(button)) && !gamepad.previousButtonState.at(static_cast<size_t>(button));
 
 }
 bool Input::isGamepadButtonReleased(GamepadButtonCode button, size_t id) const
@@ -583,9 +561,7 @@ bool Input::isGamepadButtonReleased(GamepadButtonCode button, size_t id) const
     if (id >= m_gamepads.size()) return false;
 
     const Gamepad& gamepad = m_gamepads[id];
-    if (!gamepad.currentButtonState.contains(button) || !gamepad.previousButtonState.contains(button)) return false;
-
-    return !gamepad.currentButtonState.at(button) && gamepad.previousButtonState.at(button);
+    return !gamepad.currentButtonState.at(static_cast<size_t>(button)) && gamepad.previousButtonState.at(static_cast<size_t>(button));
 }
 bool Input::isGamepadButtonDown(GamepadButtonCode button, size_t id) const
 {
@@ -593,9 +569,7 @@ bool Input::isGamepadButtonDown(GamepadButtonCode button, size_t id) const
     if (id >= m_gamepads.size()) return false;
 
     const Gamepad& gamepad = m_gamepads[id];
-    if (!gamepad.currentButtonState.contains(button)) return false;
-
-    return gamepad.currentButtonState.at(button);
+    return gamepad.currentButtonState.at(static_cast<size_t>(button));
 }
 bool Input::isActionPressed(ActionCode action, size_t id) const
 {
@@ -670,7 +644,7 @@ bool Input::isActionDown(ActionCode action, size_t id) const
 //-------------------
 // 抽象軸
 //-------------------
-Vector2 Input::getAxis2D(ActionCode action)
+Vector2 Input::getAxis2D(ActionCode action) const
 {
     switch (action)
     {
@@ -691,10 +665,10 @@ Vector2 Input::getAxis2D(ActionCode action)
             left = isActionDown(ActionCode::MoveLeft),
             right = isActionDown(ActionCode::MoveRight);
         Vector2 axis{};
-        if (right) axis.x = 1.0f;
-        if (left) axis.x = -1.0f;
-        if (backward) axis.y = 1.0f;
-        if (forward) axis.y = -1.0f;
+        if (right) axis.x += 1.0f;
+        if (left) axis.x += -1.0f;
+        if (backward) axis.y += 1.0f;
+        if (forward) axis.y += -1.0f;
         axis.normalize();
         return axis;
     }
@@ -724,19 +698,19 @@ Vector2 Input::getAxis2D(ActionCode action)
             left = isActionDown(ActionCode::LookLeft),
             right = isActionDown(ActionCode::LookRight);
         Vector2 axis{};
-        if (right) axis.x = 1.0f;
-        if (left) axis.x = -1.0f;
-        if (down) axis.y = 1.0f;
-        if (up) axis.y = -1.0f;
+        if (right) axis.x += 1.0f;
+        if (left) axis.x += -1.0f;
+        if (down) axis.y += 1.0f;
+        if (up) axis.y += -1.0f;
         axis.normalize();
         return axis;
     }
     default:
-        spdlog::warn("ActionCode:{} getAxis2Dに対応するActionではありません");
+        spdlog::warn("ActionCode:{} getAxis2Dに対応するActionではありません", static_cast<int>(action));
         return Vector2::Zero();
     }
 }
-float Input::getAxis1D(ActionCode action)
+float Input::getAxis1D(ActionCode action) const
 {
     switch (action)
     {
@@ -746,7 +720,7 @@ float Input::getAxis1D(ActionCode action)
         return wheel.y;
     }
     default:
-        spdlog::warn("ActionCode:{} getAxis1Dに対応するActionではありません");
+        spdlog::warn("ActionCode:{} getAxis1Dに対応するActionではありません", static_cast<int>(action));
         return 0.0f;
     }
 }
@@ -754,43 +728,43 @@ float Input::getAxis1D(ActionCode action)
 //----------------------
 // 具体的なアナログ入力
 //-----------------------
-Vector2 Input::getGamePadLeftStickValue(size_t id)
+Vector2 Input::getGamePadLeftStickValue(size_t id) const
 {
     if (m_gamepads.empty()) return Vector2::Zero();
     if (id >= m_gamepads.size()) return Vector2::Zero();
     const Gamepad& gamepad = m_gamepads[id];
     return gamepad.leftStick;
 }
-Vector2 Input::getGamePadRightStickValue(size_t id)
+Vector2 Input::getGamePadRightStickValue(size_t id) const
 {
     if (m_gamepads.empty()) return Vector2::Zero();
     if (id >= m_gamepads.size()) return Vector2::Zero();
     const Gamepad& gamepad = m_gamepads[id];
     return gamepad.rightStick;
 }
-float Input::getGamePadLeftTriggerValue(size_t id)
+float Input::getGamePadLeftTriggerValue(size_t id) const
 {
     if (m_gamepads.empty()) return 0.0f;
     if (id >= m_gamepads.size()) return 0.0f;
     const Gamepad& gamepad = m_gamepads[id];
     return gamepad.leftTrigger;
 }
-float Input::getGamePadRightTriggerValue(size_t id)
+float Input::getGamePadRightTriggerValue(size_t id) const
 {
     if (m_gamepads.empty()) return 0.0f;
     if (id >= m_gamepads.size()) return 0.0f;
     const Gamepad& gamepad = m_gamepads[id];
     return gamepad.rightTrigger;
 }
-Vector2 Input::getMousePosition()
+Vector2 Input::getMousePosition() const
 {
     return m_mouse.pos;
 }
-Vector2 Input::getMouseRelative()
+Vector2 Input::getMouseRelative() const
 {
     return m_mouse.relPos;
 }
-Vector2 Input::getMouseWheel()
+Vector2 Input::getMouseWheel() const
 {
     return m_mouse.wheel;
 }
@@ -809,7 +783,7 @@ void Input::setRelativeMouseMode(bool enable)
 //----------------------------------------------------------------------------------------------------
 // マウスが移動量モードかを確認する
 //----------------------------------------------------------------------------------------------------
-bool Input::getRelativeMouseMode()
+bool Input::getRelativeMouseMode() const
 {
     if (m_pWindow != nullptr)
     {
@@ -823,6 +797,6 @@ bool Input::getRelativeMouseMode()
 //-------------------------
 void Input::swapGamepad(size_t srcId, size_t destId)
 {
-    if (m_gamepads.size() >= srcId || m_gamepads.size() >= destId) return;
+    if (m_gamepads.size() <= srcId || m_gamepads.size() <= destId) return;
     std::swap(m_gamepads[srcId], m_gamepads[destId]);
 }

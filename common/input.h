@@ -65,8 +65,8 @@ enum class ActionCode : unsigned char
 //-------------------------
 struct Keyboard
 {
-    std::unordered_map<KeyCode, bool> currentKeyState;  // 現在のキー状態
-    std::unordered_map<KeyCode, bool> previousKeyState; // 前回のキー状態
+    std::array<bool, static_cast<size_t>(KeyCode::Count)> currentKeyState;  // 現在のキー状態
+    std::array<bool, static_cast<size_t>(KeyCode::Count)> previousKeyState; // 前回のキー状態
 
     Keyboard() = default;
     ~Keyboard() = default;
@@ -77,8 +77,8 @@ struct Keyboard
 //-------------------------
 struct Mouse
 {
-    std::unordered_map<MouseButtonCode, bool> currentButtonState;  // 現在のボタン状態
-    std::unordered_map<MouseButtonCode, bool> previousButtonState; // 前回のボタン状態
+    std::array<bool, static_cast<size_t>(MouseButtonCode::Count)> currentButtonState;  // 現在のボタン状態
+    std::array<bool, static_cast<size_t>(MouseButtonCode::Count)> previousButtonState; // 前回のボタン状態
     Vector2 pos;                                                   // 座標
     Vector2 relPos;                                                // 相対座標
     Vector2 wheel;                                                 // ホイールのスクロール量
@@ -94,8 +94,8 @@ struct Gamepad
 {
     SDL_Gamepad* device; // デバイス
 
-    std::unordered_map<GamepadButtonCode, bool> currentButtonState;  // 現在のボタン状態
-    std::unordered_map<GamepadButtonCode, bool> previousButtonState; // 前回のボタン状態
+    std::array<bool, static_cast<size_t>(GamepadButtonCode::Count)> currentButtonState;  // 現在のボタン状態
+    std::array<bool, static_cast<size_t>(GamepadButtonCode::Count)> previousButtonState; // 前回のボタン状態
     Vector2 leftStick;                                               // 左スティックのX軸
     Vector2 rightStick;                                              // 右スティックのX軸
     float leftTrigger;                                               // 左トリガーの値
@@ -121,6 +121,11 @@ public:
     void update();
     bool handleEvent(SDL_Event* event);
 
+    void setRelativeMouseMode(bool enable);
+    void setDeadZone(float deadZone) { m_deadZone = deadZone; }
+    void setTriggerThreshold(float triggerThreshold) { m_triggerThreshold = triggerThreshold; }
+    void swapGamepad(size_t srcId, size_t destId);
+
     bool isKeyPressed(KeyCode key) const;
     bool isKeyReleased(KeyCode key) const;
     bool isKeyDown(KeyCode key) const;
@@ -137,24 +142,18 @@ public:
     bool isActionReleased(ActionCode action, size_t id = 0u) const;
     bool isActionDown(ActionCode action, size_t id = 0u) const;
 
-    Vector2 getAxis2D(ActionCode action);
-    float getAxis1D(ActionCode action);
+    Vector2 getAxis2D(ActionCode action) const;
+    float getAxis1D(ActionCode action) const;
 
-    Vector2 getGamePadLeftStickValue(size_t id = 0u);
-    Vector2 getGamePadRightStickValue(size_t id = 0u);
-    float getGamePadLeftTriggerValue(size_t id = 0u);
-    float getGamePadRightTriggerValue(size_t id = 0u);
-    Vector2 getMousePosition();
-    Vector2 getMouseRelative();
-    Vector2 getMouseWheel();
+    Vector2 getGamePadLeftStickValue(size_t id = 0u) const;
+    Vector2 getGamePadRightStickValue(size_t id = 0u) const;
+    float getGamePadLeftTriggerValue(size_t id = 0u) const;
+    float getGamePadRightTriggerValue(size_t id = 0u) const;
+    Vector2 getMousePosition() const;
+    Vector2 getMouseRelative() const;
+    Vector2 getMouseWheel() const;
 
-    bool getRelativeMouseMode();
-    void setRelativeMouseMode(bool enable);
-
-    void setDeadZone(float deadZone) { m_deadZone = deadZone; }
-    void setTriggerThreshold(float triggerThreshold) { m_triggerThreshold = triggerThreshold; }
-
-    void swapGamepad(size_t srcId, size_t destId);
+    bool getRelativeMouseMode() const;
 
 private:
     SDL_Window* m_pWindow; // ウインドウへのポインタ
