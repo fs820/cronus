@@ -121,6 +121,12 @@ bool Application::update()
     // 物理シミュレーション
     m_pPhysicsManager->simulate(deltaTime);
 
+    // シーンの更新
+    m_pSceneManager->lateUpdate(elapsedTime, deltaTime);
+
+    // シーンの整理
+    m_pSceneManager->cleanup();
+
     gui::endFrame(); // Gui終了
     return true;
 }

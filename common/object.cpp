@@ -10,12 +10,12 @@
 //---------------------------------
 // ゲームオブジェクトクラス
 //---------------------------------
-GameObject::~GameObject() { Destroy(); }
+GameObject::~GameObject() { destroy(); }
 
 //-----------------------
 // コンポーネントの開始
 //-----------------------
-bool GameObject::Start()
+bool GameObject::start()
 {
     for (auto& component : m_components)
     {
@@ -30,7 +30,7 @@ bool GameObject::Start()
 //-----------------------
 // コンポーネントの更新
 //-----------------------
-void GameObject::Update(float deltaTime)
+void GameObject::update(float deltaTime)
 {
     for (auto& component : m_components)
     {
@@ -39,9 +39,31 @@ void GameObject::Update(float deltaTime)
 }
 
 //-----------------------
+// コンポーネントの更新
+//-----------------------
+void GameObject::physicsSync()
+{
+    for (auto& component : m_components)
+    {
+        component->physicsSync();
+    }
+}
+
+//-----------------------
+// コンポーネントの更新
+//-----------------------
+void GameObject::lateUpdate(float deltaTime)
+{
+    for (auto& component : m_components)
+    {
+        component->lateUpdate(deltaTime);
+    }
+}
+
+//-----------------------
 // コンポーネントの破棄
 //-----------------------
-void GameObject::Destroy()
+void GameObject::destroy()
 {
     for (auto& component : m_components)
     {

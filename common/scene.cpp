@@ -51,6 +51,30 @@ void SceneManager::update(float elapsedTime, float deltaTime)
     }
 }
 
+//------------------
+// シーンの更新
+//------------------
+void SceneManager::lateUpdate(float elapsedTime, float deltaTime)
+{
+    // シーンの更新
+    if (m_activeScene != nullptr)
+    {
+        m_activeScene->lateUpdate(elapsedTime, deltaTime);
+    }
+}
+
+//------------------
+// シーンの整理
+//------------------
+void SceneManager::cleanup()
+{
+    // シーンの更新
+    if (m_activeScene != nullptr)
+    {
+        m_activeScene->cleanup();
+    }
+}
+
 //---------------------------------------------
 //
 // シーンクラス
@@ -67,7 +91,7 @@ void Scene::update(float elapsedTime, float deltaTime)
     // StartしていないゲームオブジェクトのStartを呼び出す
     for (auto& gameObject : m_noStartObjects)
     {
-        if (!gameObject->Start())
+        if (!gameObject->start())
         {
             gameObject->markForDestroy(); // Startに失敗したゲームオブジェクトは破棄予定にする
         }
@@ -79,17 +103,48 @@ void Scene::update(float elapsedTime, float deltaTime)
     // ゲームオブジェクトの更新
     for (auto& gameObject : m_gameObjects)
     {
-        gameObject->Update(deltaTime);
+        gameObject->update(deltaTime);
     }
+}
 
-    // 破棄予定のゲームオブジェクトを削除
+//------------------
+// 更新
+//------------------
+void Scene::lateUpdate(float elapsedTime, float deltaTime)
+{
+    // 物理シミュレーションの結果を適応する
     for (auto& gameObject : m_gameObjects)
     {
-        if (gameObject->isMarkedForDestroy())
-        {
-            gameObject->Destroy();
-        }
+        gameObject->physicsSync();
     }
+
+    // ゲームオブジェクトの遅延更新
+    for (auto& gameObject : m_gameObjects)
+    {
+        gameObject->lateUpdate(deltaTime);
+    }
+}
+
+//------------------
+// 破棄
+//------------------
+void Scene::cleanup()
+{
+    // 破棄予定のゲームオブジェクトを削除
+    m_gameObjects.erase(
+        std::remove_if(
+            m_gameObjects.begin(),
+            m_gameObjects.end(),
+            [](const std::unique_ptr<GameObject>& obj)
+            {
+                if (obj->isMarkedForDestroy())
+                {
+                    obj->destroy();
+                    return true;
+                }
+                return false;
+            }),
+        m_gameObjects.end());
 }
 
 //------------------

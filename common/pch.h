@@ -109,3 +109,29 @@ constexpr uint64_t Hash(const char8_t* str)
     }
     return h;
 }
+
+//------------------------------
+// swapを使ったvectorの要素削除
+//------------------------------
+template<typename T>
+void swapRemove(std::vector<T>& vec, size_t index)
+{
+    if (index < vec.size())
+    {
+        std::swap(vec[index], vec.back());
+        vec.pop_back();
+    }
+}
+
+//------------------------------
+// swapを使ったvectorの要素削除
+//------------------------------
+template<typename T>
+void swapRemove(std::vector<T>& vec, T obj)
+{
+    if (auto it = std::find(vec.begin(), vec.end(), obj))
+    {
+        std::swap(it, vec.back());
+        vec.pop_back();
+    }
+}

@@ -22,7 +22,7 @@ public:
 
     void setGravity(const Vector3& gravity);
 
-    void addRigidBody(uint64_t id, CollisionShapeType shapeType, Transform offset, bool isTrigger, RigidBodyType bodyType, float mass, CollisionGroup collisionGroup, int collisionMask);
+    void addRigidBody(uint64_t id, CollisionShapeType shapeType, Transform offset, bool isTrigger, RigidBodyType bodyType, float mass, CollisionGroup collisionGroup, CollisionGroup collisionMask);
     void removeRigidBody(uint64_t id);
 
     void addForce(uint64_t id, const Vector3& force, bool isImpulse = false);
@@ -131,7 +131,7 @@ void PhysicsManagerImpl::setGravity(const Vector3& gravity)
 //--------------------------------
 // 剛体の追加
 //--------------------------------
-void PhysicsManagerImpl::addRigidBody(uint64_t id, CollisionShapeType shapeType, Transform offset, bool isTrigger, RigidBodyType bodyType, float mass, CollisionGroup collisionGroup, int collisionMask)
+void PhysicsManagerImpl::addRigidBody(uint64_t id, CollisionShapeType shapeType, Transform offset, bool isTrigger, RigidBodyType bodyType, float mass, CollisionGroup collisionGroup, CollisionGroup collisionMask)
 {
     // 形状の作成
     btCollisionShape* shape{};
@@ -151,7 +151,7 @@ void PhysicsManagerImpl::addRigidBody(uint64_t id, CollisionShapeType shapeType,
         break;
     case CollisionShapeType::Mesh:
         // 未実装
-        break;
+        return;
     }
 
     // 衝突形状マップに追加
@@ -203,7 +203,7 @@ void PhysicsManagerImpl::addRigidBody(uint64_t id, CollisionShapeType shapeType,
     m_rigidBodies.try_emplace(id, body);
 
     // ワールドに追加
-    m_dynamicsWorld->addRigidBody(body, int(collisionGroup), collisionMask);
+    m_dynamicsWorld->addRigidBody(body, static_cast<int>(collisionGroup), static_cast<int>(collisionMask));
 }
 
 //--------------------------------
@@ -442,7 +442,7 @@ void PhysicsManager::setGravity(const Vector3& gravity)
     m_impl->setGravity(gravity);
 }
 
-void PhysicsManager::addRigidBody(uint64_t id, CollisionShapeType shapeType, Transform offset, bool isTrigger, RigidBodyType bodyType, float mass, CollisionGroup collisionGroup, int collisionMask)
+void PhysicsManager::addRigidBody(uint64_t id, CollisionShapeType shapeType, Transform offset, bool isTrigger, RigidBodyType bodyType, float mass, CollisionGroup collisionGroup, CollisionGroup collisionMask)
 {
     m_impl->addRigidBody(id, shapeType, offset, isTrigger, bodyType, mass, collisionGroup, collisionMask);
 }

@@ -43,6 +43,22 @@ enum class CollisionGroup
     Trigger = 1 << 4
 };
 
+// 衝突情報（誰と誰がぶつかったか）
+struct CollisionData
+{
+    uint64_t idA; // ぶつかった物体AのID
+    uint64_t idB; // ぶつかった物体BのID
+};
+
+// レイヒット情報
+struct RayHitInfo
+{
+    bool hasHit;
+    Vector3 hitPoint;
+    Vector3 hitNormal;
+    uint64_t hitBodyID;
+};
+
 inline CollisionGroup operator|(CollisionGroup lhs, CollisionGroup rhs)
 {
     return static_cast<CollisionGroup>(
@@ -88,20 +104,3 @@ inline CollisionGroup operator~(CollisionGroup mask)
         ~static_cast<uint32_t>(mask)
         );
 }
-
-
-// 衝突情報（誰と誰がぶつかったか）
-struct CollisionData
-{
-    uint64_t idA; // ぶつかった物体AのID
-    uint64_t idB; // ぶつかった物体BのID
-};
-
-// レイヒット情報
-struct RayHitInfo
-{
-    bool hasHit;
-    Vector3 hitPoint;
-    Vector3 hitNormal;
-    uint64_t hitBodyID;
-};

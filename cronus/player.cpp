@@ -16,9 +16,7 @@ namespace factory
 {
     std::unique_ptr<GameObject> createPlayer(ModelManager& modelManager, Renderer& renderer, ModelHandle model, Transform transform, float offsetModelScaale)
     {
-        std::unique_ptr<GameObject> player = std::make_unique<GameObject>();
-
-        player->Add<TransformComponent>(transform);
+        std::unique_ptr<GameObject> player = std::make_unique<GameObject>(transform);
 
         // モデル
         Model* pModel = new Model(modelManager, renderer, model);
@@ -26,10 +24,10 @@ namespace factory
         pModel->setScale(offsetModelScaale);
         pModel->setPixelShaderType(PixelShaderType::Toon);
         pModel->setAnimation();
-        auto pModelComp = player->Add<ModelComponent>(pModel);
+        auto pModelComp = player->add<ModelComponent>(pModel);
 
         OutlineData outline = OutlineData{ Color::Black(),0.001f };
-        player->Add<ModelRenderComponent>(RenderQueueMask::Shadow | RenderQueueMask::Geometry | RenderQueueMask::Outline, RasMode::None, pModelComp->get(), outline);
+        player->add<ModelRenderComponent>(RenderQueueMask::Shadow | RenderQueueMask::Geometry | RenderQueueMask::Outline, RasMode::None, pModelComp->get(), outline);
         return player;
     }
 }

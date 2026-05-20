@@ -25,19 +25,8 @@ void ModelRenderComponent::render(Renderer& renderer)
     // ワールド変換の設定
     Transform transform{};
     auto& owner = getOwner();
-    if (owner.Has<TransformComponent>())
-    {
-        auto comps = owner.Get<TransformComponent>();
-        if (comps.size() == 1)
-        {
-            transform = comps[0]->get();
-        }
-    }
-    else
-    {
-        transform.identity();
-        spdlog::warn("MeshRenderComponent: Owner does not have TransformComponent. Using identity transform.");
-    }
+    auto trans = owner.getTransform();
+    transform = trans->get();
     renderer.setTransformWorld(transform.toMatrix());
 
     // アウトライン

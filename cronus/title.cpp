@@ -60,7 +60,7 @@ void TitleScene::onEnter()
 
     // 文字列生成
     auto pString = std::make_unique<GameObject>();
-    pString->Add<StringRenderComponent>("タイトル", Vector2{ 100,100 });
+    pString->add<StringRenderComponent>("タイトル", Vector2{ 100,100 });
     addGameObject(std::move(pString));
 }
 

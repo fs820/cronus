@@ -15,13 +15,11 @@ namespace factory
 {
     std::unique_ptr<GameObject> createDecal(MeshManager meshManager, TextureHandle texture, Transform transform, Color color)
     {
-        std::unique_ptr<GameObject> decal = std::make_unique<GameObject>();
-
-        decal->Add<TransformComponent>(transform);
+        std::unique_ptr<GameObject> decal = std::make_unique<GameObject>(transform);
 
         MeshHandle mesh = meshManager.box();
 
-        decal->Add<DecalRenderComponent>(mesh, texture, color);
+        decal->add<DecalRenderComponent>(mesh, texture, color);
         return decal;
     }
 }

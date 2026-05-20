@@ -22,6 +22,7 @@
 #include "sky.h"
 #include "board.h"
 #include "input.h"
+#include "physics.h"
 
 //-----------------------------
 // 
@@ -34,12 +35,13 @@
 //------------------------
 void GameScene::onEnter()
 {
-    auto pApp = getApp();                    // アプリケーション
-    auto pRenderer = pApp->getRenderer();    // レンダラー
-    auto pInput = getApp()->getInput();      // インプット
+    auto pApp = getApp();                      // アプリケーション
+    auto pRenderer = pApp->getRenderer();      // レンダラー
+    auto pInput = getApp()->getInput();        // インプット
+    auto pPhy = getApp()->getPhysicsManager(); // 物理
 
     // マウスを移動量モードにする (マウスが非表示になりウィンドウに固定される)
-    pInput->setRelativeMouseMode(true);
+    pInput->setRelativeMouseMode(false);
 
     // アンチエイリアスとブルームを行う
     pRenderer->setPostProcessShaderMask(PostProcessShaderMask::FXAA | PostProcessShaderMask::Bloom);
@@ -52,6 +54,9 @@ void GameScene::onEnter()
 
     // 影の描画範囲
     pRenderer->setShadowMapArea(40.0f,40.0f, 0.5f, 100.0f);
+
+    // 重力
+    pPhy->setGravity({ 0,EARTH_GRAVITY,0 });
 
     // 環境光
     BinaryReader reader(AMBIENT_FILE);
@@ -84,7 +89,7 @@ void GameScene::onEnter()
     pRenderer->getScreenSizeMagnification(screenMag);
     camera.SetAspectRatio(DEFAULT_SCREEN_SIZE.x * screenMag.x / DEFAULT_SCREEN_SIZE.y * screenMag.y);
     std::unique_ptr<GameObject> pCamera = std::make_unique<GameObject>();
-    pCamera->Add<CameraComponent>(camera);
+    pCamera->add<CameraComponent>(camera);
     addGameObject(std::move(pCamera));
 
     // ライト
@@ -98,7 +103,7 @@ void GameScene::onEnter()
     light.color = Color::White();
     light.direction = { lightDirVec,0 };
     std::unique_ptr<GameObject> pLight = std::make_unique<GameObject>();
-    pLight->Add<LightComponent>(light, true, distance, lightTelta, lightPhi, targetPos, Vector3{ 0,1,0 });
+    pLight->add<LightComponent>(light, true, distance, lightTelta, lightPhi, targetPos, Vector3{ 0,1,0 });
     addGameObject(std::move(pLight));
 
     // 地面の生成
@@ -114,7 +119,7 @@ void GameScene::onEnter()
     addGameObject(std::move(pSky));
 
     // プレイヤーの生成
-    auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getRenderer(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 100.0f);
+    auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getRenderer(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 1.0f);
     addGameObject(std::move(pPlayer));
 
     // デカールの生成

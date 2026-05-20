@@ -28,6 +28,8 @@ public:
     void addScene(std::string_view sceneName, Scene* scene);
     void changeScene(std::string_view sceneName);
     void update(float elapsedTime, float deltaTime);
+    void lateUpdate(float elapsedTime, float deltaTime);
+    void cleanup();
 
     Scene* getActiveScene() const { return m_activeScene; }
 
@@ -48,7 +50,10 @@ public:
     virtual void onEnter() {}                                  // シーンに入るときの処理
     virtual void onExit() {}                                   // シーンから出るときの処理
 
-    void update(float elapsedTime, float deltaTime); // 更新処理
+    void update(float elapsedTime, float deltaTime);     // 更新処理
+    void lateUpdate(float elapsedTime, float deltaTime); // 更新処理
+    void cleanup();
+
     void addGameObject(std::unique_ptr<GameObject> gameObject);
 
     //-------------------------------------------------------------------
@@ -60,9 +65,9 @@ public:
         std::vector<T*> result;
         for (const auto& gameObject : m_gameObjects)
         {
-            if (gameObject->Has<T>())
+            if (gameObject->has<T>())
             {
-                auto comps = gameObject->Get<T>();
+                auto comps = gameObject->get<T>();
                 result.insert(result.end(), comps.begin(), comps.end());
             }
         }

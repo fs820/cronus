@@ -16,9 +16,7 @@ namespace factory
 {
     std::unique_ptr<GameObject> createWorldEnd(MeshManager& meshManager, const TextureManager& textureManager, TextureHandle texture, Transform transform)
     {
-        std::unique_ptr<GameObject> worldEnd = std::make_unique<GameObject>();
-
-        worldEnd->Add<TransformComponent>(transform);
+        std::unique_ptr<GameObject> worldEnd = std::make_unique<GameObject>(transform);
 
         // テクスチャの登録
         int width{ 100 }, height{ 100 };
@@ -30,7 +28,7 @@ namespace factory
         MeshHandle mesh = meshManager.cylinder(texAspect * widthMag, 1.0f, 64u, true);
         Material material{};
 
-        worldEnd->Add<MeshRenderComponent>(RenderQueueMask::Geometry, RasMode::Back, mesh, material, texture);
+        worldEnd->add<MeshRenderComponent>(RenderQueueMask::Geometry, RasMode::Back, mesh, material, texture);
         return worldEnd;
     }
 }

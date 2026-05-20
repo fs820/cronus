@@ -18,7 +18,7 @@ public:
     ModelComponent(Model* pModel) : m_pModel(pModel) {}
     virtual ~ModelComponent() = default;
 
-    void update(float deltaTime) override;
+    void lateUpdate(float deltaTime) override;
 
     void set(Model* pModel);
     Model* get() const;

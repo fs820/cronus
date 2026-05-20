@@ -15,9 +15,7 @@ namespace factory
 {
     std::unique_ptr<GameObject> createGround(MeshManager& meshManager, const TextureManager& textureManager, TextureHandle texture, Transform transform, float tileMag)
     {
-        std::unique_ptr<GameObject> ground = std::make_unique<GameObject>();
-
-        ground->Add<TransformComponent>(transform);
+        std::unique_ptr<GameObject> ground = std::make_unique<GameObject>(transform);
 
         // テクスチャの登録
         int width{ 100 }, height{ 100 };
@@ -29,7 +27,7 @@ namespace factory
         Material material{};
         material.pixelShaderType = PixelShaderType::Toon;
 
-        ground->Add<MeshRenderComponent>(RenderQueueMask::Geometry, RasMode::Back, mesh, material, texture);
+        ground->add<MeshRenderComponent>(RenderQueueMask::Geometry, RasMode::Back, mesh, material, texture);
         return ground;
     }
 }

@@ -66,7 +66,7 @@ bool Cronus::onStart()
     getTextureManager()->load(maxThreads);
 
     // モデル
-    getModelManager()->registerPath(Hash("player"), u8"data/MODEL/test_m/test_003.vrm");
+    getModelManager()->registerPath(Hash("player"), u8"data/MODEL/test_004/test_.fbx");
     getModelManager()->load(*getRenderer(), *getTextureManager(), maxThreads);
 
     // GPUに送る

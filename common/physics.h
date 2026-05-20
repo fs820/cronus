@@ -22,7 +22,7 @@ public:
     void uninit();
     void simulate(float deltaTime);
 
-    void addRigidBody(uint64_t id, CollisionShapeType shapeType, Transform offset, bool isTrigger, RigidBodyType bodyType, float mass, CollisionGroup collisionGroup, int collisionMask);
+    void addRigidBody(uint64_t id, CollisionShapeType shapeType, Transform offset, bool isTrigger, RigidBodyType bodyType, float mass, CollisionGroup collisionGroup, CollisionGroup collisionMask);
     void removeRigidBody(uint64_t id);
 
     void setGravity(const Vector3& gravity);

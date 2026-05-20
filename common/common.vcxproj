@@ -183,6 +183,7 @@
     <ClInclude Include="object.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="physics.h" />
+    <ClInclude Include="physics_comp.h" />
     <ClInclude Include="physics_types.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="renderer.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="application.cpp" />
     <ClCompile Include="billboard_comp.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="component.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="json_loader.cpp" />
@@ -218,6 +220,7 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="physics.cpp" />
+    <ClCompile Include="physics_comp.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="render_decal.cpp" />
