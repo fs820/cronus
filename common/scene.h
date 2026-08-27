@@ -87,9 +87,9 @@ protected:
 private:
     Application* m_pApp;
 
-    std::vector<std::unique_ptr<GameObject>> m_gameObjects;  // ゲームオブジェクトのリスト
-    std::vector<GameObject*> m_noStartObjects;               // Startしていないゲームオブジェクトのリスト
-
     // 型情報をキーにして、そのコンポーネントのポインタ配列を保持するマップ
     std::unordered_map<std::type_index, std::vector<Component*>> m_componentCaches;
+
+    std::vector<std::unique_ptr<GameObject>> m_gameObjects;  // ゲームオブジェクトのリスト
+    std::vector<GameObject*> m_noStartObjects;               // Startしていないゲームオブジェクトのリスト
 };
