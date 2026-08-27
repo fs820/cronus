@@ -127,7 +127,7 @@ void GameScene::onEnter()
     addGameObject(std::move(pDecal));
 
     // ボードの生成
-    auto cameraComp = getGameObjectsOfType<CameraComponent>();
+    auto cameraComp = getComponentsOfType<CameraComponent>();
     auto pBoard = factory::createBoard(*getApp()->getMeshManager(), cameraComp[0]->get(), getApp()->getTextureManager()->getTextureHandle(Hash("board")), Transform(Vector3(0, 0.4f * 5.0f, 2), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.8f * 5.0f, 0.8f * 5.0f, 1.0f)));
     addGameObject(std::move(pBoard));
 }
@@ -144,14 +144,14 @@ void GameScene::onExit()
 //------------------------
 void GameScene::onUpdate(float elapsedTime, float deltaTime)
 {
-    auto pCamera = getGameObjectsOfType<CameraComponent>();
+    auto pCamera = getComponentsOfType<CameraComponent>();
     auto& camera = pCamera[0]->get();
 
 #ifdef _DEBUG
     auto pApp = getApp();                         // アプリケーション
     auto pRenderer = pApp->getRenderer();         // レンダラー
 
-    auto pLight = getGameObjectsOfType<LightComponent>();
+    auto pLight = getComponentsOfType<LightComponent>();
     auto light = pLight[0]->get();
 
     if (ImGui::Begin("Game Scene")) // ウィンドウ開始

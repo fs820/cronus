@@ -165,6 +165,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="camera_comp.h" />
     <ClInclude Include="component.h" />
+    <ClInclude Include="component_registry.h" />
     <ClInclude Include="easing.h" />
     <ClInclude Include="entry.h" />
     <ClInclude Include="event.h" />

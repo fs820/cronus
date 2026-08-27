@@ -8,8 +8,10 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
+#include <typeindex>
 #include <vector>
 #include "object.h"
+#include "component_registry.h"
 
 class Scene;
 class Renderer;
@@ -39,9 +41,9 @@ private:
 };
 
 //---------------------------------------------
-// シーンクラス
+// シーンクラス (IComponentRegistryを継承)
 //---------------------------------------------
-class Scene
+class Scene : public IComponentRegistry
 {
 public:
     Scene(Application* pApp);
@@ -56,19 +58,23 @@ public:
 
     void addGameObject(std::unique_ptr<GameObject> gameObject);
 
+    void registerComponent(Component* comp) override;
+    void unregisterComponent(Component* comp) override;
+
     //-------------------------------------------------------------------
     // ゲームオブジェクトのうち、指定したコンポーネントを持つものを取得
     //-------------------------------------------------------------------
     template<typename T>
-    std::vector<T*> getGameObjectsOfType() const
+    std::vector<T*> getComponentsOfType() const
     {
         std::vector<T*> result;
-        for (const auto& gameObject : m_gameObjects)
+        auto it = m_componentCaches.find(typeid(T));
+        if (it != m_componentCaches.end())
         {
-            if (gameObject->has<T>())
+            // キャッシュされているコンポーネントをキャストして返す
+            for (auto* comp : it->second)
             {
-                auto comps = gameObject->get<T>();
-                result.insert(result.end(), comps.begin(), comps.end());
+                result.push_back(static_cast<T*>(comp));
             }
         }
         return result;
@@ -83,4 +89,7 @@ private:
 
     std::vector<std::unique_ptr<GameObject>> m_gameObjects;  // ゲームオブジェクトのリスト
     std::vector<GameObject*> m_noStartObjects;               // Startしていないゲームオブジェクトのリスト
+
+    // 型情報をキーにして、そのコンポーネントのポインタ配列を保持するマップ
+    std::unordered_map<std::type_index, std::vector<Component*>> m_componentCaches;
 };

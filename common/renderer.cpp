@@ -579,9 +579,9 @@ void RendererImpl::uninit()
 //-------------------------------------------
 bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, Renderer& inter)
 {
-    auto cameras = scene.getGameObjectsOfType<CameraComponent>();
-    auto lights = scene.getGameObjectsOfType<LightComponent>();
-    auto renderComponents = scene.getGameObjectsOfType<RenderComponent>();
+    auto cameras = scene.getComponentsOfType<CameraComponent>();
+    auto lights = scene.getComponentsOfType<LightComponent>();
+    auto renderComponents = scene.getComponentsOfType<RenderComponent>();
 
     // ライトを設定
     std::vector<LightData> lightDatas{};

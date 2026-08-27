@@ -13,6 +13,20 @@
 GameObject::~GameObject() { destroy(); }
 
 //-----------------------
+// Registryをセットする
+//-----------------------
+void GameObject::setRegistry(IComponentRegistry* registry)
+{
+    m_pRegistry = registry;
+
+    // コンポーネントをRegistryに登録する
+    for (auto& component : m_components)
+    {
+        m_pRegistry->registerComponent(component.get());
+    }
+}
+
+//-----------------------
 // コンポーネントの開始
 //-----------------------
 bool GameObject::start()
@@ -65,6 +79,15 @@ void GameObject::lateUpdate(float deltaTime)
 //-----------------------
 void GameObject::destroy()
 {
+    // Registryのキャッシュからコンポーネントを消す
+    if (m_pRegistry != nullptr)
+    {
+        for (auto& component : m_components)
+        {
+            m_pRegistry->unregisterComponent(component.get());
+        }
+    }
+
     for (auto& component : m_components)
     {
         component->destroy();

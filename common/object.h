@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 #include "trans_comp.h"
+#include "component_registry.h"
 
 //---------------------------------
 // ゲームオブジェクトクラス
@@ -17,7 +18,7 @@ class GameObject
 {
 public:
     GameObject(const Transform& transform = Transform::Zero())
-        : m_isMarkedForDestroy{} { m_transform = std::make_unique<TransformComponent>(transform); }
+        : m_isMarkedForDestroy{}, m_pRegistry(nullptr) { m_transform = std::make_unique<TransformComponent>(transform); }
     ~GameObject();
 
     GameObject(GameObject&&) noexcept = default;
@@ -32,6 +33,9 @@ public:
     void destroy();
     void markForDestroy() { m_isMarkedForDestroy = true; }
     bool isMarkedForDestroy() const { return m_isMarkedForDestroy; }
+
+    void setRegistry(IComponentRegistry* registry);
+    IComponentRegistry* getRegistry() const { return m_pRegistry; }
 
     TransformComponent* getTransform() { return m_transform.get(); }
 
@@ -51,6 +55,12 @@ public:
 
         T* ref = component.get();
         m_components.push_back(std::move(component));
+
+        if (m_pRegistry != nullptr)
+        {
+            m_pRegistry->registerComponent(ref);
+        }
+
         return ref;
     }
 
@@ -93,4 +103,5 @@ private:
     std::unique_ptr<TransformComponent> m_transform;      // 座標変換
     std::vector<std::unique_ptr<Component>> m_components; // コンポーネント
     bool m_isMarkedForDestroy;                            // 破棄予定フラグ
+    IComponentRegistry* m_pRegistry = nullptr;            // Component登録インターフェースへのポインタ(Scene)
 };

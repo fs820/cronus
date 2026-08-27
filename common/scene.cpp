@@ -7,6 +7,7 @@
 #include "scene.h"
 #include "object.h"
 #include "camera.h"
+#include "component.h"
 
 //---------------------------------------------
 // 
@@ -148,10 +149,31 @@ void Scene::cleanup()
 }
 
 //------------------
+// Sceneへのコンポーネント登録
+//------------------
+void Scene::registerComponent(Component* comp)
+{
+    // コンポーネントの実際の型情報を使ってマップに登録
+    m_componentCaches[typeid(*comp)].push_back(comp);
+}
+
+//------------------
+// Sceneからのコンポーネント解除
+//------------------
+void Scene::unregisterComponent(Component* comp)
+{
+    auto& list = m_componentCaches[typeid(*comp)];
+
+    // リストから対象のコンポーネントを削除
+    std::erase(list, comp);
+}
+
+//------------------
 // ゲームオブジェクトを追加
 //------------------
 void Scene::addGameObject(std::unique_ptr<GameObject> gameObject)
 {
+    gameObject->setRegistry(this);                  // オブジェクトに自身のポインタを渡す(レジストリとして)
     m_noStartObjects.push_back(gameObject.get());   // Startしていないゲームオブジェクトのリストに追加
     m_gameObjects.push_back(std::move(gameObject)); // ゲームオブジェクトのリストに追加
 }
