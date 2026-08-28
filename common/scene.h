@@ -68,13 +68,17 @@ public:
     std::vector<T*> getComponentsOfType() const
     {
         std::vector<T*> result;
-        auto it = m_componentCaches.find(typeid(T));
-        if (it != m_componentCaches.end())
+
+        // キャッシュされているすべてのコンポーネントリストを走査する
+        for (const auto& pair : m_componentCaches)
         {
-            // キャッシュされているコンポーネントをキャストして返す
-            for (auto* comp : it->second)
+            for (auto* comp : pair.second)
             {
-                result.push_back(static_cast<T*>(comp));
+                // dynamic_castT型に変換できるか
+                if (auto casted = dynamic_cast<T*>(comp))
+                {
+                    result.push_back(casted);
+                }
             }
         }
         return result;
