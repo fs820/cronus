@@ -77,7 +77,7 @@ bool Cronus::onStart()
     getSceneManager()->addScene("Game", new GameScene(this));   // ゲーム
 
     // シーン切り替え
-    getSceneManager()->changeScene("Game");
+    getSceneManager()->changeScene("Title");
     return true;
 }
 

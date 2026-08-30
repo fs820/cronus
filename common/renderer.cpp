@@ -2381,7 +2381,7 @@ void RendererImpl::setupFont()
         m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_pContext.Get());
 
         // フォントファイルの読み込み
-        m_spriteFont = std::make_unique<DirectX::SpriteFont>(m_pDevice.Get(), L"data/FONT/test.spritefont");
+        m_spriteFont = std::make_unique<DirectX::SpriteFont>(m_pDevice.Get(), L"data/FONT/app.spritefont");
     }
     catch (const std::exception& e)
     {
