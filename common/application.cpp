@@ -121,6 +121,11 @@ bool Application::update()
     // 物理シミュレーション
     m_pPhysicsManager->simulate(deltaTime);
 
+#ifdef _DEBUG
+    // デバッグ描画
+    m_pPhysicsManager->debugDrawWorld(*getRenderer());
+#endif // _DEBUG
+
     // シーンの更新
     m_pSceneManager->lateUpdate(elapsedTime, deltaTime);
 

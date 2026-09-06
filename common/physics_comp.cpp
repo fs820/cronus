@@ -56,3 +56,31 @@ void PhysicsComponent::destroy()
     // 物理を破棄
     m_physicsManager.removeRigidBody(getID());
 }
+
+//---------------------------
+// 物理操作ラッパー
+//---------------------------
+void PhysicsComponent::addForce(const Vector3& force, bool isImpulse)
+{
+    m_physicsManager.addForce(getID(), force, isImpulse);
+}
+void PhysicsComponent::addTorque(const Vector3& torque, bool isImpulse)
+{
+    m_physicsManager.addTorque(getID(), torque, isImpulse);
+}
+void PhysicsComponent::setLinearVelocity(const Vector3& velocity)
+{
+    m_physicsManager.setLinearVelocity(getID(), velocity);
+}
+void PhysicsComponent::setAngularVelocity(const Vector3& velocity)
+{
+    m_physicsManager.setAngularVelocity(getID(), velocity);
+}
+void PhysicsComponent::setTransform(const Transform& transform, bool isResetForces, bool isUpdateMass)
+{
+    m_physicsManager.setTransform(getID(), transform, isResetForces, isUpdateMass);
+
+    // Transformにも即時反映
+    auto trans = getOwner().getTransform();
+    trans->set(transform);
+}

@@ -6,6 +6,43 @@
 //----------------------------------
 #include "physics.h"
 #include <bullet/btBulletDynamicsCommon.h> // Bullet Physics SDK
+#include "renderer.h"
+
+#ifdef _DEBUG
+
+//--------------------------------
+// デバッグ描画インターフェース
+//--------------------------------
+class PhysicsDebugDrawer : public btIDebugDraw
+{
+public:
+    PhysicsDebugDrawer() : m_debugMode(DBG_DrawWireframe | DBG_DrawAabb) {}
+
+    void clearLines() { m_lines.clear(); }
+    const std::vector<PhysicsDebugLine>& getLines() const { return m_lines; }
+
+    // Bulletから呼ばれる線引き関数
+    virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color) override
+    {
+        PhysicsDebugLine line;
+        line.start = Vector3(from.x(), from.y(), from.z());
+        line.end = Vector3(to.x(), to.y(), to.z());
+        line.color = Color(color.x(), color.y(), color.z(), 1.0f); // RGB + Alpha
+        m_lines.push_back(line);
+    }
+
+    virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) override {}
+    virtual void reportErrorWarning(const char* warningString) override {}
+    virtual void draw3dText(const btVector3& location, const char* textString) override {}
+    virtual void setDebugMode(int debugMode) override { m_debugMode = debugMode; }
+    virtual int getDebugMode() const override { return m_debugMode; }
+
+private:
+    std::vector<PhysicsDebugLine> m_lines;
+    int m_debugMode;
+};
+
+#endif // _DEBUG
 
 //--------------------------------
 // 内部実装クラス
@@ -36,6 +73,10 @@ public:
     const std::vector<CollisionData>& getCollisionEvents() const { return m_collisionEvents; }
     RayHitInfo rayCast(const Vector3& start, const Vector3& end);
 
+#ifdef _DEBUG
+    void debugDrawWorld(Renderer& renderer);
+#endif // _DEBUG
+
 private:
     std::unique_ptr<btDefaultCollisionConfiguration> m_collisionConfig; // 衝突設定
     std::unique_ptr<btCollisionDispatcher> m_dispatcher;                // 衝突ディスパッチャ
@@ -46,6 +87,10 @@ private:
     std::unordered_map<uint64_t, btCollisionShape*> m_collisionShapes; // 衝突形状マップ
     std::unordered_map<uint64_t, btRigidBody*> m_rigidBodies;          // 剛体マップ
     std::vector<CollisionData> m_collisionEvents;                      // 衝突リスト
+
+#ifdef _DEBUG
+    std::unique_ptr<PhysicsDebugDrawer> m_debugDrawer; // デバッグドロワーを追加
+#endif // _DEBUG
 };
 
 //--------------------------------
@@ -69,6 +114,12 @@ void PhysicsManagerImpl::init()
 
     // 重力の設定
     setGravity(Vector3(0, EARTH_GRAVITY, 0));
+
+#ifdef _DEBUG
+    // デバッグドロワーの初期化と登録
+    m_debugDrawer = std::make_unique<PhysicsDebugDrawer>();
+    m_dynamicsWorld->setDebugDrawer(m_debugDrawer.get());
+#endif // _DEBUG
 }
 
 //--------------------------------
@@ -414,6 +465,27 @@ RayHitInfo PhysicsManagerImpl::rayCast(const Vector3& start, const Vector3& end)
     return info;
 }
 
+#ifdef _DEBUG
+//-------------------------------------
+// デバッグ描画
+//-------------------------------------
+void PhysicsManagerImpl::debugDrawWorld(Renderer& renderer)
+{
+    if (m_dynamicsWorld && m_debugDrawer)
+    {
+        m_debugDrawer->clearLines();
+        m_dynamicsWorld->debugDrawWorld(); // これを呼ぶと drawLine が連続して呼ばれる
+        const auto& lines = m_debugDrawer->getLines(); // デバッグラインを取得
+
+        // それぞれのラインをレンダラーで描画
+        for (const auto& line : lines)
+        {
+            renderer.drawLine(line.start, line.end, line.color);
+        }
+    }
+}
+#endif // _DEBUG
+
 //--------------------------------
 // 外部インターフェース
 //--------------------------------
@@ -496,3 +568,12 @@ RayHitInfo PhysicsManager::rayCast(const Vector3& start, const Vector3& end)
 {
     return m_impl->rayCast(start, end);
 }
+
+#ifdef _DEBUG
+
+void PhysicsManager::debugDrawWorld(Renderer& renderer)
+{
+    m_impl->debugDrawWorld(renderer);
+}
+
+#endif // _DEBUG

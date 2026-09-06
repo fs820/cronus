@@ -25,6 +25,12 @@ public:
     void render(Renderer& renderer) override;
     void destroy() override;
 
+    void addForce(const Vector3& force, bool isImpulse = false);
+    void addTorque(const Vector3& torque, bool isImpulse = false);
+    void setLinearVelocity(const Vector3& velocity);
+    void setAngularVelocity(const Vector3& velocity);
+    void setTransform(const Transform& transform, bool isResetForces = false, bool isUpdateMass = false);
+
 private:
     PhysicsManager& m_physicsManager; // 物理マネージャー参照
 

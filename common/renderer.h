@@ -61,6 +61,7 @@ public:
     bool drawIndexedPrimitive(VertexShaderType vertexShaderType, int indexCount, unsigned int startIndexLocation, unsigned int baseVertexLocation);
     void drawDecal(Matrix transform, const MeshHandle& handle, Color color);
     void drawString(std::string_view string, Vector2 pos = { 0,0 }, Color color = Color::White(), float angle = 0.0f, Vector2 scale = { 1,1 });
+    void drawLine(const Vector3& start, const Vector3& end, const Color& color = Color::White());
 
     void onResize(int width, int height);
 

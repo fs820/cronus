@@ -212,6 +212,18 @@ struct MeshData
     ~MeshData() = default;
 };
 
+// 線 (render内でしか使わないのでここにおく)
+struct VertexLine
+{
+    Vector3 pos; // 座標
+    Color col;   // カラー
+
+    VertexLine() : pos{}, col{} {}
+    VertexLine(float x, float y, float z, Color col) : pos{ x, y, z }, col{ col } {}
+    VertexLine(Vector3 position, Color col) : pos{ position }, col{ col } {}
+    ~VertexLine() = default;
+};
+
 static constexpr std::array<const wchar_t*, size_t(PostProcessShaderType::Max)> POST_PROCESS_SHADER_FILE_NAMES =
 {
     L"PP_None.hlsl",
@@ -271,6 +283,7 @@ public:
     void drawLightingPass();
     void drawPostProcessPass(PostProcessShaderMask mask, ToneMappingType type);
     void drawString(std::string_view string, Vector2 pos = { 0,0 }, Color color = Color::White(), float angle = 0.0f, Vector2 scale = { 1,1 });
+    void drawLine(const Vector3& start, const Vector3& end, const Color& color);
 
     void setShadowMode();
     void setGeometryMode();
@@ -319,6 +332,7 @@ private:
     void setVPMatrix(Matrix view, Matrix proj);
     void setOrthographic();
     void createTexture(std::shared_ptr<TextureData> spTextureData, uint32_t id);
+    void flushLines();
 
     // 核
     ComPtr<ID3D11Device> m_pDevice;         // デバイス
@@ -340,7 +354,7 @@ private:
     // scene加工用描画先
     ComPtr<ID3D11Texture2D> m_pWorkTexture;      // シーン画像本体
     ComPtr<ID3D11RenderTargetView> m_pWorkRTV;   // 書き込み用
-    ComPtr<ID3D11ShaderResourceView> m_pWorkSRV; //　読み込み用
+    ComPtr<ID3D11ShaderResourceView> m_pWorkSRV; // 読み込み用
 
     // ブルーム用描画先
     std::array<ComPtr<ID3D11RenderTargetView>, 2> m_pBloomRTVs;
@@ -380,6 +394,10 @@ private:
     ComPtr<ID3D11PixelShader> m_pOutlinePS;       // アウトラインピクセルシェーダ
     ComPtr<ID3D11PixelShader> m_pTransparentPS;   // 半透明シェーダ
 
+    // ライン描画用
+    ComPtr<ID3D11VertexShader> m_pLineVS;
+    ComPtr<ID3D11PixelShader>  m_pLinePS;
+
     // UI用
     ComPtr<ID3D11PixelShader> m_pUIPS;   // UIシェーダ
 
@@ -390,6 +408,7 @@ private:
     ComPtr<ID3D11InputLayout> m_pInputLayout2D;    // 2D頂点レイアウト
     ComPtr<ID3D11InputLayout> m_pInputLayout3D;    // 3D頂点レイアウト
     ComPtr<ID3D11InputLayout> m_pInputLayoutModel; // スキニング頂点レイアウト
+    ComPtr<ID3D11InputLayout>  m_pInputLayoutLine; // ライン描画用頂点レイアウト
 
     // 定数バッファ
     ComPtr<ID3D11Buffer> m_pVPMatBuffer;          // 行列のバッファ
@@ -410,6 +429,11 @@ private:
     FogBufferData m_fogData;                      // フォグのキャッシュ
     ComPtr<ID3D11Buffer> m_pDecalBuffer;          // デカールのバッファ
     ComPtr<ID3D11Buffer> m_pPostProcessBuffer;    // ポストプロセスのバッファ
+
+    // ライン描画用
+    ComPtr<ID3D11Buffer>       m_pLineVertexBuffer;        // 動的頂点バッファ
+    UINT                       m_lineVertexBufferSize = 0; // 現在確保しているバッファの頂点数容量
+    std::vector<VertexLine>    m_lineVertices;             // 描画する頂点のキャッシュ
 
     // State (設定)
     std::array<ComPtr<ID3D11SamplerState>, size_t(SampMode::Max)> m_samplerStates;     // サンプラー
@@ -448,7 +472,7 @@ private:
     std::unique_ptr<DirectX::SpriteFont> m_spriteFont;
 };
 
-RendererImpl::RendererImpl() : m_pDevice(nullptr), m_pContext(nullptr), m_pSwapChain(nullptr), m_hWnd{}, m_pRenderTargetView(nullptr), m_pDepthStencilView(nullptr), m_pDepthStencilTexture(nullptr), m_pSceneTexture{}, m_pSceneRTV{}, m_pSceneSRV{}, m_pVertexShader2D(nullptr), m_pVertexShader3D(nullptr), m_pGeometryPS(nullptr), m_pInputLayout2D(nullptr), m_pInputLayout3D(nullptr), m_pWMatBuffer(nullptr), m_wMatData{}, m_pMtlBuffer(nullptr), m_mtlData{}, m_pVPMatBuffer(nullptr), m_vpMatData{}, m_pLightBuffer(nullptr), m_lightData{}, m_samplerStates{}, m_pDummyTextureWhite(nullptr), m_pDummyTextureBlack(nullptr), m_pInputLayoutModel(nullptr), m_pBoneBuffer(nullptr), m_boneData{}, m_pVertexShaderModel(nullptr), m_pGBufferTextures{}, m_pGBufferRTVs{}, m_pGBufferSRVs{}, m_pScreenVS{}, m_blendStates{}, m_depthStates{}, m_rasStates{}, m_textures{}, m_screenSize{}, m_screenMagnification{}, m_viewportSize{}, m_pShadowTexture{}, m_pShadowDSV{}, m_pShadowSRV{}, m_currentPass{}, m_currentForwardSubPass{}, m_pShadowConstantBuffer{}, m_lightVPMatrix{}, m_pSkyPS{}, m_pTransparentPS{}, m_pOutline3DVS{}, m_pOutlineModelVS{}, m_pOutlinePS{}, m_pOutlineBuffer{}, m_outlineData{}, m_pShadowPS{}, m_pFogBuffer{}, m_texMutex{}, m_spriteBatch{}, m_spriteFont{}, m_pDecalBuffer(nullptr), m_pDecalVS(nullptr), m_pDecalPS(nullptr), m_pPostProcessShaders{}, m_pPostProcessBuffer{}, m_pWorkTexture{}, m_pWorkRTV{}, m_pWorkSRV{}, m_pBloomRTVs{}, m_pBloomSRVs{}, m_meshs{}, m_pUnifiedLighting_DL_PS{}, m_pUIPS{}, m_postProcessMask{}, m_toneMappingType{}, m_ambient{}, m_shadowMapResolution{ DEFAULT_SHADOWMAP_RESOLUTION }, m_shadowMapProj{} {}
+RendererImpl::RendererImpl() : m_pDevice(nullptr), m_pContext(nullptr), m_pSwapChain(nullptr), m_hWnd{}, m_pRenderTargetView(nullptr), m_pDepthStencilView(nullptr), m_pDepthStencilTexture(nullptr), m_pSceneTexture{}, m_pSceneRTV{}, m_pSceneSRV{}, m_pVertexShader2D(nullptr), m_pVertexShader3D(nullptr), m_pGeometryPS(nullptr), m_pInputLayout2D(nullptr), m_pInputLayoutLine(nullptr), m_pInputLayout3D(nullptr), m_pWMatBuffer(nullptr), m_wMatData{}, m_pMtlBuffer(nullptr), m_mtlData{}, m_pVPMatBuffer(nullptr), m_vpMatData{}, m_pLightBuffer(nullptr), m_lightData{}, m_samplerStates{}, m_pDummyTextureWhite(nullptr), m_pDummyTextureBlack(nullptr), m_pInputLayoutModel(nullptr), m_pBoneBuffer(nullptr), m_boneData{}, m_pVertexShaderModel(nullptr), m_pGBufferTextures{}, m_pGBufferRTVs{}, m_pGBufferSRVs{}, m_pScreenVS{}, m_blendStates{}, m_depthStates{}, m_rasStates{}, m_textures{}, m_screenSize{}, m_screenMagnification{}, m_viewportSize{}, m_pShadowTexture{}, m_pShadowDSV{}, m_pShadowSRV{}, m_currentPass{}, m_currentForwardSubPass{}, m_pShadowConstantBuffer{}, m_lightVPMatrix{}, m_pSkyPS{}, m_pLineVS{}, m_pLinePS{}, m_pTransparentPS{}, m_pOutline3DVS{}, m_pOutlineModelVS{}, m_pOutlinePS{}, m_pOutlineBuffer{}, m_outlineData{}, m_pShadowPS{}, m_pFogBuffer{}, m_texMutex{}, m_spriteBatch{}, m_spriteFont{}, m_pDecalBuffer(nullptr), m_pDecalVS(nullptr), m_pDecalPS(nullptr), m_pPostProcessShaders{}, m_pPostProcessBuffer{}, m_pWorkTexture{}, m_pWorkRTV{}, m_pWorkSRV{}, m_pBloomRTVs{}, m_pBloomSRVs{}, m_meshs{}, m_pUnifiedLighting_DL_PS{}, m_pUIPS{}, m_postProcessMask{}, m_toneMappingType{}, m_ambient{}, m_shadowMapResolution{ DEFAULT_SHADOWMAP_RESOLUTION }, m_shadowMapProj{}, m_pLineVertexBuffer{}, m_lineVertices{} {}
 RendererImpl::~RendererImpl() { uninit(); }
 
 //-------------------------------------------
@@ -529,10 +553,14 @@ void RendererImpl::uninit()
     m_pLightBuffer.Reset();
     m_pVPMatBuffer.Reset();
 
+    // ライン描画用頂点バッファ破棄
+    m_pLineVertexBuffer.Reset();
+
     // 入力レイアウト破棄
     m_pInputLayout2D.Reset();
     m_pInputLayout3D.Reset();
     m_pInputLayoutModel.Reset();
+    m_pInputLayoutLine.Reset();
 
     // シェーダー破棄
     for (auto& pPostProcessShader : m_pPostProcessShaders)
@@ -554,6 +582,8 @@ void RendererImpl::uninit()
     m_pVertexShaderModel.Reset();
     m_pVertexShader2D.Reset();
     m_pVertexShader3D.Reset();
+    m_pLineVS.Reset();
+    m_pLinePS.Reset();
 
     // 深度ステンシルビュー破棄
     m_pDepthStencilView.Reset();
@@ -718,6 +748,9 @@ bool RendererImpl::render(const Scene& scene, std::function<void()> guiRender, R
                 renderComponent->render(inter);
             }
         }
+
+        // ライン描画
+        flushLines();
 
         endForward();
         //-------------------------
@@ -1847,6 +1880,14 @@ void RendererImpl::setupShader()
     };
     m_pDevice->CreateInputLayout(layoutModel, ARRAYSIZE(layoutModel), pBlob->GetBufferPointer(), pBlob->GetBufferSize(), m_pInputLayoutModel.ReleaseAndGetAddressOf());
 
+    // 入力レイアウトの作成 (VertexLine構造体とHLSLの紐づけ)
+    D3D11_INPUT_ELEMENT_DESC layoutLine[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+    m_pDevice->CreateInputLayout(layoutLine, ARRAYSIZE(layoutLine), pBlob->GetBufferPointer(), pBlob->GetBufferSize(), m_pInputLayoutLine.ReleaseAndGetAddressOf());
+
     // シャドウ用ピクセルシェーダー
     path = std::filesystem::path(SHADER_DIRECTORY) / L"ShadowPS.hlsl";
     D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_0", 0, 0, pBlob.ReleaseAndGetAddressOf(), nullptr);
@@ -1904,6 +1945,15 @@ void RendererImpl::setupShader()
     path = std::filesystem::path(SHADER_DIRECTORY) / L"TransparentPS.hlsl";
     D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_0", 0, 0, pBlob.ReleaseAndGetAddressOf(), nullptr);
     m_pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, m_pTransparentPS.ReleaseAndGetAddressOf());
+
+    // 線描画用シェーダー
+    path = std::filesystem::path(SHADER_DIRECTORY) / L"LineVS.hlsl";
+    D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_0", 0, 0, pBlob.ReleaseAndGetAddressOf(), nullptr);
+    m_pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, m_pLineVS.ReleaseAndGetAddressOf());
+
+    path = std::filesystem::path(SHADER_DIRECTORY) / L"LinePS.hlsl";
+    D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_0", 0, 0, pBlob.ReleaseAndGetAddressOf(), nullptr);
+    m_pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, m_pLinePS.ReleaseAndGetAddressOf());
 
     // ポストプロセス用シェーダー
     for (size_t cnt = 0; cnt < m_pPostProcessShaders.size(); ++cnt)
@@ -1991,6 +2041,15 @@ void RendererImpl::setupShader()
     ppd.Usage = D3D11_USAGE_DEFAULT;
     ppd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     m_pDevice->CreateBuffer(&ppd, nullptr, m_pPostProcessBuffer.ReleaseAndGetAddressOf());
+
+    // 線描画用動的頂点バッファの初期生成
+    m_lineVertexBufferSize = 2048;
+    D3D11_BUFFER_DESC bd = {};
+    bd.ByteWidth = sizeof(VertexLine) * m_lineVertexBufferSize;
+    bd.Usage = D3D11_USAGE_DYNAMIC;                     // CPUから更新可能
+    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;          // CPU書き込み許可
+    m_pDevice->CreateBuffer(&bd, nullptr, m_pLineVertexBuffer.ReleaseAndGetAddressOf());
 }
 
 //-----------------------------------
@@ -2762,6 +2821,15 @@ void RendererImpl::drawString(std::string_view string, Vector2 pos, Color color,
 }
 
 //---------------------------------
+// ラインの描画
+//---------------------------------
+void RendererImpl::drawLine(const Vector3& start, const Vector3& end, const Color& color)
+{
+    m_lineVertices.push_back({ start, color });
+    m_lineVertices.push_back({ end, color });
+}
+
+//---------------------------------
 // テクスチャを作成する
 //---------------------------------
 void RendererImpl::createTexture(std::shared_ptr<TextureData> spTextureData, uint32_t id)
@@ -2904,6 +2972,62 @@ void RendererImpl::createTexture(std::shared_ptr<TextureData> spTextureData, uin
         std::lock_guard<std::mutex> lock(m_texMutex);
         m_textures[id] = pSRV;
     }
+}
+
+//---------------------------------
+// ライン描画のフラッシュ
+//---------------------------------
+void RendererImpl::flushLines()
+{
+    if (m_lineVertices.empty()) return;
+
+    UINT vertexCount = static_cast<UINT>(m_lineVertices.size());
+
+    // 容量を超えた場合は再生成
+    if (vertexCount > m_lineVertexBufferSize)
+    {
+        m_lineVertexBufferSize = vertexCount * 2; // 余裕を持って再確保
+        D3D11_BUFFER_DESC bd = {};
+        bd.ByteWidth = sizeof(VertexLine) * m_lineVertexBufferSize;
+        bd.Usage = D3D11_USAGE_DYNAMIC;
+        bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        m_pLineVertexBuffer.Reset();
+        m_pDevice->CreateBuffer(&bd, nullptr, m_pLineVertexBuffer.ReleaseAndGetAddressOf());
+    }
+
+    // MapしてCPUからGPUメモリへコピー (DISCARD指定で高速化)
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    if (SUCCEEDED(m_pContext->Map(m_pLineVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
+    {
+        memcpy(mappedResource.pData, m_lineVertices.data(), sizeof(VertexLine) * vertexCount);
+        m_pContext->Unmap(m_pLineVertexBuffer.Get(), 0);
+    }
+
+    // ステートとパスの設定
+    setRasMode(RasMode::None);         // カリングなし
+    setBlendMode(BlendMode::Default);  // アルファブレンディング対応
+    setDepthMode(DepthMode::TestOnly); // 深度テストあり・書き込みなし (遮蔽無視したい場合は None)
+
+    // パイプライン設定
+    UINT stride = sizeof(VertexLine);
+    UINT offset = 0;
+    ID3D11Buffer* pVB = m_pLineVertexBuffer.Get();
+    m_pContext->IASetVertexBuffers(0, 1, &pVB, &stride, &offset);
+    m_pContext->IASetInputLayout(m_pInputLayoutLine.Get());
+    m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST); // LINELIST
+
+    // シェーダーと定数バッファ
+    m_pContext->VSSetShader(m_pLineVS.Get(), nullptr, 0);
+    ID3D11Buffer* pVPBuf = m_pVPMatBuffer.Get();
+    m_pContext->VSSetConstantBuffers(0, 1, &pVPBuf);
+    m_pContext->PSSetShader(m_pLinePS.Get(), nullptr, 0);
+
+    // 描画
+    m_pContext->Draw(vertexCount, 0);
+
+    // 頂点リストのクリア
+    m_lineVertices.clear();
 }
 
 //---------------------------------
@@ -3070,6 +3194,14 @@ void Renderer::drawString(std::string_view string, Vector2 pos, Color color, flo
     if (m_pImpl != nullptr)
     {
         m_pImpl->drawString(string, pos, color, angle, scale);
+    }
+}
+
+void Renderer::drawLine(const Vector3& start, const Vector3& end, const Color& color)
+{
+    if (m_pImpl != nullptr)
+    {
+        m_pImpl->drawLine(start, end, color);
     }
 }
 

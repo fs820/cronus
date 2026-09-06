@@ -8,6 +8,7 @@
 #include "physics_types.h"
 
 class PhysicsManagerImpl;
+class Renderer;
 
 //--------------------------------------------
 // 物理管理クラス
@@ -38,6 +39,10 @@ public:
     const std::vector<CollisionData>& getCollisionEvents() const;
 
     RayHitInfo rayCast(const Vector3& start, const Vector3& end);
+
+#ifdef _DEBUG
+    void debugDrawWorld(Renderer& renderer);
+#endif // _DEBUG
 
 private:
     std::unique_ptr<PhysicsManagerImpl> m_impl;

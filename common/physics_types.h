@@ -104,3 +104,13 @@ inline CollisionGroup operator~(CollisionGroup mask)
         ~static_cast<uint32_t>(mask)
         );
 }
+
+#ifdef _DEBUG
+// デバッグ用の線分データ
+struct PhysicsDebugLine
+{
+    Vector3 start;
+    Vector3 end;
+    Color color;
+};
+#endif // _DEBUG

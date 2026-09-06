@@ -107,7 +107,7 @@ void GameScene::onEnter()
     addGameObject(std::move(pLight));
 
     // 地面の生成
-    auto pGround = factory::createGround(*getApp()->getMeshManager(), *getApp()->getTextureManager(), getApp()->getTextureManager()->getTextureHandle(Hash("ground")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, math::degreesToRadians(90.0f), 0.0f), Vector3(100.0f, 100.0f, 1.0f)), 1000.0f);
+    auto pGround = factory::createGround(*getApp()->getMeshManager(), *getApp()->getTextureManager(), *getApp()->getPhysicsManager(), getApp()->getTextureManager()->getTextureHandle(Hash("ground")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, math::degreesToRadians(90.0f), 0.0f), Vector3(100.0f, 100.0f, 1.0f)), 1000.0f);
     addGameObject(std::move(pGround));
 
     // 果ての生成
@@ -119,7 +119,7 @@ void GameScene::onEnter()
     addGameObject(std::move(pSky));
 
     // プレイヤーの生成
-    auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getRenderer(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 1.0f);
+    auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getPhysicsManager(), *getApp()->getRenderer(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 0, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 1.0f);
     addGameObject(std::move(pPlayer));
 
     // デカールの生成
