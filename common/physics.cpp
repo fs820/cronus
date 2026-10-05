@@ -205,6 +205,9 @@ void PhysicsManagerImpl::addRigidBody(uint64_t id, CollisionShapeType shapeType,
         return;
     }
 
+    // スケールの設定
+    shape->setLocalScaling(btVector3(offset.scale.x, offset.scale.y, offset.scale.z));
+
     // 衝突形状マップに追加
     m_collisionShapes.try_emplace(id, shape);
 

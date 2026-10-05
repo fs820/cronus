@@ -32,6 +32,7 @@ public:
     void update(float elapsedTime, float deltaTime);
     void lateUpdate(float elapsedTime, float deltaTime);
     void cleanup();
+    void uninit();
 
     Scene* getActiveScene() const { return m_activeScene; }
 
@@ -55,6 +56,7 @@ public:
     void update(float elapsedTime, float deltaTime);     // 更新処理
     void lateUpdate(float elapsedTime, float deltaTime); // 更新処理
     void cleanup();
+    void uninit();
 
     void addGameObject(std::unique_ptr<GameObject> gameObject);
 

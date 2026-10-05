@@ -50,7 +50,7 @@ MeshHandle MeshManager::sprite()
 }
 
 //-------------
-// 3D面
+// 3D面 (XY平面)
 //-------------
 MeshHandle MeshManager::quad(float texUMax, float texVMax)
 {
@@ -75,6 +75,46 @@ MeshHandle MeshManager::quad(float texUMax, float texVMax)
     vertices[1] = Vertex3D{ Vector3{  0.5f, 0.5f,0.0f },Vector3{ 0.0f, 0.0f,-1.0f }, Vector2{ texUMax, 0.0f } };
     vertices[2] = Vertex3D{ Vector3{  0.5f, -0.5f,0.0f },Vector3{ 0.0f, 0.0f,-1.0f }, Vector2{ texUMax, texVMax } };
     vertices[3] = Vertex3D{ Vector3{ -0.5f, -0.5f,0.0f },Vector3{ 0.0f, 0.0f,-1.0f }, Vector2{ 0.0f, texVMax } };
+
+    // インデックスデータの初期化
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    indices[3] = 2;
+    indices[4] = 3;
+    indices[5] = 0;
+
+    // メッシュの作成
+    m_cache.try_emplace(desc, m_renderer.createMesh(VertexShaderType::Vertex3D, vertices.data(), vertices.size(), indices.data(), indices.size()));
+    return m_cache[desc];
+}
+
+//-----------------------
+// 3D面 (XZ平面,地面用)
+//-----------------------
+MeshHandle MeshManager::groundQuad(float texUMax, float texVMax)
+{
+    // メッシュ情報
+    MeshDesc desc{};
+    desc.type = MeshType::GroundQuad;
+    desc.texUMax = texUMax;
+    desc.texVMax = texVMax;
+
+    // 作ってあるならそれを返す
+    if (m_cache.contains(desc)) return m_cache[desc];
+
+    std::vector<Vertex3D> vertices;    // 頂点データ
+    std::vector<unsigned int> indices; // インデックスデータ
+
+    // サイズ指定
+    vertices.resize(QUAD_VERTEX);
+    indices.resize(POLYGON_VERTEX * 2u);
+
+    // 頂点データの初期化
+    vertices[0] = Vertex3D{ Vector3{ -0.5f, 0.0f, 0.5f },Vector3{ 0.0f, 1.0f,0.0f }, Vector2{ 0.0f, 0.0f } };
+    vertices[1] = Vertex3D{ Vector3{  0.5f, 0.0f, 0.5f },Vector3{ 0.0f, 1.0f,0.0f }, Vector2{ texUMax, 0.0f } };
+    vertices[2] = Vertex3D{ Vector3{  0.5f, 0.0f, -0.5f },Vector3{ 0.0f, 1.0f,0.0f }, Vector2{ texUMax, texVMax } };
+    vertices[3] = Vertex3D{ Vector3{ -0.5f, 0.0f, -0.5f },Vector3{ 0.0f, 1.0f,0.0f }, Vector2{ 0.0f, texVMax } };
 
     // インデックスデータの初期化
     indices[0] = 0;

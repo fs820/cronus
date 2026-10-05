@@ -69,10 +69,22 @@ void SceneManager::lateUpdate(float elapsedTime, float deltaTime)
 //------------------
 void SceneManager::cleanup()
 {
-    // シーンの更新
+    // シーンの整理
     if (m_activeScene != nullptr)
     {
         m_activeScene->cleanup();
+    }
+}
+
+//------------------
+// シーンの破棄
+//------------------
+void SceneManager::uninit()
+{
+    // シーンの破棄
+    if (m_activeScene != nullptr)
+    {
+        m_activeScene->uninit();
     }
 }
 
@@ -146,6 +158,15 @@ void Scene::cleanup()
                 return false;
             }),
         m_gameObjects.end());
+}
+
+//------------------
+// 破棄
+//------------------
+void Scene::uninit()
+{
+    // 全てのゲームオブジェクトを削除
+    m_gameObjects.clear();
 }
 
 //------------------

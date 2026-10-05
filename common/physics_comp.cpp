@@ -23,10 +23,12 @@ bool PhysicsComponent::start()
 {
     /// 物理に登録する
     auto& owner = getOwner();
-        auto trans = owner.getTransform();
-        auto transform = trans->get();
-        m_physicsManager.addRigidBody(getID(), m_collisionShapeType, transform, m_isTrigger, m_rigidBodyType, m_mass, m_collisionGroup, m_collisionMask);
-        return true;
+    auto trans = owner.getTransform();
+    auto transform = trans->get();
+
+    transform *= m_offsetTransform; // オフセットを加算
+    m_physicsManager.addRigidBody(getID(), m_collisionShapeType, transform, m_isTrigger, m_rigidBodyType, m_mass, m_collisionGroup, m_collisionMask);
+    return true;
 }
 
 //---------------------------
@@ -37,7 +39,15 @@ void PhysicsComponent::physicsSync()
     // 物理をもとに位置を更新する
     auto& owner = getOwner();
     auto trans = owner.getTransform();
-    trans->set(m_physicsManager.getTransform(getID()));
+
+    // 物理の結果を取得してTransformに反映 (位置と回転のみ)
+    Transform current = trans->get();
+    Transform physicsResult = m_physicsManager.getTransform(getID());
+
+    current.position = physicsResult.position;
+    current.rotation = physicsResult.rotation;
+    current /= m_offsetTransform; // オフセットを減算
+    trans->set(current);
 }
 
 //---------------------------
@@ -78,7 +88,7 @@ void PhysicsComponent::setAngularVelocity(const Vector3& velocity)
 }
 void PhysicsComponent::setTransform(const Transform& transform, bool isResetForces, bool isUpdateMass)
 {
-    m_physicsManager.setTransform(getID(), transform, isResetForces, isUpdateMass);
+    m_physicsManager.setTransform(getID(), transform * m_offsetTransform, isResetForces, isUpdateMass);
 
     // Transformにも即時反映
     auto trans = getOwner().getTransform();

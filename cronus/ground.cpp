@@ -23,7 +23,7 @@ namespace factory
         textureManager.getTextureSize(texture, width, height);
 
         // メッシュ
-        MeshHandle mesh = meshManager.quad((transform.scale.x / width) * tileMag, (transform.scale.y / height) * tileMag);
+        MeshHandle mesh = meshManager.groundQuad((transform.scale.x / width) * tileMag, (transform.scale.z / height) * tileMag);
 
         Material material{};
         material.pixelShaderType = PixelShaderType::Toon;
@@ -31,7 +31,7 @@ namespace factory
         ground->add<MeshRenderComponent>(RenderQueueMask::Geometry, RasMode::Back, mesh, material, texture);
 
         // 物理コンポーネントの追加
-        ground->add<PhysicsComponent>(physicsManager,
+        ground->add<PhysicsComponent>(physicsManager, Transform(),
             CollisionShapeType::Plane, RigidBodyType::Static,
             0.0f, false,
             CollisionGroup::Environment, CollisionGroup::Player | CollisionGroup::Enemy);

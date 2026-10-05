@@ -1880,6 +1880,11 @@ void RendererImpl::setupShader()
     };
     m_pDevice->CreateInputLayout(layoutModel, ARRAYSIZE(layoutModel), pBlob->GetBufferPointer(), pBlob->GetBufferSize(), m_pInputLayoutModel.ReleaseAndGetAddressOf());
 
+    // 線描画用シェーダー
+    path = std::filesystem::path(SHADER_DIRECTORY) / L"LineVS.hlsl";
+    D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_0", 0, 0, pBlob.ReleaseAndGetAddressOf(), nullptr);
+    m_pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, m_pLineVS.ReleaseAndGetAddressOf());
+
     // 入力レイアウトの作成 (VertexLine構造体とHLSLの紐づけ)
     D3D11_INPUT_ELEMENT_DESC layoutLine[] =
     {
@@ -1945,11 +1950,6 @@ void RendererImpl::setupShader()
     path = std::filesystem::path(SHADER_DIRECTORY) / L"TransparentPS.hlsl";
     D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_0", 0, 0, pBlob.ReleaseAndGetAddressOf(), nullptr);
     m_pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, m_pTransparentPS.ReleaseAndGetAddressOf());
-
-    // 線描画用シェーダー
-    path = std::filesystem::path(SHADER_DIRECTORY) / L"LineVS.hlsl";
-    D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_0", 0, 0, pBlob.ReleaseAndGetAddressOf(), nullptr);
-    m_pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, m_pLineVS.ReleaseAndGetAddressOf());
 
     path = std::filesystem::path(SHADER_DIRECTORY) / L"LinePS.hlsl";
     D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_0", 0, 0, pBlob.ReleaseAndGetAddressOf(), nullptr);
@@ -3025,6 +3025,16 @@ void RendererImpl::flushLines()
 
     // 描画
     m_pContext->Draw(vertexCount, 0);
+
+    // パイプラインを元に戻す
+    m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // TRIANGLELIST
+
+    // ライン用IAステートを解除
+    ID3D11Buffer* nullVB = nullptr;
+    stride = 0;
+    offset = 0;
+    m_pContext->IASetVertexBuffers(0, 1, &nullVB, &stride, &offset);
+    m_pContext->IASetInputLayout(nullptr);
 
     // 頂点リストのクリア
     m_lineVertices.clear();

@@ -32,6 +32,7 @@ namespace factory
 
         // 物理コンポーネントの追加
         player->add<PhysicsComponent>(physicsManager,
+            Transform(Vector3(0, transform.scale.y, 0), Quaternion::Identity(), Vector3(1, 1, 1)),
             CollisionShapeType::Capsule, RigidBodyType::Dynamic,
             1.0f, false,
             CollisionGroup::Player, CollisionGroup::Environment | CollisionGroup::Enemy);

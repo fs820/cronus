@@ -22,6 +22,7 @@ enum class MeshType : unsigned char
 {
     Sprite,
     Quad,
+    GroundQuad,
     Box,
     Cylinder,
     Sphere,
@@ -96,6 +97,7 @@ public:
 
     MeshHandle sprite();
     MeshHandle quad(float texUMax = 1.0f,float texVMax = 1.0f);
+    MeshHandle groundQuad(float texUMax = 1.0f, float texVMax = 1.0f);
     MeshHandle box(float texUMax = 1.0f, float texVMax = 1.0f);
     MeshHandle cylinder(float texUMax = 1.0f, float texVMax = 1.0f, unsigned int splits = mesh::DEFAULT_SPLITS, bool isInward = false, bool isCover = false);
     MeshHandle sphere(float texUMax = 1.0f, float texVMax = 1.0f, unsigned int splitsTheta = mesh::DEFAULT_SPLITS, unsigned int splitsPhi = mesh::DEFAULT_SPLITS, bool isInward = false, bool ishalfDome = false);

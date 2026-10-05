@@ -83,6 +83,7 @@ void Application::uninit()
 
     // 固定の破棄
     gui::uninit();
+    m_pSceneManager->uninit();
     m_pPhysicsManager->uninit();
     m_pRenderer->uninit();
     m_pWindow->uninit();

@@ -16,8 +16,8 @@ class PhysicsManager;
 class PhysicsComponent : public Component
 {
 public:
-    PhysicsComponent(PhysicsManager& physicsManager, CollisionShapeType collisionShapeType, RigidBodyType rigidBodyType, float mass, bool isTrigger, CollisionGroup collisionGroup, CollisionGroup collisionMask)
-        : m_physicsManager(physicsManager), m_collisionShapeType(collisionShapeType), m_rigidBodyType(rigidBodyType), m_mass(mass), m_isTrigger(isTrigger), m_collisionGroup(collisionGroup), m_collisionMask(collisionMask) {}
+    PhysicsComponent(PhysicsManager& physicsManager, const Transform& offset, CollisionShapeType collisionShapeType, RigidBodyType rigidBodyType, float mass, bool isTrigger, CollisionGroup collisionGroup, CollisionGroup collisionMask)
+        : m_physicsManager(physicsManager), m_offsetTransform(offset), m_collisionShapeType(collisionShapeType), m_rigidBodyType(rigidBodyType), m_mass(mass), m_isTrigger(isTrigger), m_collisionGroup(collisionGroup), m_collisionMask(collisionMask) {}
     virtual ~PhysicsComponent() = default;
 
     bool start() override;
@@ -34,6 +34,7 @@ public:
 private:
     PhysicsManager& m_physicsManager; // 物理マネージャー参照
 
+    Transform m_offsetTransform;             // オフセット変換
     CollisionShapeType m_collisionShapeType; // 形状
     RigidBodyType m_rigidBodyType;           // 物理タイプ
     float m_mass;                            // 重さ
