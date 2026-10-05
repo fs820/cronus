@@ -119,7 +119,7 @@ void GameScene::onEnter()
     addGameObject(std::move(pSky));
 
     // プレイヤーの生成
-    auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getPhysicsManager(), *getApp()->getRenderer(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 2, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 1.0f);
+    auto pPlayer = factory::createPlayer(*getApp()->getModelManager(), *getApp()->getPhysicsManager(), *getApp()->getRenderer(), *getApp()->getInput(), getApp()->getModelManager()->getModelHandle(Hash("player")), Transform(Vector3(0, 2, 0), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(1, 1, 1)), 1.0f);
     addGameObject(std::move(pPlayer));
 
     // デカールの生成

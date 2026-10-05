@@ -12,10 +12,11 @@
 #include "render_model.h"
 #include "model.h"
 #include "texture.h"
+#include "player_controller.h"
 
 namespace factory
 {
-    std::unique_ptr<GameObject> createPlayer(ModelManager& modelManager, PhysicsManager& physicsManager, Renderer& renderer, ModelHandle model, Transform transform, float offsetModelScaale)
+    std::unique_ptr<GameObject> createPlayer(ModelManager& modelManager, PhysicsManager& physicsManager, Renderer& renderer, Input& input, ModelHandle model, Transform transform, float offsetModelScaale)
     {
         std::unique_ptr<GameObject> player = std::make_unique<GameObject>(transform);
 
@@ -36,6 +37,9 @@ namespace factory
             CollisionShapeType::Capsule, RigidBodyType::Dynamic,
             1.0f, false,
             CollisionGroup::Player, CollisionGroup::Environment | CollisionGroup::Enemy);
+
+        // プレイヤー操作コンポーネントの追加
+        player->add<PlayerControllerComponent>(input);
 
         return player;
     }

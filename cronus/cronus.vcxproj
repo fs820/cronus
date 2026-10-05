@@ -167,6 +167,7 @@
     <ClCompile Include="game_loader.cpp" />
     <ClCompile Include="ground.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="player_controller.cpp" />
     <ClCompile Include="sky.cpp" />
     <ClCompile Include="title_rogo.cpp" />
     <ClCompile Include="title.cpp" />
@@ -187,6 +188,7 @@
     <ClInclude Include="game_loader.h" />
     <ClInclude Include="ground.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="player_controller.h" />
     <ClInclude Include="sky.h" />
     <ClInclude Include="title_rogo.h" />
     <ClInclude Include="resource.h" />
