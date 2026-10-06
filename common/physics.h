@@ -35,6 +35,11 @@ public:
     void setTransform(uint64_t id, const Transform& transform, bool isResetForces = false, bool isUpdateMass = false);
     void setMaterial(uint64_t id, float friction, float restitution);
 
+    void setAngularFactor(uint64_t id, const Vector3& factor);
+    void setActivationState(uint64_t id, bool isActive);
+    void setPreventSleep(uint64_t id, bool preventSleep);
+    void setDamping(uint64_t id, float linearDamping, float angularDamping);
+
     Transform getTransform(uint64_t id);
     const std::vector<CollisionData>& getCollisionEvents() const;
 

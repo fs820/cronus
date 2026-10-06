@@ -94,3 +94,27 @@ void PhysicsComponent::setTransform(const Transform& transform, bool isResetForc
     auto trans = getOwner().getTransform();
     trans->set(transform);
 }
+void PhysicsComponent::setMaterial(float friction, float restitution)
+{
+    m_physicsManager.setMaterial(getID(), friction, restitution);
+}
+
+void PhysicsComponent::setAngularFactor(const Vector3& factor)
+{
+    m_physicsManager.setAngularFactor(getID(), factor);
+}
+
+void PhysicsComponent::setActivationState(bool isActive)
+{
+    m_physicsManager.setActivationState(getID(), isActive);
+}
+
+void PhysicsComponent::setPreventSleep(bool preventSleep)
+{
+    m_physicsManager.setPreventSleep(getID(), preventSleep);
+}
+
+void PhysicsComponent::setDamping(float linearDamping, float angularDamping)
+{
+    m_physicsManager.setDamping(getID(), linearDamping, angularDamping);
+}

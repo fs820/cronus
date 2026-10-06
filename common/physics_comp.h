@@ -30,6 +30,12 @@ public:
     void setLinearVelocity(const Vector3& velocity);
     void setAngularVelocity(const Vector3& velocity);
     void setTransform(const Transform& transform, bool isResetForces = false, bool isUpdateMass = false);
+    void setMaterial(float friction, float restitution);
+
+    void setAngularFactor(const Vector3& factor);
+    void setActivationState(bool isActive);
+    void setPreventSleep(bool preventSleep);
+    void setDamping(float linearDamping, float angularDamping);
 
 private:
     PhysicsManager& m_physicsManager; // 物理マネージャー参照

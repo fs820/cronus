@@ -25,7 +25,7 @@ namespace factory
         pModel->init();
         pModel->setScale(offsetModelScaale);
         pModel->setPixelShaderType(PixelShaderType::Toon);
-        pModel->setAnimation();
+        //pModel->setAnimation();
         auto pModelComp = player->add<ModelComponent>(pModel);
 
         OutlineData outline = OutlineData{ Color::Black(),0.001f };

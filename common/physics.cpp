@@ -69,6 +69,11 @@ public:
     void setTransform(uint64_t id, const Transform& transform, bool isResetForces = false, bool isUpdateMass = false);
     void setMaterial(uint64_t id, float friction, float restitution);
 
+    void setAngularFactor(uint64_t id, const Vector3& factor);
+    void setActivationState(uint64_t id, bool isActive);
+    void setPreventSleep(uint64_t id, bool preventSleep);
+    void setDamping(uint64_t id, float linearDamping, float angularDamping);
+
     Transform getTransform(uint64_t id);
     const std::vector<CollisionData>& getCollisionEvents() const { return m_collisionEvents; }
     RayHitInfo rayCast(const Vector3& start, const Vector3& end);
@@ -415,6 +420,65 @@ void PhysicsManagerImpl::setMaterial(uint64_t id, float friction, float restitut
 }
 
 //-------------------------------------
+// 指定IDの剛体の角度係数を設定
+//-------------------------------------
+void PhysicsManagerImpl::setAngularFactor(uint64_t id, const Vector3& factor)
+{
+    if (m_rigidBodies.contains(id))
+    {
+        btRigidBody* body = m_rigidBodies[id];
+        body->setAngularFactor(btVector3(factor.x, factor.y, factor.z));
+    }
+}
+
+//-------------------------------------
+// 指定IDの剛体のアクティブ状態を設定
+//-------------------------------------
+void PhysicsManagerImpl::setActivationState(uint64_t id, bool isActive)
+{
+    if (m_rigidBodies.contains(id))
+    {
+        btRigidBody* body = m_rigidBodies[id];
+        if (isActive)
+        {
+            body->activate(true);
+            body->setActivationState(ACTIVE_TAG);
+        }
+        else
+        {
+            body->setActivationState(DISABLE_SIMULATION);
+        }
+    }
+}
+
+//-------------------------------------
+// 指定IDの剛体のスリープ防止を設定
+//-------------------------------------
+void PhysicsManagerImpl::setPreventSleep(uint64_t id, bool preventSleep)
+{
+    if (m_rigidBodies.contains(id))
+    {
+        btRigidBody* body = m_rigidBodies[id];
+        if (preventSleep)
+            body->setActivationState(DISABLE_DEACTIVATION); // スリープさせない
+        else
+            body->setActivationState(ACTIVE_TAG);           // スリープを許可する
+    }
+}
+
+//-------------------------------------
+// 指定IDの剛体の減衰を設定
+//-------------------------------------
+void PhysicsManagerImpl::setDamping(uint64_t id, float linearDamping, float angularDamping)
+{
+    if (m_rigidBodies.contains(id))
+    {
+        btRigidBody* body = m_rigidBodies[id];
+        body->setDamping(linearDamping, angularDamping);
+    }
+}
+
+//-------------------------------------
 // 指定IDの剛体のTransformを取得
 //-------------------------------------
 Transform PhysicsManagerImpl::getTransform(uint64_t id)
@@ -557,7 +621,25 @@ void PhysicsManager::setMaterial(uint64_t id, float friction, float restitution)
     m_impl->setMaterial(id, friction, restitution);
 }
 
-Transform PhysicsManager::getTransform(size_t id)
+void PhysicsManager::setAngularFactor(uint64_t id, const Vector3& factor)
+{
+    m_impl->setAngularFactor(id, factor);
+}
+
+void PhysicsManager::setActivationState(uint64_t id, bool isActive)
+{
+    m_impl->setActivationState(id, isActive);
+}
+void PhysicsManager::setPreventSleep(uint64_t id, bool preventSleep)
+{
+    m_impl->setPreventSleep(id, preventSleep);
+}
+void PhysicsManager::setDamping(uint64_t id, float linearDamping, float angularDamping)
+{
+    m_impl->setDamping(id, linearDamping, angularDamping);
+}
+
+Transform PhysicsManager::getTransform(uint64_t id)
 {
     return m_impl->getTransform(id);
 }
