@@ -503,6 +503,13 @@ struct Quaternion
         );
     }
 
+    static Vector3 Rotate(const Quaternion& q, const Vector3& v)
+    {
+        Vector3 qv{ q.x, q.y, q.z };
+        Vector3 t = qv.cross(v) * 2.0f;
+        return v + t * q.w + qv.cross(t);
+    }
+
     void normalize()
     {
         float len = sqrtf(x * x + y * y + z * z + w * w);
@@ -574,6 +581,13 @@ struct Quaternion
         y = axis.y * s;
         z = axis.z * s;
         w = cosf(halfAngle);
+    }
+
+    Vector3 rotate(const Vector3& v) const
+    {
+        Vector3 qv{ x, y, z };
+        Vector3 t = qv.cross(v) * 2.0f;
+        return v + t * w + qv.cross(t);
     }
 
     Matrix toMatrix() const;
