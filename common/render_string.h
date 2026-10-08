@@ -21,7 +21,7 @@ public:
 
     void render(Renderer& renderer) override;
 
-    void setMeshHandle(std::string_view string) { m_string = string; }
+    void setString(std::string_view string) { m_string = string; }
     void setPosition(const Vector2& pos) { m_pos = pos; }
     void setColor(const Color& color) { m_color = color; }
     void setAngle(float angle) { m_angle = angle; }

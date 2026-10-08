@@ -52,6 +52,11 @@ public:
     void setFullscreen(bool fullscreen);
     void setCursorVisible(bool visible);
 
+    void startInputText(int posX, int posY, int scaleX, int scaleY);
+    std::string getInputText() const { return m_inputText; }
+    std::string getEditingText() const { return m_editingText; }
+    bool isInputComplete() const { return m_isInputComplete; }
+
     void* getNativeWindow() const { return m_pNativeWindow; }
 
 private:
@@ -65,4 +70,8 @@ private:
     void* m_pNativeWindow;                                   // 生のウィンドウ
 
     std::unique_ptr<SDL_Cursor, SDLCursorDeleter> m_pCursor; // カーソル
+
+    std::string m_inputText;    // 確定済みの文字列 (UTF-8)
+    std::string m_editingText;  // IME変換中の文字列 (UTF-8)
+    bool m_isInputComplete;     // 入力が完了したかどうか
 };

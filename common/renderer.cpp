@@ -2794,6 +2794,22 @@ void RendererImpl::drawPostProcessPass(PostProcessShaderMask mask, ToneMappingTy
 //---------------------------------
 void RendererImpl::drawString(std::string_view string, Vector2 pos, Color color, float angle, Vector2 scale)
 {
+    auto wString = Utf8ToWide(string);
+    std::wstring result;
+    for (wchar_t c : wString)
+    {
+        if (m_spriteFont->ContainsCharacter(c))
+        {
+            result += c;
+        }
+        else
+        {
+            // '?' に置き換える
+            if (m_spriteFont->ContainsCharacter(L'?'))
+                result += L'?';
+        }
+    }
+
     // 描画開始
     m_spriteBatch->Begin(
         DirectX::SpriteSortMode_Deferred,
@@ -2808,7 +2824,7 @@ void RendererImpl::drawString(std::string_view string, Vector2 pos, Color color,
     // テキスト描画
     m_spriteFont->DrawString(
         m_spriteBatch.get(),
-        string.data(),
+        result.c_str(),
         DirectX::XMVECTOR{ pos.x, pos.y },
         DirectX::XMVECTOR{ color.r, color.g,color.b,color.a },
         angle,

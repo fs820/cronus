@@ -10,7 +10,7 @@
 constexpr size_t MAX_BONES = 256; // 最大ボーン数
 constexpr size_t MAX_LIGHT = 8;   // 最大ライト数
 
-constexpr float WORLD_SIZE = 100.0f; // 1,0f = 1mの世界 (主にmodel変換など用)
+constexpr float WORLD_SIZE = 100.0f; // 1.0f = 1mの世界 (主にmodel変換など用)
 
 // デフォルトのビューポートサイズ (基準解像度)
 // UIはこの基準の位置と大きさにしてrendererから比率を取り出して拡縮する

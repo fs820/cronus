@@ -25,7 +25,7 @@ void SDLCursorDeleter::operator()(SDL_Cursor* cursor) const
 // ウィンドウクラス
 // 
 //------------------------------------------
-Window::Window() : m_pWindow{}, m_pNativeWindow{}, m_pCursor{} {}
+Window::Window() : m_pWindow{}, m_pNativeWindow{}, m_pCursor{}, m_inputText{}, m_editingText{}, m_isInputComplete{} {}
 Window::~Window() { uninit(); }   // SDL_Quit漏れを防ぐ
 
 //------------------------------------------
@@ -163,6 +163,36 @@ bool Window::handleEvent(SDL_Event* event)
         }
     }
 
+    // テキスト入力の処理
+    switch (event->type)
+    {
+        // 文字が確定入力された時（半角英数、またはIMEで変換確定した時）
+    case SDL_EVENT_TEXT_INPUT:
+        m_inputText += event->text.text;
+        break;
+        // IMEで日本語を変換中の時（未確定の文字列）
+    case SDL_EVENT_TEXT_EDITING:
+        m_editingText = event->edit.text; // 変換中の文字を保持
+        break;
+        // BackspaceやEnterなどの制御キーの処理
+    case SDL_EVENT_KEY_DOWN:
+        if (event->key.key == SDLK_BACKSPACE && m_inputText.length() > 0)
+        {
+            // マルチバイト文字を考慮して消す
+            PopBackUtf8(m_inputText);
+        }
+        else if (event->key.key == SDLK_RETURN)
+        {
+            // Enterキーで入力完了
+            if (m_editingText.empty())
+            { // 変換中でなければ決定
+                m_isInputComplete = true;
+                SDL_StopTextInput(m_pWindow.get()); // 入力モード終了
+            }
+        }
+        break;
+    }
+
     return true;
 }
 
@@ -249,6 +279,23 @@ void Window::setCursorVisible(bool visible)
     {
         SDL_HideCursor();
     }
+}
+
+//------------------------------------------
+// 入力テキストの開始
+//------------------------------------------
+void Window::startInputText(int posX, int posY, int scaleX, int scaleY)
+{
+    m_inputText.clear();       // 入力済み文字列をクリア
+    m_editingText.clear();     // 変換中文字列をクリア
+    m_isInputComplete = false; // 入力完了フラグをリセット
+
+    // 入力モードを開始する（IMEが有効になる）
+    SDL_StartTextInput(m_pWindow.get());
+
+    // IMEの変換候補ウィンドウ（予測変換のリスト）が出る位置をOSに教える
+    SDL_Rect rect = { posX, posY, scaleX, scaleY }; // 入力欄の画面上の座標とサイズ
+    SDL_SetTextInputArea(m_pWindow.get(), &rect, 0);
 }
 
 //------------------------------------------

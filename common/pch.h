@@ -88,6 +88,21 @@ inline std::string ToUtf8String(const std::filesystem::path& p)
     return std::string(u8.begin(), u8.end());
 }
 
+inline void PopBackUtf8(std::string& str)
+{
+    if (str.empty()) return;
+
+    size_t pos = str.size() - 1;
+
+    // 継続バイト 10xxxxxx を飛ばす
+    while (pos > 0 && (static_cast<unsigned char>(str[pos]) & 0xC0) == 0x80)
+    {
+        --pos;
+    }
+
+    str.erase(pos);
+}
+
 constexpr uint64_t Hash(const char* str)
 {
     uint64_t h = 2166136261u; // FNV-1a

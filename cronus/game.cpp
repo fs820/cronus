@@ -23,6 +23,8 @@
 #include "board.h"
 #include "input.h"
 #include "physics.h"
+#include "window.h"
+#include "render_string.h"
 
 //-----------------------------
 // 
@@ -130,6 +132,11 @@ void GameScene::onEnter()
     auto cameraComp = getComponentsOfType<CameraComponent>();
     auto pBoard = factory::createBoard(*getApp()->getMeshManager(), cameraComp[0]->get(), getApp()->getTextureManager()->getTextureHandle(Hash("board")), Transform(Vector3(0, 0.4f * 5.0f, 2), Quaternion::RotationYawPitchRoll(0.0f, 0.0f, 0.0f), Vector3(0.8f * 5.0f, 0.8f * 5.0f, 1.0f)));
     addGameObject(std::move(pBoard));
+
+    // 文字列生成
+    auto pString = std::make_unique<GameObject>();
+    pString->add<StringRenderComponent>("", Vector2{ 800, 500 }, Color::Red());
+    addGameObject(std::move(pString));
 }
 
 //------------------------
@@ -215,4 +222,28 @@ void GameScene::onUpdate(float elapsedTime, float deltaTime)
 #endif // _DEBUG
 
     camera.Move(deltaTime, Vector2::Zero(), 0.0f);
+
+    static bool isInputTextActive = false;
+    if (getApp()->getInput()->isKeyPressed(KeyCode::F2))
+    {
+        auto mousePos = getApp()->getInput()->getMousePosition();
+        getApp()->getWindow()->startInputText(int(mousePos.x), int(mousePos.y), 100, 30);
+        isInputTextActive = true;
+    }
+
+    if (isInputTextActive)
+    {
+        auto inputText = getApp()->getWindow()->getInputText();
+        auto editingText = getApp()->getWindow()->getEditingText();
+
+        auto stringComponents = getComponentsOfType<StringRenderComponent>();
+        auto& stringComponent = stringComponents[0];
+        stringComponent->setString(inputText);
+
+        if (getApp()->getWindow()->isInputComplete())
+        {
+            stringComponent->setString("");
+            isInputTextActive = false;
+        }
+    }
 }
