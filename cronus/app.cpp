@@ -57,6 +57,10 @@ bool Cronus::onStart()
     unsigned int hw = std::thread::hardware_concurrency();
     unsigned int maxThreads = std::max(1u, hw / 2);
 
+    // モデル
+    getModelManager()->registerPath(Hash("player"), u8"data/MODEL/星穹铁道—花火/花火3.0.pmx");
+    getModelManager()->load(*getRenderer(), *getTextureManager(), maxThreads);
+
     // テクスチャ
     getTextureManager()->registerPath(Hash("logo"), u8"data/TEXTURE/logo.png");
     getTextureManager()->registerPath(Hash("ground"), u8"data/TEXTURE/ground.png");
@@ -65,10 +69,6 @@ bool Cronus::onStart()
     getTextureManager()->registerPath(Hash("sky"), u8"data/TEXTURE/sky.jpg");
     getTextureManager()->registerPath(Hash("board"), u8"data/TEXTURE/board.png");
     getTextureManager()->load(maxThreads);
-
-    // モデル
-    getModelManager()->registerPath(Hash("player"), u8"data/MODEL/test_004/test_.fbx");
-    getModelManager()->load(*getRenderer(), *getTextureManager(), maxThreads);
 
     // GPUに送る
     getRenderer()->uploadTextures(*getTextureManager(), maxThreads);
