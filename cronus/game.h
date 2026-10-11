@@ -8,6 +8,8 @@
 #include "scene.h"
 #include "graphics_types.h"
 
+class Sound;
+
 constexpr const char* AMBIENT_FILE = "data/ambient.bin";
 constexpr const char* CAMERA_FILE = "data/camera.bin";
 
@@ -17,7 +19,7 @@ constexpr const char* CAMERA_FILE = "data/camera.bin";
 class GameScene : public Scene
 {
 public:
-    GameScene(Application* pApp) : Scene(pApp), m_ambient{} {}
+    GameScene(Application* pApp) : Scene(pApp), m_ambient{}, m_pBgm{} {}
     virtual ~GameScene() override = default;
 
     void onEnter() override;
@@ -26,4 +28,5 @@ public:
 
 private:
     Color m_ambient;
+    std::unique_ptr<Sound> m_pBgm;
 };

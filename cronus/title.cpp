@@ -13,6 +13,7 @@
 #include "renderer.h"
 #include "render_string.h"
 #include "input.h"
+#include "sound.h"
 
 //-----------------------------
 // 
@@ -62,6 +63,9 @@ void TitleScene::onEnter()
     auto pString = std::make_unique<GameObject>();
     pString->add<StringRenderComponent>("まどか", Vector2{ 100,100 });
     addGameObject(std::move(pString));
+
+    m_pBgm = std::make_unique<Sound>(*getApp()->getSoundManager(), getApp()->getSoundManager()->getSoundHandle(Hash("titlebgm")));
+    m_pBgm->play();
 }
 
 //------------------------
@@ -69,6 +73,7 @@ void TitleScene::onEnter()
 //------------------------
 void TitleScene::onExit()
 {
+    m_pBgm.reset();
 }
 
 //------------------------
@@ -83,4 +88,9 @@ void TitleScene::onUpdate(float elapsedTime, float deltaTime)
     }
     ImGui::End(); // ウィンドウ終了
 #endif // _DEBUG
+
+    if (getApp()->getInput()->isKeyPressed(KeyCode::Enter))
+    {
+        getApp()->getSceneManager()->changeScene("Game"); // ゲームシーンに切り替え
+    }
 }

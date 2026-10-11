@@ -7,6 +7,8 @@
 #pragma once
 #include "scene.h"
 
+class Sound;
+
 //---------------------------------------------
 // タイトルシーンクラス
 //---------------------------------------------
@@ -21,4 +23,5 @@ public:
     void onUpdate(float elapsedTime, float deltaTime) override;
 
 private:
+    std::unique_ptr<Sound> m_pBgm;
 };

@@ -25,6 +25,7 @@
 #include "physics.h"
 #include "window.h"
 #include "render_string.h"
+#include "sound.h"
 
 //-----------------------------
 // 
@@ -137,6 +138,9 @@ void GameScene::onEnter()
     auto pString = std::make_unique<GameObject>();
     pString->add<StringRenderComponent>("", Vector2{ 800, 500 }, Color::Red());
     addGameObject(std::move(pString));
+
+    m_pBgm = std::make_unique<Sound>(*getApp()->getSoundManager(), getApp()->getSoundManager()->getSoundHandle(Hash("gamebgm")));
+    m_pBgm->play();
 }
 
 //------------------------
@@ -144,6 +148,7 @@ void GameScene::onEnter()
 //------------------------
 void GameScene::onExit()
 {
+    m_pBgm.reset();
 }
 
 //------------------------

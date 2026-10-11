@@ -16,6 +16,7 @@
 #include "renderer.h"
 #include "texture.h"
 #include "model.h"
+#include "sound.h"
 
 //---------------------------------
 // Cronus (ゲーム本体)
@@ -72,12 +73,16 @@ bool Cronus::onStart()
     // GPUに送る
     getRenderer()->uploadTextures(*getTextureManager(), maxThreads);
 
+    getSoundManager()->registerPath(Hash("titlebgm"), u8"data/BGM/test_.ogg");
+    getSoundManager()->registerPath(Hash("gamebgm"), u8"data/BGM/test.ogg");
+    getSoundManager()->load(maxThreads);
+
     // シーンを追加
     getSceneManager()->addScene("Title", new TitleScene(this)); // タイトル
     getSceneManager()->addScene("Game", new GameScene(this));   // ゲーム
 
     // シーン切り替え
-    getSceneManager()->changeScene("Game");
+    getSceneManager()->changeScene("Title");
     return true;
 }
 
