@@ -112,6 +112,9 @@ bool Application::update()
 
     // 入力の更新
     m_pInput->update();
+
+    // サウンドの更新
+    m_pSoundManager->update();
     
     // ゲームの更新
     if (!onUpdate(elapsedTime, deltaTime)) return false;

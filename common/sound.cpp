@@ -472,7 +472,7 @@ void SoundManager::set3DListener(Vector3 pos, Vector3 forward, Vector3 vel, Vect
     {
         // リスナーの位置を設定
         FMOD_VECTOR fPos = { pos.x, pos.y, pos.z };
-        FMOD_VECTOR fVel = { 0.0f, 0.0f, 0.0f };
+        FMOD_VECTOR fVel = { vel.x, vel.y, vel.z };
         FMOD_VECTOR fForward = { forward.x, forward.y, forward.z };
         FMOD_VECTOR fUp = { up.x, up.y, up.z };
 
