@@ -58,7 +58,7 @@ bool Cronus::onStart()
     unsigned int maxThreads = std::max(1u, hw / 2);
 
     // モデル
-    getModelManager()->registerPath(Hash("player"), u8"data/MODEL/星穹铁道—花火/花火3.0.pmx");
+    getModelManager()->registerPath(Hash("player"), u8"data/MODEL/test_004/test_.fbx");
     getModelManager()->load(*getRenderer(), *getTextureManager(), maxThreads);
 
     // テクスチャ
