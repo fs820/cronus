@@ -61,7 +61,7 @@ void TitleScene::onEnter()
 
     // 文字列生成
     auto pString = std::make_unique<GameObject>();
-    pString->add<StringRenderComponent>("まどか", Vector2{ 100,100 });
+    pString->add<StringRenderComponent>("test", Vector2{ 100,100 });
     addGameObject(std::move(pString));
 
     m_pBgm = std::make_unique<Sound>(*getApp()->getSoundManager(), getApp()->getSoundManager()->getSoundHandle(Hash("titlebgm")));

@@ -73,7 +73,7 @@ bool Cronus::onStart()
     // GPUに送る
     getRenderer()->uploadTextures(*getTextureManager(), maxThreads);
 
-    getSoundManager()->registerPath(Hash("titlebgm"), u8"data/BGM/test_.ogg");
+    getSoundManager()->registerPath(Hash("titlebgm"), u8"data/BGM/test.ogg");
     getSoundManager()->registerPath(Hash("gamebgm"), u8"data/BGM/test.ogg");
     getSoundManager()->load(maxThreads);
 
